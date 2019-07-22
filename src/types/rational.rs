@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/22 11:28:19 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/22 12:33:53 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,20 +40,25 @@ impl Rational {
     pub fn new(param: RationalParam) -> Self {
         match param {
             RationalParam::Float(f_value) => {
-                let sign = f_value >= 0.0;
-                let dec = dec_div(f_value);
+                let mut den = dec_div(f_value);
+                let mut num = (f_value.abs() * den as f64) as u64;
+
+                simplify_gcd(&mut num, &mut den);
                 Rational {
-                    positiv: sign,
-                    numerator: (f_value.abs() * dec as f64) as u64,
-                    denominator: dec,
+                    positiv: f_value >= 0.0,
+                    numerator: num,
+                    denominator: den,
                 }
             }
             RationalParam::Couple(n_value, d_value) => {
-                let sign = n_value * d_value >= 0;
+                let mut num = n_value.abs() as u64;
+                let mut den = d_value.abs() as u64;
+
+                simplify_gcd(&mut num, &mut den);
                 Rational {
-                    positiv: sign,
-                    numerator: n_value.abs() as u64,
-                    denominator: d_value.abs() as u64,
+                    positiv: n_value * d_value >= 0,
+                    numerator: num,
+                    denominator: den,
                 }
             }
             RationalParam::Zero => Rational {
@@ -73,9 +78,22 @@ fn dec_div(nb: f64) -> u64 {
     return dec as u64;
 }
 
+fn simplify_gcd(num: &mut u64, den: &mut u64) {
+    let div = gcd(*num, *den);
+    *num = *num / div;
+    *den = *den / div;
+}
+
+fn gcd(val_a: u64, val_b: u64) -> u64 {
+    match val_b {
+        0 => val_a,
+        _ => gcd(val_b, val_a % val_b),
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{Rational, RationalParam};
+    use super::{gcd, Rational, RationalParam};
 
     #[test]
     fn new_zero() {
@@ -96,8 +114,8 @@ mod tests {
             Rational::new(RationalParam::Float(123.0)),
             Rational::new(RationalParam::Float(-99999999.9)),
             Rational::new(RationalParam::Float(111111111.1)),
-            Rational::new(RationalParam::Float(-8.88888888)),
-            Rational::new(RationalParam::Float(2.222222222)),
+            Rational::new(RationalParam::Float(-7.77777777)),
+            Rational::new(RationalParam::Float(3.333333333)),
         );
 
         assert!(values.0.positiv, "Float invalid sign");
@@ -105,8 +123,8 @@ mod tests {
         assert_eq!(values.0.denominator, 1, "Float invalid denominator");
 
         assert!(!values.1.positiv, "Float invalid sign");
-        assert_eq!(values.1.numerator, 4242, "Float invalid numerator");
-        assert_eq!(values.1.denominator, 100, "Float invalid denominator");
+        assert_eq!(values.1.numerator, 2121, "Float invalid numerator");
+        assert_eq!(values.1.denominator, 50, "Float invalid denominator");
 
         assert!(values.2.positiv, "Float invalid sign");
         assert_eq!(values.2.numerator, 123, "Float invalid numerator");
@@ -121,14 +139,14 @@ mod tests {
         assert_eq!(values.4.denominator, 10, "Float invalid denominator");
 
         assert!(!values.5.positiv, "Float invalid sign");
-        assert_eq!(values.5.numerator, 888888888, "Float invalid numerator");
+        assert_eq!(values.5.numerator, 777777777, "Float invalid numerator");
         assert_eq!(
             values.5.denominator, 100000000,
             "Float invalid denominator"
         );
 
         assert!(values.6.positiv, "Float invalid sign");
-        assert_eq!(values.6.numerator, 2222222222, "Float invalid numerator");
+        assert_eq!(values.6.numerator, 3333333333, "Float invalid numerator");
         assert_eq!(
             values.6.denominator, 1000000000,
             "Float invalid denominator"
@@ -154,5 +172,13 @@ mod tests {
         assert!(!values.2.positiv, "Couple invalid sign");
         assert_eq!(values.2.numerator, 1, "Couple invalid numerator");
         assert_eq!(values.2.denominator, 3, "Couple invalid denominator");
+    }
+
+    #[test]
+    fn gcd_result() {
+        assert_eq!(gcd(1029, 1071), 21);
+        assert_eq!(gcd(221, 782), 17);
+        assert_eq!(gcd(782, 32), 2);
+        assert_eq!(gcd(78752, 3), 1);
     }
 }
