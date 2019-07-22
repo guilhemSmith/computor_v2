@@ -6,12 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/09 12:19:15 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/22 09:55:24 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::rational::Rational;
-use super::Number;
 use std::fmt;
 
 pub struct Imaginary {

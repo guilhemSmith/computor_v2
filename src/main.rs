@@ -6,28 +6,25 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/09 12:18:40 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/22 10:49:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-mod numbers;
+mod types;
 
-use crate::numbers::imaginary::Imaginary;
-use crate::numbers::rational::Rational;
+// use crate::types::imaginary::Imaginary;
+use crate::types::rational::{Rational, RationalParam};
 
 fn main() {
-    let num = Imaginary {
-        real: Rational {
-            below_zero: true,
-            numerator: 100,
-            denominator: 42,
-        },
-        irreal: Rational {
-            below_zero: false,
-            numerator: 100,
-            denominator: 10,
-        },
-    };
+    let values = vec![
+        Rational::new(RationalParam::Float(-42.42)),
+        Rational::new(RationalParam::Float(134.0)),
+        Rational::new(RationalParam::Couple(-986, -3)),
+        Rational::new(RationalParam::Couple(-587, 2)),
+        Rational::new(RationalParam::Zero),
+    ];
 
-    println!("Hello, world! '{}'", num);
+    for num in values {
+        println!("'{}' aslo known as {:?}", num, num);
+    }
 }
