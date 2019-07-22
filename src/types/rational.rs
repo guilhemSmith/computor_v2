@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/22 12:33:53 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/22 12:41:08 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,14 @@ impl fmt::Display for Rational {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "{}{}",
+            "{}{}{}",
             if self.positiv { "" } else { "- " },
-            self.numerator as f64 / self.denominator as f64
+            self.numerator,
+            if self.denominator > 1 {
+                format!(" / {}", self.denominator)
+            } else {
+                String::from("")
+            }
         )
     }
 }

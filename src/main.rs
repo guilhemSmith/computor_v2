@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/22 10:49:54 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/22 12:35:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,6 @@ fn main() {
     ];
 
     for num in values {
-        println!("'{}' aslo known as {:?}", num, num);
+        println!("'{}' also known as {:?}", num, num);
     }
 }
