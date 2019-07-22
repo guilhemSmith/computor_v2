@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/22 12:41:08 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/22 17:32:26 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use std::fmt;
+use std::{cmp, fmt, ops};
 
 pub enum RationalParam {
     Float(f64),
@@ -18,7 +18,7 @@ pub enum RationalParam {
     Zero,
 }
 
-#[derive(Debug)]
+#[derive(Eq, Copy, Clone, Debug)]
 pub struct Rational {
     positiv: bool,
     numerator: u64,
@@ -71,6 +71,90 @@ impl Rational {
                 numerator: 0,
                 denominator: 1,
             },
+        }
+    }
+}
+
+impl cmp::PartialEq for Rational {
+    fn eq(&self, rhs: &Self) -> bool {
+        self.positiv == rhs.positiv
+            && self.numerator == rhs.numerator
+            && self.denominator == rhs.denominator
+    }
+}
+
+impl ops::Add<Rational> for Rational {
+    type Output = Rational;
+
+    fn add(self, rhs: Rational) -> Rational {
+        let mut sign = self.positiv && rhs.positiv;
+        let mut num = if (self.positiv && rhs.positiv)
+            || !(self.positiv || rhs.positiv)
+        {
+            self.numerator * rhs.denominator + rhs.numerator * self.denominator
+        } else {
+            let val_a = cmp::max(
+                self.numerator * rhs.denominator,
+                rhs.numerator * self.denominator,
+            );
+            let val_b = cmp::min(
+                self.numerator * rhs.denominator,
+                rhs.numerator * self.denominator,
+            );
+            sign = if val_a == self.numerator * rhs.denominator {
+                self.positiv
+            } else {
+                rhs.positiv
+            };
+            val_a - val_b
+        };
+        let mut den = self.denominator * rhs.denominator;
+
+        simplify_gcd(&mut num, &mut den);
+        Rational {
+            positiv: sign,
+            numerator: num,
+            denominator: den,
+        }
+    }
+}
+
+impl ops::Sub<Rational> for Rational {
+    type Output = Rational;
+
+    fn sub(self, rhs: Rational) -> Rational {
+        let rhs_sig = if rhs.numerator != 0 {
+            !rhs.positiv
+        } else {
+            true
+        };
+        let mut sign = self.positiv && rhs_sig;
+        let mut num = if (self.positiv && rhs_sig) || !(self.positiv || rhs_sig)
+        {
+            self.numerator * rhs.denominator + rhs.numerator * self.denominator
+        } else {
+            let val_a = cmp::max(
+                self.numerator * rhs.denominator,
+                rhs.numerator * self.denominator,
+            );
+            let val_b = cmp::min(
+                self.numerator * rhs.denominator,
+                rhs.numerator * self.denominator,
+            );
+            sign = if val_a == self.numerator * rhs.denominator {
+                self.positiv
+            } else {
+                rhs_sig
+            };
+            val_a - val_b
+        };
+        let mut den = self.denominator * rhs.denominator;
+
+        simplify_gcd(&mut num, &mut den);
+        Rational {
+            positiv: sign,
+            numerator: num,
+            denominator: den,
         }
     }
 }
@@ -177,6 +261,74 @@ mod tests {
         assert!(!values.2.positiv, "Couple invalid sign");
         assert_eq!(values.2.numerator, 1, "Couple invalid numerator");
         assert_eq!(values.2.denominator, 3, "Couple invalid denominator");
+    }
+
+    #[test]
+    fn add_rational() {
+        let zero = Rational::new(RationalParam::Zero);
+        let neg_big = Rational::new(RationalParam::Couple(-133, 4));
+        let neg_small = Rational::new(RationalParam::Couple(-1, 2));
+        let pos_big = Rational::new(RationalParam::Couple(123, 4));
+        let pos_small = Rational::new(RationalParam::Couple(2, 3));
+
+        assert_eq!(zero + pos_big, pos_big);
+        assert_eq!(pos_small + zero, pos_small);
+        assert_eq!(zero + neg_big, neg_big);
+        assert_eq!(neg_small + zero, neg_small);
+
+        assert_eq!(
+            pos_small + pos_big,
+            Rational::new(RationalParam::Couple(377, 12))
+        );
+        assert_eq!(
+            neg_small + neg_big,
+            Rational::new(RationalParam::Couple(-270, 8))
+        );
+        assert_eq!(
+            pos_small + neg_big,
+            Rational::new(RationalParam::Couple(-391, 12))
+        );
+        assert_eq!(
+            neg_small + pos_big,
+            Rational::new(RationalParam::Couple(242, 8))
+        );
+    }
+
+    #[test]
+    fn sub_rational() {
+        let zero = Rational::new(RationalParam::Zero);
+        let neg_big = Rational::new(RationalParam::Couple(-133, 4));
+        let neg_small = Rational::new(RationalParam::Couple(-1, 2));
+        let pos_big = Rational::new(RationalParam::Couple(123, 4));
+        let pos_small = Rational::new(RationalParam::Couple(2, 3));
+
+        assert_eq!(
+            zero - pos_big,
+            Rational::new(RationalParam::Couple(-123, 4))
+        );
+        assert_eq!(pos_small - zero, pos_small);
+        assert_eq!(
+            zero - neg_big,
+            Rational::new(RationalParam::Couple(133, 4))
+        );
+        assert_eq!(neg_small - zero, neg_small);
+
+        assert_eq!(
+            pos_small - pos_big,
+            Rational::new(RationalParam::Couple(-361, 12))
+        );
+        assert_eq!(
+            neg_small - neg_big,
+            Rational::new(RationalParam::Couple(262, 8))
+        );
+        assert_eq!(
+            pos_small - neg_big,
+            Rational::new(RationalParam::Couple(407, 12))
+        );
+        assert_eq!(
+            neg_small - pos_big,
+            Rational::new(RationalParam::Couple(-250, 8))
+        );
     }
 
     #[test]
