@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 12:50:00 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 14:21:24 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,6 @@ impl cmp::PartialOrd for Rational {
             ),
             _ => None,
         }
-
     }
 }
 
@@ -112,10 +111,11 @@ impl ops::Add<Rational> for Rational {
     type Output = Rational;
 
     fn add(self, rhs: Rational) -> Rational {
-        let mut sign = self.positiv && rhs.positiv;
+        let sign;
         let mut num = if (self.positiv && rhs.positiv)
             || !(self.positiv || rhs.positiv)
         {
+            sign = self.positiv && rhs.positiv;
             self.numerator * rhs.denominator + rhs.numerator * self.denominator
         } else {
             let val_a = cmp::max(
@@ -126,10 +126,10 @@ impl ops::Add<Rational> for Rational {
                 self.numerator * rhs.denominator,
                 rhs.numerator * self.denominator,
             );
-            sign = if val_a == self.numerator * rhs.denominator {
-                self.positiv
+            if val_a == self.numerator * rhs.denominator {
+                sign = self.positiv
             } else {
-                rhs.positiv
+                sign = rhs.positiv
             };
             val_a - val_b
         };
@@ -137,7 +137,7 @@ impl ops::Add<Rational> for Rational {
 
         simplify_gcd(&mut num, &mut den);
         Rational {
-            positiv: sign,
+            positiv: sign || num == 0,
             numerator: num,
             denominator: den,
         }
@@ -153,9 +153,10 @@ impl ops::Sub<Rational> for Rational {
         } else {
             true
         };
-        let mut sign = self.positiv && rhs_sig;
+        let sign;
         let mut num = if (self.positiv && rhs_sig) || !(self.positiv || rhs_sig)
         {
+            sign = self.positiv && rhs_sig;
             self.numerator * rhs.denominator + rhs.numerator * self.denominator
         } else {
             let val_a = cmp::max(
@@ -166,10 +167,10 @@ impl ops::Sub<Rational> for Rational {
                 self.numerator * rhs.denominator,
                 rhs.numerator * self.denominator,
             );
-            sign = if val_a == self.numerator * rhs.denominator {
-                self.positiv
+            if val_a == self.numerator * rhs.denominator {
+                sign = self.positiv
             } else {
-                rhs_sig
+                sign = rhs_sig
             };
             val_a - val_b
         };
@@ -177,7 +178,7 @@ impl ops::Sub<Rational> for Rational {
 
         simplify_gcd(&mut num, &mut den);
         Rational {
-            positiv: sign,
+            positiv: sign || num == 0,
             numerator: num,
             denominator: den,
         }
