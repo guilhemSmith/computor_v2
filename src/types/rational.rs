@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 14:39:02 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 14:44:55 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,11 @@ impl Rational {
     }
 
     pub fn zero() -> Self {
-        Rational::new(Raw::Zero)
+        Rational {
+            positiv: true,
+            numerator: 0,
+            denominator: 1,
+        }
     }
 }
 

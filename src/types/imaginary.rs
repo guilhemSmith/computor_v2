@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 14:34:56 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 14:44:07 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,24 @@ use super::Raw;
 use std::fmt;
 
 pub struct Imaginary {
-    pub real: Rational,
-    pub irreal: Rational,
+    real: Rational,
+    irreal: Rational,
+}
+
+impl Imaginary {
+    pub fn new(real: Raw, irreal: Raw) -> Self {
+        Imaginary {
+            real: Rational::new(real),
+            irreal: Rational::new(irreal),
+        }
+    }
+
+    pub fn zero() -> Self {
+        Imaginary {
+            real: Rational::zero(),
+            irreal: Rational::zero(),
+        }
+    }
 }
 
 impl fmt::Display for Imaginary {
