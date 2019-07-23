@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/22 17:32:26 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 11:16:24 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,6 +159,42 @@ impl ops::Sub<Rational> for Rational {
     }
 }
 
+impl ops::Mul<Rational> for Rational {
+    type Output = Rational;
+
+    fn mul(self, rhs: Rational) -> Rational {
+        let mut num = self.numerator * rhs.numerator;
+        let mut den = self.denominator * rhs.denominator;
+
+        simplify_gcd(&mut num, &mut den);
+        Rational {
+            positiv: num == 0
+                || (self.positiv && rhs.positiv)
+                || !(self.positiv || rhs.positiv),
+            numerator: num,
+            denominator: den,
+        }
+    }
+}
+
+impl ops::Div<Rational> for Rational {
+    type Output = Rational;
+
+    fn div(self, rhs: Rational) -> Rational {
+        let mut num = self.numerator * rhs.denominator;
+        let mut den = self.denominator * rhs.numerator;
+
+        simplify_gcd(&mut num, &mut den);
+        Rational {
+            positiv: num == 0
+                || (self.positiv && rhs.positiv)
+                || !(self.positiv || rhs.positiv),
+            numerator: num,
+            denominator: den,
+        }
+    }
+}
+
 fn dec_div(nb: f64) -> u64 {
     let mut dec: f64 = 1.0;
     while (nb * dec).fract() != 0.0 {
@@ -181,9 +217,8 @@ fn gcd(val_a: u64, val_b: u64) -> u64 {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{gcd, Rational, RationalParam};
-
+mod constructor {
+    use super::{Rational, RationalParam};
     #[test]
     fn new_zero() {
         let zero = Rational::new(RationalParam::Zero);
@@ -196,72 +231,100 @@ mod tests {
     }
 
     #[test]
-    fn new_float() {
-        let values = (
-            Rational::new(RationalParam::Float(0.0)),
-            Rational::new(RationalParam::Float(-42.42)),
-            Rational::new(RationalParam::Float(123.0)),
-            Rational::new(RationalParam::Float(-99999999.9)),
-            Rational::new(RationalParam::Float(111111111.1)),
-            Rational::new(RationalParam::Float(-7.77777777)),
-            Rational::new(RationalParam::Float(3.333333333)),
-        );
+    fn new_float_0() {
+        let value = Rational::new(RationalParam::Float(0.0));
 
-        assert!(values.0.positiv, "Float invalid sign");
-        assert_eq!(values.0.numerator, 0, "Float invalid numerator");
-        assert_eq!(values.0.denominator, 1, "Float invalid denominator");
-
-        assert!(!values.1.positiv, "Float invalid sign");
-        assert_eq!(values.1.numerator, 2121, "Float invalid numerator");
-        assert_eq!(values.1.denominator, 50, "Float invalid denominator");
-
-        assert!(values.2.positiv, "Float invalid sign");
-        assert_eq!(values.2.numerator, 123, "Float invalid numerator");
-        assert_eq!(values.2.denominator, 1, "Float invalid denominator");
-
-        assert!(!values.3.positiv, "Float invalid sign");
-        assert_eq!(values.3.numerator, 999999999, "Float invalid numerator");
-        assert_eq!(values.3.denominator, 10, "Float invalid denominator");
-
-        assert!(values.4.positiv, "Float invalid sign");
-        assert_eq!(values.4.numerator, 1111111111, "Float invalid numerator");
-        assert_eq!(values.4.denominator, 10, "Float invalid denominator");
-
-        assert!(!values.5.positiv, "Float invalid sign");
-        assert_eq!(values.5.numerator, 777777777, "Float invalid numerator");
-        assert_eq!(
-            values.5.denominator, 100000000,
-            "Float invalid denominator"
-        );
-
-        assert!(values.6.positiv, "Float invalid sign");
-        assert_eq!(values.6.numerator, 3333333333, "Float invalid numerator");
-        assert_eq!(
-            values.6.denominator, 1000000000,
-            "Float invalid denominator"
-        );
+        assert!(value.positiv, "Float invalid sign");
+        assert_eq!(value.numerator, 0, "Float invalid numerator");
+        assert_eq!(value.denominator, 1, "Float invalid denominator");
     }
 
     #[test]
-    fn new_couple() {
-        let values = (
-            Rational::new(RationalParam::Couple(0, 1)),
-            Rational::new(RationalParam::Couple(-986, -3)),
-            Rational::new(RationalParam::Couple(-1, 3)),
-        );
+    fn new_float_1() {
+        let value = Rational::new(RationalParam::Float(-42.42));
 
-        assert!(values.0.positiv, "Couple invalid sign");
-        assert_eq!(values.0.numerator, 0, "Couple invalid numerator");
-        assert_eq!(values.0.denominator, 1, "Couple invalid denominator");
-
-        assert!(values.1.positiv, "Couple invalid sign");
-        assert_eq!(values.1.numerator, 986, "Couple invalid numerator");
-        assert_eq!(values.1.denominator, 3, "Couple invalid denominator");
-
-        assert!(!values.2.positiv, "Couple invalid sign");
-        assert_eq!(values.2.numerator, 1, "Couple invalid numerator");
-        assert_eq!(values.2.denominator, 3, "Couple invalid denominator");
+        assert!(!value.positiv, "Float invalid sign");
+        assert_eq!(value.numerator, 2121, "Float invalid numerator");
+        assert_eq!(value.denominator, 50, "Float invalid denominator");
     }
+
+    #[test]
+    fn new_float_2() {
+        let value = Rational::new(RationalParam::Float(123.0));
+
+        assert!(value.positiv, "Float invalid sign");
+        assert_eq!(value.numerator, 123, "Float invalid numerator");
+        assert_eq!(value.denominator, 1, "Float invalid denominator");
+    }
+
+    #[test]
+    fn new_float_3() {
+        let value = Rational::new(RationalParam::Float(-99999999.9));
+
+        assert!(!value.positiv, "Float invalid sign");
+        assert_eq!(value.numerator, 999999999, "Float invalid numerator");
+        assert_eq!(value.denominator, 10, "Float invalid denominator");
+    }
+
+    #[test]
+    fn new_float_4() {
+        let value = Rational::new(RationalParam::Float(111111111.1));
+
+        assert!(value.positiv, "Float invalid sign");
+        assert_eq!(value.numerator, 1111111111, "Float invalid numerator");
+        assert_eq!(value.denominator, 10, "Float invalid denominator");
+    }
+
+    #[test]
+    fn new_float_5() {
+        let value = Rational::new(RationalParam::Float(-7.77777777));
+
+        assert!(!value.positiv, "Float invalid sign");
+        assert_eq!(value.numerator, 777777777, "Float invalid numerator");
+        assert_eq!(value.denominator, 100000000, "Float invalid denominator");
+    }
+
+    #[test]
+    fn new_float_6() {
+        let value = Rational::new(RationalParam::Float(3.333333333));
+
+        assert!(value.positiv, "Float invalid sign");
+        assert_eq!(value.numerator, 3333333333, "Float invalid numerator");
+        assert_eq!(value.denominator, 1000000000, "Float invalid denominator");
+    }
+
+    #[test]
+    fn new_couple_0() {
+        let value = Rational::new(RationalParam::Couple(0, 1));
+
+        assert!(value.positiv, "Couple invalid sign");
+        assert_eq!(value.numerator, 0, "Couple invalid numerator");
+        assert_eq!(value.denominator, 1, "Couple invalid denominator");
+    }
+
+    #[test]
+    fn new_couple_1() {
+        let value = Rational::new(RationalParam::Couple(-986, -3));
+
+        assert!(value.positiv, "Couple invalid sign");
+        assert_eq!(value.numerator, 986, "Couple invalid numerator");
+        assert_eq!(value.denominator, 3, "Couple invalid denominator");
+    }
+
+    #[test]
+    fn new_couple_2() {
+        let value = Rational::new(RationalParam::Couple(-1, 3));
+
+        assert!(!value.positiv, "Couple invalid sign");
+        assert_eq!(value.numerator, 1, "Couple invalid numerator");
+        assert_eq!(value.denominator, 3, "Couple invalid denominator");
+    }
+
+}
+
+#[cfg(test)]
+mod operator {
+    use super::{Rational, RationalParam};
 
     #[test]
     fn add_rational() {
@@ -330,6 +393,71 @@ mod tests {
             Rational::new(RationalParam::Couple(-250, 8))
         );
     }
+
+    #[test]
+    fn mul_rational() {
+        let zero = Rational::new(RationalParam::Zero);
+        let neg_big = Rational::new(RationalParam::Couple(-133, 4));
+        let neg_small = Rational::new(RationalParam::Couple(-1, 2));
+        let pos_big = Rational::new(RationalParam::Couple(123, 4));
+        let pos_small = Rational::new(RationalParam::Couple(2, 3));
+
+        assert_eq!(zero * pos_big, zero);
+        assert_eq!(pos_small * zero, zero);
+        assert_eq!(zero * neg_big, zero);
+        assert_eq!(neg_small * zero, zero);
+
+        assert_eq!(
+            pos_small * pos_big,
+            Rational::new(RationalParam::Couple(246, 12))
+        );
+        assert_eq!(
+            neg_small * neg_big,
+            Rational::new(RationalParam::Couple(133, 8))
+        );
+        assert_eq!(
+            pos_small * neg_big,
+            Rational::new(RationalParam::Couple(-266, 12))
+        );
+        assert_eq!(
+            neg_small * pos_big,
+            Rational::new(RationalParam::Couple(-123, 8))
+        );
+    }
+
+    #[test]
+    fn div_rational() {
+        let zero = Rational::new(RationalParam::Zero);
+        let neg_big = Rational::new(RationalParam::Couple(-133, 4));
+        let neg_small = Rational::new(RationalParam::Couple(-1, 2));
+        let pos_big = Rational::new(RationalParam::Couple(123, 4));
+        let pos_small = Rational::new(RationalParam::Couple(2, 3));
+
+        assert_eq!(zero / pos_big, zero);
+        assert_eq!(zero / neg_big, zero);
+
+        assert_eq!(
+            pos_small / pos_big,
+            Rational::new(RationalParam::Couple(8, 369))
+        );
+        assert_eq!(
+            neg_small / neg_big,
+            Rational::new(RationalParam::Couple(4, 266))
+        );
+        assert_eq!(
+            pos_small / neg_big,
+            Rational::new(RationalParam::Couple(-8, 399))
+        );
+        assert_eq!(
+            neg_small / pos_big,
+            Rational::new(RationalParam::Couple(-4, 246))
+        );
+    }
+}
+
+#[cfg(test)]
+mod other {
+    use super::gcd;
 
     #[test]
     fn gcd_result() {
