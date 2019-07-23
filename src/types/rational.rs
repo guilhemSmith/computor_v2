@@ -6,12 +6,15 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 14:44:55 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 16:33:10 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Raw;
 use std::{cmp, fmt, ops};
+
+const PRECISION: usize = 10;
+const EPSILON: f64 = 0.0000001;
 
 #[derive(Eq, Ord, Copy, Clone, Debug)]
 pub struct Rational {
@@ -65,14 +68,14 @@ impl Rational {
 impl fmt::Display for Rational {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let sign = if self.positiv { "" } else { "- " };
-        if self.numerator != 0 {
+        if self.denominator != 0 {
             let float_value: f64 =
                 self.numerator as f64 / self.denominator as f64;
             let fract_len = dec_len(float_value);
-            if fract_len <= 10 {
+            if fract_len <= PRECISION {
                 write!(f, "{}{:.*}", sign, fract_len, float_value)
             } else {
-                write!(f, "{}{:.*}..", sign, 10, float_value)
+                write!(f, "{}{:.*}..", sign, PRECISION, float_value)
             }
         } else {
             write!(f, "{}inf", sign)
@@ -227,7 +230,7 @@ impl ops::Div<Rational> for Rational {
 fn dec_len(nb: f64) -> usize {
     let mut n = 0;
     let mut dec = 1.0;
-    while n < 11 && (nb * dec).fract() != 0.0 {
+    while n < PRECISION + 1 && (nb * dec).fract() > EPSILON {
         n += 1;
         dec = dec * 10.0;
     }

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 14:44:07 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 14:59:25 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ use super::rational::Rational;
 use super::Raw;
 use std::fmt;
 
+#[derive(Debug)]
 pub struct Imaginary {
     real: Rational,
     irreal: Rational,
@@ -37,23 +38,35 @@ impl Imaginary {
 
 impl fmt::Display for Imaginary {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}{}",
-            self.real,
-            if self.irreal == Rational::zero() {
-                format!(
-                    " {}{}i",
-                    if self.irreal > Rational::zero() {
-                        "+ "
-                    } else {
-                        ""
-                    },
-                    self.irreal
-                )
-            } else {
-                String::from("")
-            }
-        )
+        if self.real != Rational::zero() {
+            write!(
+                f,
+                "{}{}",
+                self.real,
+                if self.irreal != Rational::zero() {
+                    format!(
+                        " {}{}i",
+                        if self.irreal > Rational::zero() {
+                            "+ "
+                        } else {
+                            ""
+                        },
+                        self.irreal
+                    )
+                } else {
+                    String::from("")
+                }
+            )
+        } else {
+            write!(
+                f,
+                "{}",
+                if self.irreal != Rational::zero() {
+                    format!("{}i", self.irreal)
+                } else {
+                    String::from("0")
+                }
+            )
+        }
     }
 }
