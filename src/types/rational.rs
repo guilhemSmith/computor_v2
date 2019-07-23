@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 11:53:32 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 12:50:00 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,17 +27,19 @@ pub struct Rational {
 
 impl fmt::Display for Rational {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}{}{}",
-            if self.positiv { "" } else { "- " },
-            self.numerator,
-            if self.denominator > 1 {
-                format!(" / {}", self.denominator)
+        let sign = if self.positiv { "" } else { "- " };
+        if self.numerator != 0 {
+            let float_value: f64 =
+                self.numerator as f64 / self.denominator as f64;
+            let fract_len = dec_len(float_value);
+            if fract_len <= 10 {
+                write!(f, "{}{:.*}", sign, fract_len, float_value)
             } else {
-                String::from("")
+                write!(f, "{}{:.*}..", sign, 10, float_value)
             }
-        )
+        } else {
+            write!(f, "{}inf", sign)
+        }
     }
 }
 
@@ -216,6 +218,16 @@ impl ops::Div<Rational> for Rational {
             denominator: den,
         }
     }
+}
+
+fn dec_len(nb: f64) -> usize {
+    let mut n = 0;
+    let mut dec = 1.0;
+    while n < 11 && (nb * dec).fract() != 0.0 {
+        n += 1;
+        dec = dec * 10.0;
+    }
+    return n;
 }
 
 fn dec_div(nb: f64) -> u64 {
