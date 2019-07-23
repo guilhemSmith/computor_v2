@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 11:16:24 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 11:53:32 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ pub enum RationalParam {
     Zero,
 }
 
-#[derive(Eq, Copy, Clone, Debug)]
+#[derive(Eq, Ord, Copy, Clone, Debug)]
 pub struct Rational {
     positiv: bool,
     numerator: u64,
@@ -80,6 +80,29 @@ impl cmp::PartialEq for Rational {
         self.positiv == rhs.positiv
             && self.numerator == rhs.numerator
             && self.denominator == rhs.denominator
+    }
+}
+
+impl cmp::PartialOrd for Rational {
+    fn partial_cmp(&self, rhs: &Self) -> Option<cmp::Ordering> {
+        match (self.positiv, rhs.positiv) {
+            (left_sign, right_sign) if left_sign && !right_sign => {
+                Some(cmp::Ordering::Greater)
+            }
+            (left_sign, right_sign) if !left_sign && right_sign => {
+                Some(cmp::Ordering::Less)
+            }
+            (left_sign, right_sign) if left_sign && right_sign => Some(
+                (self.numerator * rhs.denominator)
+                    .cmp(&(self.denominator * rhs.numerator)),
+            ),
+            (left_sign, right_sign) if !left_sign && !right_sign => Some(
+                (rhs.numerator * self.denominator)
+                    .cmp(&(rhs.denominator * self.numerator)),
+            ),
+            _ => None,
+        }
+
     }
 }
 
@@ -452,6 +475,61 @@ mod operator {
             neg_small / pos_big,
             Rational::new(RationalParam::Couple(-4, 246))
         );
+    }
+
+    #[test]
+    fn cmp_0() {
+        let val_a = Rational::new(RationalParam::Zero);
+        let val_b = Rational::new(RationalParam::Couple(42, 10));
+
+        assert!(val_a < val_b);
+        assert!(val_a <= val_b);
+        assert!(!(val_a > val_b));
+        assert!(!(val_a >= val_b));
+    }
+
+    #[test]
+    fn cmp_1() {
+        let val_a = Rational::new(RationalParam::Couple(8, 10));
+        let val_b = Rational::new(RationalParam::Couple(42, 10));
+
+        assert!(val_a < val_b);
+        assert!(val_a <= val_b);
+        assert!(!(val_a > val_b));
+        assert!(!(val_a >= val_b));
+    }
+
+    #[test]
+    fn cmp_2() {
+        let val_a = Rational::new(RationalParam::Zero);
+        let val_b = Rational::new(RationalParam::Couple(-42, 10));
+
+        assert!(val_a > val_b);
+        assert!(val_a >= val_b);
+        assert!(!(val_a < val_b));
+        assert!(!(val_a <= val_b));
+    }
+
+    #[test]
+    fn cmp_3() {
+        let val_a = Rational::new(RationalParam::Couple(8, 10));
+        let val_b = Rational::new(RationalParam::Couple(-42, 10));
+
+        assert!(val_a > val_b);
+        assert!(val_a >= val_b);
+        assert!(!(val_a < val_b));
+        assert!(!(val_a <= val_b));
+    }
+
+    #[test]
+    fn cmp_4() {
+        let val_a = Rational::new(RationalParam::Couple(-8, 10));
+        let val_b = Rational::new(RationalParam::Couple(-42, 10));
+
+        assert!(val_a > val_b);
+        assert!(val_a >= val_b);
+        assert!(!(val_a < val_b));
+        assert!(!(val_a <= val_b));
     }
 }
 
