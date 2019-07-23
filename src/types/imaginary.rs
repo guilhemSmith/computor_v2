@@ -6,11 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/22 09:55:24 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 14:34:56 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::rational::Rational;
+use super::Raw;
 use std::fmt;
 
 pub struct Imaginary {
@@ -24,10 +25,14 @@ impl fmt::Display for Imaginary {
             f,
             "{}{}",
             self.real,
-            if !self.irreal.is_null() {
+            if self.irreal == Rational::zero() {
                 format!(
                     " {}{}i",
-                    if !self.irreal.below_zero { "+ " } else { "" },
+                    if self.irreal > Rational::zero() {
+                        "+ "
+                    } else {
+                        ""
+                    },
                     self.irreal
                 )
             } else {

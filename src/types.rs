@@ -6,9 +6,15 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:52:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/22 09:59:57 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 14:26:43 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// pub mod imaginary;
+pub mod imaginary;
 pub mod rational;
+
+pub enum Raw {
+    Float(f64),
+    Couple(i64, i64),
+    Zero,
+}

@@ -6,17 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 14:21:24 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 14:34:34 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+use super::Raw;
 use std::{cmp, fmt, ops};
-
-pub enum RationalParam {
-    Float(f64),
-    Couple(i64, i64),
-    Zero,
-}
 
 #[derive(Eq, Ord, Copy, Clone, Debug)]
 pub struct Rational {
@@ -44,9 +39,9 @@ impl fmt::Display for Rational {
 }
 
 impl Rational {
-    pub fn new(param: RationalParam) -> Self {
+    pub fn new(param: Raw) -> Self {
         match param {
-            RationalParam::Float(f_value) => {
+            Raw::Float(f_value) => {
                 let mut den = dec_div(f_value);
                 let mut num = (f_value.abs() * den as f64) as u64;
 
@@ -57,7 +52,7 @@ impl Rational {
                     denominator: den,
                 }
             }
-            RationalParam::Couple(n_value, d_value) => {
+            Raw::Couple(n_value, d_value) => {
                 let mut num = n_value.abs() as u64;
                 let mut den = d_value.abs() as u64;
 
@@ -68,12 +63,16 @@ impl Rational {
                     denominator: den,
                 }
             }
-            RationalParam::Zero => Rational {
+            Raw::Zero => Rational {
                 positiv: true,
                 numerator: 0,
                 denominator: 1,
             },
         }
+    }
+
+    pub fn zero() -> Self {
+        Rational::new(Raw::Zero)
     }
 }
 
@@ -254,10 +253,10 @@ fn gcd(val_a: u64, val_b: u64) -> u64 {
 
 #[cfg(test)]
 mod constructor {
-    use super::{Rational, RationalParam};
+    use super::{Rational, Raw};
     #[test]
     fn new_zero() {
-        let zero = Rational::new(RationalParam::Zero);
+        let zero = Rational::new(Raw::Zero);
         assert!(zero.positiv, "Zero is positive.");
         assert_eq!(zero.numerator, 0, "Zero numerator is not null");
         assert_eq!(
@@ -268,7 +267,7 @@ mod constructor {
 
     #[test]
     fn new_float_0() {
-        let value = Rational::new(RationalParam::Float(0.0));
+        let value = Rational::new(Raw::Float(0.0));
 
         assert!(value.positiv, "Float invalid sign");
         assert_eq!(value.numerator, 0, "Float invalid numerator");
@@ -277,7 +276,7 @@ mod constructor {
 
     #[test]
     fn new_float_1() {
-        let value = Rational::new(RationalParam::Float(-42.42));
+        let value = Rational::new(Raw::Float(-42.42));
 
         assert!(!value.positiv, "Float invalid sign");
         assert_eq!(value.numerator, 2121, "Float invalid numerator");
@@ -286,7 +285,7 @@ mod constructor {
 
     #[test]
     fn new_float_2() {
-        let value = Rational::new(RationalParam::Float(123.0));
+        let value = Rational::new(Raw::Float(123.0));
 
         assert!(value.positiv, "Float invalid sign");
         assert_eq!(value.numerator, 123, "Float invalid numerator");
@@ -295,7 +294,7 @@ mod constructor {
 
     #[test]
     fn new_float_3() {
-        let value = Rational::new(RationalParam::Float(-99999999.9));
+        let value = Rational::new(Raw::Float(-99999999.9));
 
         assert!(!value.positiv, "Float invalid sign");
         assert_eq!(value.numerator, 999999999, "Float invalid numerator");
@@ -304,7 +303,7 @@ mod constructor {
 
     #[test]
     fn new_float_4() {
-        let value = Rational::new(RationalParam::Float(111111111.1));
+        let value = Rational::new(Raw::Float(111111111.1));
 
         assert!(value.positiv, "Float invalid sign");
         assert_eq!(value.numerator, 1111111111, "Float invalid numerator");
@@ -313,7 +312,7 @@ mod constructor {
 
     #[test]
     fn new_float_5() {
-        let value = Rational::new(RationalParam::Float(-7.77777777));
+        let value = Rational::new(Raw::Float(-7.77777777));
 
         assert!(!value.positiv, "Float invalid sign");
         assert_eq!(value.numerator, 777777777, "Float invalid numerator");
@@ -322,7 +321,7 @@ mod constructor {
 
     #[test]
     fn new_float_6() {
-        let value = Rational::new(RationalParam::Float(3.333333333));
+        let value = Rational::new(Raw::Float(3.333333333));
 
         assert!(value.positiv, "Float invalid sign");
         assert_eq!(value.numerator, 3333333333, "Float invalid numerator");
@@ -331,7 +330,7 @@ mod constructor {
 
     #[test]
     fn new_couple_0() {
-        let value = Rational::new(RationalParam::Couple(0, 1));
+        let value = Rational::new(Raw::Couple(0, 1));
 
         assert!(value.positiv, "Couple invalid sign");
         assert_eq!(value.numerator, 0, "Couple invalid numerator");
@@ -340,7 +339,7 @@ mod constructor {
 
     #[test]
     fn new_couple_1() {
-        let value = Rational::new(RationalParam::Couple(-986, -3));
+        let value = Rational::new(Raw::Couple(-986, -3));
 
         assert!(value.positiv, "Couple invalid sign");
         assert_eq!(value.numerator, 986, "Couple invalid numerator");
@@ -349,7 +348,7 @@ mod constructor {
 
     #[test]
     fn new_couple_2() {
-        let value = Rational::new(RationalParam::Couple(-1, 3));
+        let value = Rational::new(Raw::Couple(-1, 3));
 
         assert!(!value.positiv, "Couple invalid sign");
         assert_eq!(value.numerator, 1, "Couple invalid numerator");
@@ -360,140 +359,86 @@ mod constructor {
 
 #[cfg(test)]
 mod operator {
-    use super::{Rational, RationalParam};
+    use super::{Rational, Raw};
 
     #[test]
     fn add_rational() {
-        let zero = Rational::new(RationalParam::Zero);
-        let neg_big = Rational::new(RationalParam::Couple(-133, 4));
-        let neg_small = Rational::new(RationalParam::Couple(-1, 2));
-        let pos_big = Rational::new(RationalParam::Couple(123, 4));
-        let pos_small = Rational::new(RationalParam::Couple(2, 3));
+        let zero = Rational::new(Raw::Zero);
+        let neg_big = Rational::new(Raw::Couple(-133, 4));
+        let neg_small = Rational::new(Raw::Couple(-1, 2));
+        let pos_big = Rational::new(Raw::Couple(123, 4));
+        let pos_small = Rational::new(Raw::Couple(2, 3));
 
         assert_eq!(zero + pos_big, pos_big);
         assert_eq!(pos_small + zero, pos_small);
         assert_eq!(zero + neg_big, neg_big);
         assert_eq!(neg_small + zero, neg_small);
 
-        assert_eq!(
-            pos_small + pos_big,
-            Rational::new(RationalParam::Couple(377, 12))
-        );
-        assert_eq!(
-            neg_small + neg_big,
-            Rational::new(RationalParam::Couple(-270, 8))
-        );
-        assert_eq!(
-            pos_small + neg_big,
-            Rational::new(RationalParam::Couple(-391, 12))
-        );
-        assert_eq!(
-            neg_small + pos_big,
-            Rational::new(RationalParam::Couple(242, 8))
-        );
+        assert_eq!(pos_small + pos_big, Rational::new(Raw::Couple(377, 12)));
+        assert_eq!(neg_small + neg_big, Rational::new(Raw::Couple(-270, 8)));
+        assert_eq!(pos_small + neg_big, Rational::new(Raw::Couple(-391, 12)));
+        assert_eq!(neg_small + pos_big, Rational::new(Raw::Couple(242, 8)));
     }
 
     #[test]
     fn sub_rational() {
-        let zero = Rational::new(RationalParam::Zero);
-        let neg_big = Rational::new(RationalParam::Couple(-133, 4));
-        let neg_small = Rational::new(RationalParam::Couple(-1, 2));
-        let pos_big = Rational::new(RationalParam::Couple(123, 4));
-        let pos_small = Rational::new(RationalParam::Couple(2, 3));
+        let zero = Rational::new(Raw::Zero);
+        let neg_big = Rational::new(Raw::Couple(-133, 4));
+        let neg_small = Rational::new(Raw::Couple(-1, 2));
+        let pos_big = Rational::new(Raw::Couple(123, 4));
+        let pos_small = Rational::new(Raw::Couple(2, 3));
 
-        assert_eq!(
-            zero - pos_big,
-            Rational::new(RationalParam::Couple(-123, 4))
-        );
+        assert_eq!(zero - pos_big, Rational::new(Raw::Couple(-123, 4)));
         assert_eq!(pos_small - zero, pos_small);
-        assert_eq!(
-            zero - neg_big,
-            Rational::new(RationalParam::Couple(133, 4))
-        );
+        assert_eq!(zero - neg_big, Rational::new(Raw::Couple(133, 4)));
         assert_eq!(neg_small - zero, neg_small);
 
-        assert_eq!(
-            pos_small - pos_big,
-            Rational::new(RationalParam::Couple(-361, 12))
-        );
-        assert_eq!(
-            neg_small - neg_big,
-            Rational::new(RationalParam::Couple(262, 8))
-        );
-        assert_eq!(
-            pos_small - neg_big,
-            Rational::new(RationalParam::Couple(407, 12))
-        );
-        assert_eq!(
-            neg_small - pos_big,
-            Rational::new(RationalParam::Couple(-250, 8))
-        );
+        assert_eq!(pos_small - pos_big, Rational::new(Raw::Couple(-361, 12)));
+        assert_eq!(neg_small - neg_big, Rational::new(Raw::Couple(262, 8)));
+        assert_eq!(pos_small - neg_big, Rational::new(Raw::Couple(407, 12)));
+        assert_eq!(neg_small - pos_big, Rational::new(Raw::Couple(-250, 8)));
     }
 
     #[test]
     fn mul_rational() {
-        let zero = Rational::new(RationalParam::Zero);
-        let neg_big = Rational::new(RationalParam::Couple(-133, 4));
-        let neg_small = Rational::new(RationalParam::Couple(-1, 2));
-        let pos_big = Rational::new(RationalParam::Couple(123, 4));
-        let pos_small = Rational::new(RationalParam::Couple(2, 3));
+        let zero = Rational::new(Raw::Zero);
+        let neg_big = Rational::new(Raw::Couple(-133, 4));
+        let neg_small = Rational::new(Raw::Couple(-1, 2));
+        let pos_big = Rational::new(Raw::Couple(123, 4));
+        let pos_small = Rational::new(Raw::Couple(2, 3));
 
         assert_eq!(zero * pos_big, zero);
         assert_eq!(pos_small * zero, zero);
         assert_eq!(zero * neg_big, zero);
         assert_eq!(neg_small * zero, zero);
 
-        assert_eq!(
-            pos_small * pos_big,
-            Rational::new(RationalParam::Couple(246, 12))
-        );
-        assert_eq!(
-            neg_small * neg_big,
-            Rational::new(RationalParam::Couple(133, 8))
-        );
-        assert_eq!(
-            pos_small * neg_big,
-            Rational::new(RationalParam::Couple(-266, 12))
-        );
-        assert_eq!(
-            neg_small * pos_big,
-            Rational::new(RationalParam::Couple(-123, 8))
-        );
+        assert_eq!(pos_small * pos_big, Rational::new(Raw::Couple(246, 12)));
+        assert_eq!(neg_small * neg_big, Rational::new(Raw::Couple(133, 8)));
+        assert_eq!(pos_small * neg_big, Rational::new(Raw::Couple(-266, 12)));
+        assert_eq!(neg_small * pos_big, Rational::new(Raw::Couple(-123, 8)));
     }
 
     #[test]
     fn div_rational() {
-        let zero = Rational::new(RationalParam::Zero);
-        let neg_big = Rational::new(RationalParam::Couple(-133, 4));
-        let neg_small = Rational::new(RationalParam::Couple(-1, 2));
-        let pos_big = Rational::new(RationalParam::Couple(123, 4));
-        let pos_small = Rational::new(RationalParam::Couple(2, 3));
+        let zero = Rational::new(Raw::Zero);
+        let neg_big = Rational::new(Raw::Couple(-133, 4));
+        let neg_small = Rational::new(Raw::Couple(-1, 2));
+        let pos_big = Rational::new(Raw::Couple(123, 4));
+        let pos_small = Rational::new(Raw::Couple(2, 3));
 
         assert_eq!(zero / pos_big, zero);
         assert_eq!(zero / neg_big, zero);
 
-        assert_eq!(
-            pos_small / pos_big,
-            Rational::new(RationalParam::Couple(8, 369))
-        );
-        assert_eq!(
-            neg_small / neg_big,
-            Rational::new(RationalParam::Couple(4, 266))
-        );
-        assert_eq!(
-            pos_small / neg_big,
-            Rational::new(RationalParam::Couple(-8, 399))
-        );
-        assert_eq!(
-            neg_small / pos_big,
-            Rational::new(RationalParam::Couple(-4, 246))
-        );
+        assert_eq!(pos_small / pos_big, Rational::new(Raw::Couple(8, 369)));
+        assert_eq!(neg_small / neg_big, Rational::new(Raw::Couple(4, 266)));
+        assert_eq!(pos_small / neg_big, Rational::new(Raw::Couple(-8, 399)));
+        assert_eq!(neg_small / pos_big, Rational::new(Raw::Couple(-4, 246)));
     }
 
     #[test]
     fn cmp_0() {
-        let val_a = Rational::new(RationalParam::Zero);
-        let val_b = Rational::new(RationalParam::Couple(42, 10));
+        let val_a = Rational::new(Raw::Zero);
+        let val_b = Rational::new(Raw::Couple(42, 10));
 
         assert!(val_a < val_b);
         assert!(val_a <= val_b);
@@ -503,8 +448,8 @@ mod operator {
 
     #[test]
     fn cmp_1() {
-        let val_a = Rational::new(RationalParam::Couple(8, 10));
-        let val_b = Rational::new(RationalParam::Couple(42, 10));
+        let val_a = Rational::new(Raw::Couple(8, 10));
+        let val_b = Rational::new(Raw::Couple(42, 10));
 
         assert!(val_a < val_b);
         assert!(val_a <= val_b);
@@ -514,8 +459,8 @@ mod operator {
 
     #[test]
     fn cmp_2() {
-        let val_a = Rational::new(RationalParam::Zero);
-        let val_b = Rational::new(RationalParam::Couple(-42, 10));
+        let val_a = Rational::new(Raw::Zero);
+        let val_b = Rational::new(Raw::Couple(-42, 10));
 
         assert!(val_a > val_b);
         assert!(val_a >= val_b);
@@ -525,8 +470,8 @@ mod operator {
 
     #[test]
     fn cmp_3() {
-        let val_a = Rational::new(RationalParam::Couple(8, 10));
-        let val_b = Rational::new(RationalParam::Couple(-42, 10));
+        let val_a = Rational::new(Raw::Couple(8, 10));
+        let val_b = Rational::new(Raw::Couple(-42, 10));
 
         assert!(val_a > val_b);
         assert!(val_a >= val_b);
@@ -536,8 +481,8 @@ mod operator {
 
     #[test]
     fn cmp_4() {
-        let val_a = Rational::new(RationalParam::Couple(-8, 10));
-        let val_b = Rational::new(RationalParam::Couple(-42, 10));
+        let val_a = Rational::new(Raw::Couple(-8, 10));
+        let val_b = Rational::new(Raw::Couple(-42, 10));
 
         assert!(val_a > val_b);
         assert!(val_a >= val_b);
