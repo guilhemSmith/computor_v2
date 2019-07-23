@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 16:33:10 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 18:15:35 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,6 +227,27 @@ impl ops::Div<Rational> for Rational {
     }
 }
 
+impl ops::Rem<Rational> for Rational {
+    type Output = Rational;
+
+    fn rem(self, rhs: Rational) -> Rational {
+        if self < rhs {
+            self
+        } else {
+            let mut num = (self.numerator * rhs.denominator)
+                % (rhs.numerator * self.denominator);
+            let mut den = self.denominator * rhs.denominator;
+
+            simplify_gcd(&mut num, &mut den);
+            Rational {
+                positiv: num == 0 || self.positiv,
+                numerator: num,
+                denominator: den,
+            }
+        }
+    }
+}
+
 fn dec_len(nb: f64) -> usize {
     let mut n = 0;
     let mut dec = 1.0;
@@ -440,6 +461,22 @@ mod operator {
         assert_eq!(neg_small / neg_big, Rational::new(Raw::Couple(4, 266)));
         assert_eq!(pos_small / neg_big, Rational::new(Raw::Couple(-8, 399)));
         assert_eq!(neg_small / pos_big, Rational::new(Raw::Couple(-4, 246)));
+    }
+
+    #[test]
+    fn mod_rational() {
+        let zero = Rational::new(Raw::Zero);
+        let neg_big = Rational::new(Raw::Float(-133.33));
+        let neg_small = Rational::new(Raw::Float(-1.42));
+        let pos_big = Rational::new(Raw::Float(123.123));
+        let pos_small = Rational::new(Raw::Float(2.222));
+
+        assert_eq!(pos_big % pos_big, zero);
+        assert_eq!(zero % pos_big, zero);
+        assert_eq!(zero % neg_big, zero);
+
+        assert_eq!(pos_small % pos_big, Rational::new(Raw::Float(2.222)));
+        assert_eq!(neg_small % neg_big, Rational::new(Raw::Float(-1.42)));
     }
 
     #[test]

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 16:00:03 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 18:15:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,6 @@ fn main() {
         Imaginary::new(Raw::Zero, Raw::Couple(15, 89)),
         Imaginary::zero(),
     ];
-
-    println!("{}", 425879631 as f64 / 10000000 as f64);
 
     for num in ra_values {
         println!("\n'{}' also known as '{:?}'", num, num);
