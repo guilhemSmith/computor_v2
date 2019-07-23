@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 14:34:34 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/23 14:39:02 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,24 +18,6 @@ pub struct Rational {
     positiv: bool,
     numerator: u64,
     denominator: u64,
-}
-
-impl fmt::Display for Rational {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let sign = if self.positiv { "" } else { "- " };
-        if self.numerator != 0 {
-            let float_value: f64 =
-                self.numerator as f64 / self.denominator as f64;
-            let fract_len = dec_len(float_value);
-            if fract_len <= 10 {
-                write!(f, "{}{:.*}", sign, fract_len, float_value)
-            } else {
-                write!(f, "{}{:.*}..", sign, 10, float_value)
-            }
-        } else {
-            write!(f, "{}inf", sign)
-        }
-    }
 }
 
 impl Rational {
@@ -73,6 +55,24 @@ impl Rational {
 
     pub fn zero() -> Self {
         Rational::new(Raw::Zero)
+    }
+}
+
+impl fmt::Display for Rational {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let sign = if self.positiv { "" } else { "- " };
+        if self.numerator != 0 {
+            let float_value: f64 =
+                self.numerator as f64 / self.denominator as f64;
+            let fract_len = dec_len(float_value);
+            if fract_len <= 10 {
+                write!(f, "{}{:.*}", sign, fract_len, float_value)
+            } else {
+                write!(f, "{}{:.*}..", sign, 10, float_value)
+            }
+        } else {
+            write!(f, "{}inf", sign)
+        }
     }
 }
 
