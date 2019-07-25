@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/25 14:51:46 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/25 15:12:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,17 @@ impl ops::Add<Imaginary> for Imaginary {
     }
 }
 
+impl ops::Sub<Imaginary> for Imaginary {
+    type Output = Imaginary;
+
+    fn sub(self, rhs: Imaginary) -> Imaginary {
+        Imaginary {
+            real: self.real - rhs.real,
+            irreal: self.irreal - rhs.irreal,
+        }
+    }
+}
+
 #[cfg(test)]
 mod operator {
     use super::{Imaginary, Raw};
@@ -112,7 +123,24 @@ mod operator {
     }
 
     #[test]
-    fn sub_imaginary() {}
+    fn sub_imaginary() {
+        let zero = Imaginary::new(Raw::Zero, Raw::Zero);
+        let real_1 = Imaginary::new(Raw::Float(42.0), Raw::Zero);
+        let real_2 = Imaginary::new(Raw::Float(-13.00001456), Raw::Zero);
+        let irreal_1 = Imaginary::new(Raw::Zero, Raw::Float(81.0987));
+        let irreal_2 = Imaginary::new(Raw::Zero, Raw::Float(50.0));
+        let complex_1 = Imaginary::new(Raw::Float(42.0), Raw::Float(50.0));
+        let complex_2 = Imaginary::new(Raw::Float(-42.0), Raw::Float(50.0));
+
+        assert_eq!(real_1 - zero, real_1);
+        assert_eq!(
+            real_1 - real_2,
+            Imaginary::new(Raw::Float(42.0 + 13.00001456), Raw::Zero)
+        );
+        assert_eq!(irreal_1 - zero, irreal_1);
+        assert_eq!(complex_1 - zero, complex_1);
+        assert_eq!(irreal_2 - real_1, complex_2);
+    }
 
     #[test]
     fn mul_imaginary() {}
