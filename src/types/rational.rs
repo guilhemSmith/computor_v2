@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 18:15:35 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/25 11:43:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@ impl Rational {
     pub fn new(param: Raw) -> Self {
         match param {
             Raw::Float(f_value) => {
-                let mut den = dec_div(f_value);
-                let mut num = (f_value.abs() * den as f64) as u64;
+                let mut den = dec_div(f_value.abs());
+                let mut num = (f_value.abs() * den as f64).round() as u64;
 
                 simplify_gcd(&mut num, &mut den);
                 Rational {
@@ -249,21 +249,29 @@ impl ops::Rem<Rational> for Rational {
 }
 
 fn dec_len(nb: f64) -> usize {
-    let mut n = 0;
-    let mut dec = 1.0;
-    while n < PRECISION + 1 && (nb * dec).fract() > EPSILON {
-        n += 1;
-        dec = dec * 10.0;
+    let mut len = PRECISION + 1;
+    let mut ten_power: f64 = 10.0_f64.powi(PRECISION as i32 + 1);
+    let mut limited = (nb * ten_power).round();
+    let mut fract = limited.fract();
+    while len > 0 && fract < EPSILON {
+        len -= 1;
+        limited = limited / 10.0;
+        fract = limited.fract();
+        ten_power = ten_power / 10.0;
     }
-    return n;
+    return len + 1;
 }
 
 fn dec_div(nb: f64) -> u64 {
-    let mut dec: f64 = 1.0;
-    while (nb * dec).fract() != 0.0 {
-        dec = dec * 10.0;
+    let mut ten_power: f64 = 10.0_f64.powi(PRECISION as i32 + 1);
+    let mut limited = (nb * ten_power).round();
+    let mut fract = limited.fract();
+    while fract < EPSILON {
+        limited = limited / 10.0;
+        fract = limited.fract();
+        ten_power = ten_power / 10.0;
     }
-    return dec as u64;
+    return (ten_power * 10.0) as u64;
 }
 
 fn simplify_gcd(num: &mut u64, den: &mut u64) {

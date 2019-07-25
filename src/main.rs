@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/23 18:15:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/25 10:47:31 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ use crate::types::rational::Rational;
 use crate::types::Raw;
 
 fn main() {
+    let weird = Rational::new(Raw::Float(1.003));
     let ra_values = vec![
         Rational::new(Raw::Couple(1, 3)),
         Rational::new(Raw::Couple(42, 12)),
@@ -32,6 +33,7 @@ fn main() {
         Imaginary::zero(),
     ];
 
+    println!("{}", weird);
     for num in ra_values {
         println!("\n'{}' also known as '{:?}'", num, num);
     }
