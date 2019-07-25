@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/25 15:12:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/25 16:29:45 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,13 +99,36 @@ impl ops::Sub<Imaginary> for Imaginary {
     }
 }
 
+impl ops::Mul<Imaginary> for Imaginary {
+    type Output = Imaginary;
+
+    fn mul(self, rhs: Imaginary) -> Imaginary {
+        Imaginary {
+            real: self.real * rhs.real - self.irreal * rhs.irreal,
+            irreal: self.real * rhs.irreal + self.irreal * rhs.real,
+        }
+    }
+}
+
+impl ops::Div<Imaginary> for Imaginary {
+    type Output = Imaginary;
+
+    fn div(self, rhs: Imaginary) -> Imaginary {
+        let den = rhs.real.pow(2) + rhs.irreal.pow(2);
+        Imaginary {
+            real: (self.real * rhs.real + self.irreal * rhs.irreal) / den,
+            irreal: (self.irreal * rhs.real - self.real * rhs.irreal) / den,
+        }
+    }
+}
+
 #[cfg(test)]
 mod operator {
     use super::{Imaginary, Raw};
 
     #[test]
     fn add_imaginary() {
-        let zero = Imaginary::new(Raw::Zero, Raw::Zero);
+        let zero = Imaginary::zero();
         let real_1 = Imaginary::new(Raw::Float(42.0), Raw::Zero);
         let real_2 = Imaginary::new(Raw::Float(-13.00001456), Raw::Zero);
         let irreal_1 = Imaginary::new(Raw::Zero, Raw::Float(81.0987));
@@ -124,7 +147,7 @@ mod operator {
 
     #[test]
     fn sub_imaginary() {
-        let zero = Imaginary::new(Raw::Zero, Raw::Zero);
+        let zero = Imaginary::zero();
         let real_1 = Imaginary::new(Raw::Float(42.0), Raw::Zero);
         let real_2 = Imaginary::new(Raw::Float(-13.00001456), Raw::Zero);
         let irreal_1 = Imaginary::new(Raw::Zero, Raw::Float(81.0987));
@@ -143,10 +166,28 @@ mod operator {
     }
 
     #[test]
-    fn mul_imaginary() {}
+    fn mul_imaginary() {
+        let zero = Imaginary::zero();
+        let complex_1 = Imaginary::new(Raw::Float(42.0), Raw::Float(50.0));
+        let complex_2 = Imaginary::new(Raw::Float(2.0), Raw::Float(3.0));
+        let complex_3 = Imaginary::new(Raw::Float(3.0), Raw::Float(2.0));
+        let complex_4 = Imaginary::new(Raw::Float(0.0), Raw::Float(13.0));
+
+        assert_eq!(complex_1 * zero, zero);
+        assert_eq!(zero * complex_2, zero);
+        assert_eq!(complex_2 * complex_3, complex_4);
+    }
 
     #[test]
-    fn div_imaginary() {}
+    fn div_imaginary() {
+        let zero = Imaginary::zero();
+        let complex_2 = Imaginary::new(Raw::Float(2.0), Raw::Float(3.0));
+        let complex_3 = Imaginary::new(Raw::Float(3.0), Raw::Float(2.0));
+        let complex_4 = Imaginary::new(Raw::Couple(12, 13), Raw::Couple(5, 13));
+
+        assert_eq!(zero / complex_2, zero);
+        assert_eq!(complex_2 / complex_3, complex_4);
+    }
 
     #[test]
     fn cmp_0() {}
