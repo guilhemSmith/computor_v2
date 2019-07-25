@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/07/22 09:55:57 by gsmith           ###   ########.fr        #
+#    Updated: 2019/07/25 17:30:51 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,13 @@ SRC			= $(addprefix src/, \
 				types.rs \
 				$(addprefix types/, \
 					imaginary.rs \
-					rational.rs))
+					rational.rs) \
+				lexer.rs \
+				$(addprefix lexer/, \
+					expression.rs \
+					operand.rs \
+					operator.rs) \
+)
 
 ifdef DEV
 	COMPILED_BIN = $(DEBUG_BIN)
