@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/25 11:43:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/25 12:57:39 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -259,14 +259,18 @@ fn dec_len(nb: f64) -> usize {
         fract = limited.fract();
         ten_power = ten_power / 10.0;
     }
-    return len + 1;
+    if fract < EPSILON {
+        len
+    } else {
+        len + 1
+    }
 }
 
 fn dec_div(nb: f64) -> u64 {
     let mut ten_power: f64 = 10.0_f64.powi(PRECISION as i32 + 1);
     let mut limited = (nb * ten_power).round();
     let mut fract = limited.fract();
-    while fract < EPSILON {
+    while ten_power >= 1.0 && fract < EPSILON {
         limited = limited / 10.0;
         fract = limited.fract();
         ten_power = ten_power / 10.0;

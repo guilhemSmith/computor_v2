@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/25 10:47:31 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/25 12:46:01 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,12 @@ fn main() {
         Imaginary::zero(),
     ];
 
-    println!("{}", weird);
+    println!("'{}'", weird);
     for num in ra_values {
-        println!("\n'{}' also known as '{:?}'", num, num);
+        println!("\n'{}'", num);
     }
     println!("\n");
     for num in im_values {
-        println!("\n'{}' also known as '{:?}'", num, num);
+        println!("\n'{}'", num);
     }
 }
