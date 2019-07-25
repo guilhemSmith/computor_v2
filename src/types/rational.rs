@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/25 12:57:39 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/25 15:28:43 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,21 @@ impl Rational {
             positiv: true,
             numerator: 0,
             denominator: 1,
+        }
+    }
+
+    pub fn pow(&self, power: u32) -> Rational {
+        match power {
+            0 => Rational {
+                positiv: true,
+                numerator: 1,
+                denominator: 1,
+            },
+            _ => Rational {
+                positiv: self.positiv,
+                numerator: self.numerator.pow(power),
+                denominator: self.denominator.pow(power),
+            },
         }
     }
 }
