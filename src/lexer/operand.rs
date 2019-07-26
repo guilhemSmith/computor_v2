@@ -6,29 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/25 18:39:57 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/26 11:05:23 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+use crate::error::InvalidOperandError;
 use crate::types::{Imaginary, Raw};
-use std::{error::Error, fmt};
-
-#[derive(Debug)]
-pub struct InvalidOperandError {
-    raw_value: String,
-}
-
-impl fmt::Display for InvalidOperandError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "Operand can't be interpreted as a numeric value : {}",
-            self.raw_value
-        )
-    }
-}
-
-impl Error for InvalidOperandError {}
 
 pub struct Operand {
     value: Imaginary,
@@ -42,13 +25,7 @@ impl Operand {
         let fl_value = match raw_str.parse::<f64>() {
             Ok(val) => val,
             Err(_err) => {
-                return Err(InvalidOperandError {
-                    raw_value: format!(
-                        "{}{}",
-                        raw_str,
-                        if is_real { "" } else { "i" }
-                    ),
-                })
+                return Err(InvalidOperandError::new(raw_str, is_real));
             }
         };
 
