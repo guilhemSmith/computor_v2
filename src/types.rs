@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:52:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/25 17:36:19 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/26 11:50:43 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-pub mod imaginary;
-pub mod rational;
+mod imaginary;
+mod rational;
 
 pub use imaginary::Imaginary;
 pub use rational::Rational;

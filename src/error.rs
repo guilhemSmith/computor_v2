@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/26 09:36:25 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/26 11:22:59 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/26 12:03:08 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,11 @@ mod invalid_operator;
 pub use div_by_zero::DivByZeroError;
 pub use invalid_operand::InvalidOperandError;
 pub use invalid_operator::InvalidOperatorError;
-use std::{error::Error, fmt};
+use std::error::Error;
 
 pub fn log_error<T>(error: T, position: u32)
 where
-    T: Error + fmt::Display,
+    T: Error,
 {
     eprintln!("[c:{}] - {}", position, error);
 }
