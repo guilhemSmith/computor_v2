@@ -19,23 +19,23 @@ pub use operand::Operand;
 pub use operator::Operator;
 
 pub enum Token {
-	Expr(Expression),
-	Orand(Operand),
-	Orator(Operator),
-	Invalid,
+    Expr(Expression),
+    Orand(Operand),
+    Orator(Operator),
+    Invalid,
 }
 
 pub fn read_input() -> Expression {
-	let tik = match Operand::new("125", true) {
-		Ok(op) => Token::Orand(op),
-		Err(_err) => Token::Invalid,
-	};
-	let tok = match Operator::new('+') {
-		Ok(op) => Token::Orator(op),
-		Err(_err) => Token::Invalid,
-	};
-	let res = Token::Expr(Expression {});
-	match (tik, tok, res) {
-		_ => Expression {},
-	}
+    let tik = match Operand::new("125", true) {
+        Ok(op) => Token::Orand(op),
+        Err(_err) => Token::Invalid,
+    };
+    let tok = match Operator::new('+') {
+        Ok(op) => Token::Orator(op),
+        Err(_err) => Token::Invalid,
+    };
+    let res = Token::Expr(Expression {});
+    match (tik, tok, res) {
+        _ => Expression {},
+    }
 }

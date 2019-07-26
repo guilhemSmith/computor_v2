@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/26 11:05:23 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/26 11:40:21 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use crate::error::InvalidOperandError;
+use crate::error::{DivByZeroError, InvalidOperandError};
 use crate::types::{Imaginary, Raw};
 
 pub struct Operand {
@@ -37,6 +37,34 @@ impl Operand {
             Ok(Operand {
                 value: Imaginary::new(Raw::Zero, Raw::Float(fl_value)),
             })
+        }
+    }
+
+    pub fn add(&mut self, rhs: Operand) -> &Operand {
+        self.value = self.value + rhs.value;
+        self
+    }
+
+    pub fn sub(&mut self, rhs: Operand) -> &Operand {
+        self.value = self.value - rhs.value;
+        self
+    }
+
+    pub fn mul(&mut self, rhs: Operand) -> &Operand {
+        self.value = self.value * rhs.value;
+        self
+    }
+
+    pub fn div(&mut self, rhs: Operand) -> Result<&Operand, DivByZeroError> {
+        if rhs.value != Imaginary::zero() {
+            self.value = self.value / rhs.value;
+            Ok(self)
+        } else {
+            Err(DivByZeroError::new(
+                format!("{}", self.value),
+                format!("{}", rhs.value),
+                '/',
+            ))
         }
     }
 }
