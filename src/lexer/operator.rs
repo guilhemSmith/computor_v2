@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/26 11:47:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/26 15:58:36 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,16 @@ impl Operator {
         Ok(Operator { op: op })
     }
 
-    pub fn exec(&self, val_a: &mut Operand, val_b: Operand) {}
+    pub fn exec<'a>(
+        &self,
+        val_a: &'a mut Operand,
+        val_b: Operand,
+    ) -> Result<&'a Operand, DivByZeroError> {
+        match self.op {
+            Operation::Basic(operation) => Ok(operation(val_a, val_b)),
+            Operation::Divide(operation) => operation(val_a, val_b),
+        }
+    }
 }
 
 fn add(val_a: &mut Operand, val_b: Operand) -> &Operand {
