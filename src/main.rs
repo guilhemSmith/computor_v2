@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/26 16:18:14 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/26 17:18:50 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,14 @@ mod error;
 mod lexer;
 mod types;
 
-use crate::lexer::read_input;
+use crate::lexer::Lexer;
 
 fn main() {
-    read_input();
+    let mut lex = Lexer::new(true);
+    loop {
+        match lex.read_input() {
+            Some(_) => {},
+            None => break,
+        }
+    }
 }

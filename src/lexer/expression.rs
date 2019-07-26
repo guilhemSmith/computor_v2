@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/26 11:56:47 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/26 16:42:50 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ pub struct Expression {
 }
 
 impl Expression {
-    pub fn new() -> Self {
+    pub fn new(input_trimed: String) -> Self {
         Expression { tokens: Vec::new() }
     }
 
