@@ -6,29 +6,24 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 13:30:13 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 14:44:17 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod expression;
 mod operand;
 mod operator;
+mod token;
 
 pub use expression::Expression;
 pub use operand::Operand;
 pub use operator::Operator;
+pub use token::Token;
 
 use crate::error::ComputorError;
 use std::io::{self, prelude::Write};
 
 const PROMPT: &str = "> ";
-
-pub enum Token {
-    Expr(Expression),
-    Orand(Operand),
-    Orator(Operator),
-    Invalid(ComputorError, usize),
-}
 
 pub struct Lexer {
     verbose: bool,
@@ -48,7 +43,11 @@ impl Lexer {
         };
         match io::stdin().read_line(&mut input) {
             Err(err) => return Err(ComputorError::IO(err)),
-            _ => {}
+            Ok(len) => {
+                if len < 1 {
+                    println!("");
+                }
+            }
         };
         if self.verbose {
             println!("[V:Lexer] - input read: '{}'", input.trim());

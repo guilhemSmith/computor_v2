@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 13:55:09 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 17:46:28 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{Operand, Operator, Token};
-use crate::error::ComputorError;
+use crate::error::{BadUseOperatorError, ComputorError};
 use std::{fmt, vec::Vec};
 
 pub struct Expression {
@@ -86,6 +86,20 @@ impl Expression {
         return Ok(expr);
     }
 
+    pub fn compute(&mut self, verbose: bool) -> Result<(), ComputorError> {
+        if verbose {
+            println!("[V:computor] - {}", self);
+        }
+
+        let mut tokens = &mut self.tokens;
+        let mut i: usize = 1;
+
+        while i < tokens.len() - 2 {
+            compute_op(&mut tokens, &mut i)?;
+        }
+        Ok(())
+    }
+
     pub fn push(&mut self, tok: Token) {
         self.tokens.push(tok);
     }
@@ -115,5 +129,23 @@ fn read_operand(raw_operand: &str, pos: usize) -> Token {
     ) {
         Ok(orand) => Token::Orand(orand),
         Err(err) => Token::Invalid(err, pos),
+    }
+}
+
+fn compute_op(
+    tokens: &mut Vec<Token>,
+    i: &mut usize,
+) -> Result<Option<Operand>, ComputorError> {
+    match (tokens[*i - 1], tokens[*i], tokens[*i + 1]) {
+        (Token::Orator(ref op), _, _) if op.symbol() == '*' => {
+            Err(BadUseOperatorError::new(op.symbol()))
+        }
+        (_, _, Token::Orator(ref op)) if op.symbol() == '*' => {
+            Err(BadUseOperatorError::new(op.symbol()))
+        }
+        (Token::Orand(ref lhs), Token::Orator(ref op), Token::Orand(ref rhs)) => {
+            Ok(Some(op.exec(&lhs, &rhs)?))
+        }
+        _ => Ok(None),
     }
 }

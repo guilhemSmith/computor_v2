@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 13:07:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 16:55:13 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@ use crate::error::{ComputorError, InvalidOperatorError};
 use std::fmt;
 
 enum Operation {
-    Basic(fn(&mut Operand, Operand) -> &Operand),
-    Divide(fn(&mut Operand, Operand) -> Result<&Operand, ComputorError>),
+    Basic(fn(&Operand, &Operand) -> Operand),
+    Divide(fn(&Operand, &Operand) -> Result<(Operand), ComputorError>),
 }
 
 pub struct Operator {
@@ -45,30 +45,34 @@ impl Operator {
         })
     }
 
-    pub fn exec<'a>(
+    pub fn exec(
         &self,
-        val_a: &'a mut Operand,
-        val_b: Operand,
-    ) -> Result<&'a Operand, ComputorError> {
+        val_a: &Operand,
+        val_b: &Operand,
+    ) -> Result<(Operand), ComputorError> {
         match self.op {
             Operation::Basic(operation) => Ok(operation(val_a, val_b)),
             Operation::Divide(operation) => operation(val_a, val_b),
         }
     }
+
+    pub fn symbol(&self) -> char {
+        self.symbol
+    }
 }
 
-fn add(val_a: &mut Operand, val_b: Operand) -> &Operand {
-    val_a.add(val_b)
+fn add(val_a: &Operand, val_b: &Operand) -> Operand {
+    Operand::add(val_a, val_b)
 }
 
-fn sub(val_a: &mut Operand, val_b: Operand) -> &Operand {
-    val_a.sub(val_b)
+fn sub(val_a: &Operand, val_b: &Operand) -> Operand {
+    Operand::sub(val_a, val_b)
 }
 
-fn mul(val_a: &mut Operand, val_b: Operand) -> &Operand {
-    val_a.mul(val_b)
+fn mul(val_a: &Operand, val_b: &Operand) -> Operand {
+    Operand::mul(val_a, val_b)
 }
 
-fn div(val_a: &mut Operand, val_b: Operand) -> Result<&Operand, ComputorError> {
-    val_a.div(val_b)
+fn div(val_a: &Operand, val_b: &Operand) -> Result<(Operand), ComputorError> {
+    Operand::div(val_a, val_b)
 }

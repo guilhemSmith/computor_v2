@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 13:08:17 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 16:54:57 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,28 +44,35 @@ impl Operand {
         }
     }
 
-    pub fn add(&mut self, rhs: Operand) -> &Operand {
-        self.value = self.value + rhs.value;
-        self
+    pub fn add(lhs: &Operand, rhs: &Operand) -> Operand {
+        Operand {
+            value: lhs.value + rhs.value,
+        }
     }
 
-    pub fn sub(&mut self, rhs: Operand) -> &Operand {
-        self.value = self.value - rhs.value;
-        self
+    pub fn sub(lhs: &Operand, rhs: &Operand) -> Operand {
+        Operand {
+            value: lhs.value - rhs.value,
+        }
     }
 
-    pub fn mul(&mut self, rhs: Operand) -> &Operand {
-        self.value = self.value * rhs.value;
-        self
+    pub fn mul(lhs: &Operand, rhs: &Operand) -> Operand {
+        Operand {
+            value: lhs.value * rhs.value,
+        }
     }
 
-    pub fn div(&mut self, rhs: Operand) -> Result<&Operand, ComputorError> {
+    pub fn div(
+        lhs: &Operand,
+        rhs: &Operand,
+    ) -> Result<(Operand), ComputorError> {
         if rhs.value != Imaginary::zero() {
-            self.value = self.value / rhs.value;
-            Ok(self)
+            Ok((Operand {
+                value: lhs.value / rhs.value,
+            }))
         } else {
             Err(DivByZeroError::new(
-                format!("{}", self.value),
+                format!("{}", lhs.value),
                 format!("{}", rhs.value),
                 '/',
             ))

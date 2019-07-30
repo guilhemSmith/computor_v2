@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/07/26 11:08:18 by gsmith           ###   ########.fr        #
+#    Updated: 2019/07/30 15:07:44 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,13 +19,16 @@ SRC			= $(addprefix src/, \
 				main.rs \
 				error.rs \
 				$(addprefix error/, \
+					bad_use_operator.rs \
+					div_by_zero.rs \
 					invalid_operand.rs \
 					invalid_operator.rs) \
 				lexer.rs \
 				$(addprefix lexer/, \
 					expression.rs \
 					operand.rs \
-					operator.rs) \
+					operator.rs \
+					token.rs) \
 				types.rs \
 				$(addprefix types/, \
 					imaginary.rs \
