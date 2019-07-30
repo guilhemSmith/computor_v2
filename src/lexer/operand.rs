@@ -6,15 +6,22 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 11:34:05 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 13:08:17 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use crate::error::{ComputorError, DivByZeroError, InvalidOperandError};
 use crate::types::{Imaginary, Raw};
+use std::fmt;
 
 pub struct Operand {
     value: Imaginary,
+}
+
+impl fmt::Display for Operand {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{}]", self.value)
+    }
 }
 
 impl Operand {

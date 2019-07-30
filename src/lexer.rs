@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 11:47:22 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 13:30:13 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ pub use expression::Expression;
 pub use operand::Operand;
 pub use operator::Operator;
 
-use crate::error::{ComputorError, InvalidOperandError, InvalidOperatorError};
+use crate::error::ComputorError;
 use std::io::{self, prelude::Write};
 
 const PROMPT: &str = "> ";
@@ -27,8 +27,7 @@ pub enum Token {
     Expr(Expression),
     Orand(Operand),
     Orator(Operator),
-    InvalidOperand(InvalidOperandError),
-    InvalidOperator(InvalidOperatorError),
+    Invalid(ComputorError, usize),
 }
 
 pub struct Lexer {

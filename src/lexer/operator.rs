@@ -6,12 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 11:33:21 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 13:07:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Operand;
 use crate::error::{ComputorError, InvalidOperatorError};
+use std::fmt;
 
 enum Operation {
     Basic(fn(&mut Operand, Operand) -> &Operand),
@@ -19,7 +20,14 @@ enum Operation {
 }
 
 pub struct Operator {
+    symbol: char,
     op: Operation,
+}
+
+impl fmt::Display for Operator {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{}]", self.symbol)
+    }
 }
 
 impl Operator {
@@ -31,7 +39,10 @@ impl Operator {
             '/' => Operation::Divide(div),
             _ => return Err(InvalidOperatorError::new(symbol)),
         };
-        Ok(Operator { op: op })
+        Ok(Operator {
+            symbol: symbol,
+            op: op,
+        })
     }
 
     pub fn exec<'a>(
