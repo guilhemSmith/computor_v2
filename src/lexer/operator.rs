@@ -6,16 +6,16 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/26 15:58:36 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 11:33:21 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Operand;
-use crate::error::{DivByZeroError, InvalidOperatorError};
+use crate::error::{ComputorError, InvalidOperatorError};
 
 enum Operation {
     Basic(fn(&mut Operand, Operand) -> &Operand),
-    Divide(fn(&mut Operand, Operand) -> Result<&Operand, DivByZeroError>),
+    Divide(fn(&mut Operand, Operand) -> Result<&Operand, ComputorError>),
 }
 
 pub struct Operator {
@@ -23,7 +23,7 @@ pub struct Operator {
 }
 
 impl Operator {
-    pub fn new(symbol: char) -> Result<Operator, InvalidOperatorError> {
+    pub fn new(symbol: char) -> Result<Operator, ComputorError> {
         let op = match symbol {
             '+' => Operation::Basic(add),
             '-' => Operation::Basic(sub),
@@ -38,7 +38,7 @@ impl Operator {
         &self,
         val_a: &'a mut Operand,
         val_b: Operand,
-    ) -> Result<&'a Operand, DivByZeroError> {
+    ) -> Result<&'a Operand, ComputorError> {
         match self.op {
             Operation::Basic(operation) => Ok(operation(val_a, val_b)),
             Operation::Divide(operation) => operation(val_a, val_b),
@@ -58,9 +58,6 @@ fn mul(val_a: &mut Operand, val_b: Operand) -> &Operand {
     val_a.mul(val_b)
 }
 
-fn div(
-    val_a: &mut Operand,
-    val_b: Operand,
-) -> Result<&Operand, DivByZeroError> {
+fn div(val_a: &mut Operand, val_b: Operand) -> Result<&Operand, ComputorError> {
     val_a.div(val_b)
 }

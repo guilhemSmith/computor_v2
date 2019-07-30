@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/26 15:56:52 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 11:34:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use crate::error::{DivByZeroError, InvalidOperandError};
+use crate::error::{ComputorError, DivByZeroError, InvalidOperandError};
 use crate::types::{Imaginary, Raw};
 
 pub struct Operand {
@@ -18,10 +18,7 @@ pub struct Operand {
 }
 
 impl Operand {
-    pub fn new(
-        raw_str: &str,
-        is_real: bool,
-    ) -> Result<Operand, InvalidOperandError> {
+    pub fn new(raw_str: &str, is_real: bool) -> Result<Operand, ComputorError> {
         let fl_value = match raw_str.parse::<f64>() {
             Ok(val) => val,
             Err(_err) => {
@@ -55,7 +52,7 @@ impl Operand {
         self
     }
 
-    pub fn div(&mut self, rhs: Operand) -> Result<&Operand, DivByZeroError> {
+    pub fn div(&mut self, rhs: Operand) -> Result<&Operand, ComputorError> {
         if rhs.value != Imaginary::zero() {
             self.value = self.value / rhs.value;
             Ok(self)

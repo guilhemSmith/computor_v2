@@ -6,10 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/26 10:56:21 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/26 10:59:45 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 11:30:19 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+use super::ComputorError::{self, InvalidOperator};
 use std::{error::Error, fmt};
 
 #[derive(Debug)]
@@ -26,7 +27,7 @@ impl fmt::Display for InvalidOperatorError {
 }
 
 impl InvalidOperatorError {
-    pub fn new(symbol: char) -> Self {
-        InvalidOperatorError { symbol: symbol }
+    pub fn new(symbol: char) -> ComputorError {
+        InvalidOperator(InvalidOperatorError { symbol: symbol })
     }
 }

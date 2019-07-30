@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/26 17:20:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/07/30 11:47:22 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,8 @@ pub use expression::Expression;
 pub use operand::Operand;
 pub use operator::Operator;
 
-use crate::error::{log_error, InvalidOperandError, InvalidOperatorError};
+use crate::error::{ComputorError, InvalidOperandError, InvalidOperatorError};
 use std::io::{self, prelude::Write};
-use std::vec::Vec;
 
 const PROMPT: &str = "> ";
 
@@ -34,33 +33,28 @@ pub enum Token {
 
 pub struct Lexer {
     verbose: bool,
-    hist: Vec<String>,
 }
 
 impl Lexer {
     pub fn new(verbose: bool) -> Self {
-        Lexer {
-            verbose: verbose,
-            hist: Vec::new(),
-        }
+        Lexer { verbose: verbose }
     }
 
-    pub fn read_input(&mut self) -> Option<Expression> {
+    pub fn read_input(&mut self) -> Result<Expression, ComputorError> {
         let mut input = String::new();
 
-        if !print_prompt() {
-            return None;
-        }
-        match io::stdin().read_line(&mut input) {
-            Ok(size) => {
-                if size == 0 {
-                    return None;
-                }
-            }
-            Err(err) => log_error(err, 0),
+        match print_prompt() {
+            Err(err) => return Err(ComputorError::IO(err)),
+            _ => {}
         };
-        self.hist.push(input.clone());
-        Some(Expression::new(self.clear_input(input)))
+        match io::stdin().read_line(&mut input) {
+            Err(err) => return Err(ComputorError::IO(err)),
+            _ => {}
+        };
+        if self.verbose {
+            println!("[V:Lexer] - input read: '{}'", input.trim());
+        }
+        Expression::new(self.clear_input(input))
     }
 
     fn clear_input(&self, raw_input: String) -> String {
@@ -81,21 +75,10 @@ impl Lexer {
     }
 }
 
-fn print_prompt() -> bool {
+fn print_prompt() -> Result<(), io::Error> {
     let mut stdout = io::stdout();
 
-    match write!(&mut stdout, "{}", PROMPT) {
-        Ok(_) => {}
-        Err(err) => {
-            log_error(err, 0);
-            return false;
-        }
-    };
-    match stdout.flush() {
-        Ok(_) => true,
-        Err(err) => {
-            log_error(err, 0);
-            false
-        }
-    }
+    write!(&mut stdout, "{}", PROMPT)?;
+    stdout.flush()?;
+    Ok(())
 }
