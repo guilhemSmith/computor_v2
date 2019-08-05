@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/05 18:23:02 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/05 19:24:40 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,27 @@ impl Expression {
         if verbose {
             println!("[V:computor] - {}", self);
         }
-        self.tokens = compute_op(self.tokens.split_off(0))?;
+        // let mut index = 1;
+        // let mut iter = self.tokens.iter();
+        // iter.next();
+        // while index < self.tokens.len() - 1 {
+        //     match iter.next() {
+        //         Some(tok) => match tok {
+        //             Token::Orator(op) => {
+        //                 if op.prior() {
+        //                     self.tokens = compute_op(self.tokens.split_off(index - 1))?;
+        //                 } else {
+        //                     index += 1;
+        //                 }
+        //             },
+        //             _ => { index += 1 }
+        //         },
+        //         None => break,
+        //     };
+        // }
+        while self.tokens.len() > 1 {
+            self.tokens = compute_op(self.tokens.split_off(0))?;
+        }
         Ok(())
     }
 
