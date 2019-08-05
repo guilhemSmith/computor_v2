@@ -6,16 +6,16 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 17:46:28 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/05 18:13:14 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{Operand, Operator, Token};
-use crate::error::{BadUseOperatorError, ComputorError};
-use std::{fmt, vec::Vec};
+use crate::error::{BadUseOperatorError, ComputorError, InvalidExprError};
+use std::{collections::LinkedList, fmt};
 
 pub struct Expression {
-    tokens: Vec<Token>,
+    tokens: LinkedList<Token>,
 }
 
 impl fmt::Display for Expression {
@@ -25,20 +25,7 @@ impl fmt::Display for Expression {
 
         loop {
             match iter_token.next() {
-                Some(tok) => match tok {
-                    Token::Expr(exp) => {
-                        tokens_str = format!("{}{}", tokens_str, exp)
-                    }
-                    Token::Orand(op) => {
-                        tokens_str = format!("{}{}", tokens_str, op)
-                    }
-                    Token::Orator(op) => {
-                        tokens_str = format!("{}{}", tokens_str, op)
-                    }
-                    Token::Invalid(_, _) => {
-                        tokens_str = format!("{}{}", tokens_str, "[error]")
-                    }
-                },
+                Some(tok) => tokens_str = format!("{}{}", tokens_str, tok),
                 None => break,
             };
         }
@@ -48,7 +35,9 @@ impl fmt::Display for Expression {
 
 impl Expression {
     pub fn new(input_trimed: String) -> Result<Self, ComputorError> {
-        let mut expr = Expression { tokens: Vec::new() };
+        let mut expr = Expression {
+            tokens: LinkedList::new(),
+        };
         let mut operand_index: i32 = -1;
         let mut iter_char = input_trimed.char_indices();
 
@@ -90,18 +79,12 @@ impl Expression {
         if verbose {
             println!("[V:computor] - {}", self);
         }
-
-        let mut tokens = &mut self.tokens;
-        let mut i: usize = 1;
-
-        while i < tokens.len() - 2 {
-            compute_op(&mut tokens, &mut i)?;
-        }
+        self.tokens = compute_op(self.tokens.split_off(0))?;
         Ok(())
     }
 
     pub fn push(&mut self, tok: Token) {
-        self.tokens.push(tok);
+        self.tokens.push_back(tok);
     }
 
     pub fn is_empty(&self) -> bool {
@@ -133,19 +116,34 @@ fn read_operand(raw_operand: &str, pos: usize) -> Token {
 }
 
 fn compute_op(
-    tokens: &mut Vec<Token>,
-    i: &mut usize,
-) -> Result<Option<Operand>, ComputorError> {
-    match (tokens[*i - 1], tokens[*i], tokens[*i + 1]) {
-        (Token::Orator(ref op), _, _) if op.symbol() == '*' => {
-            Err(BadUseOperatorError::new(op.symbol()))
-        }
-        (_, _, Token::Orator(ref op)) if op.symbol() == '*' => {
-            Err(BadUseOperatorError::new(op.symbol()))
-        }
-        (Token::Orand(ref lhs), Token::Orator(ref op), Token::Orand(ref rhs)) => {
-            Ok(Some(op.exec(&lhs, &rhs)?))
-        }
-        _ => Ok(None),
-    }
+    mut lst: LinkedList<Token>,
+) -> Result<LinkedList<Token>, ComputorError> {
+    let mut remain = lst.split_off(3);
+    let lst_orand = (lst.pop_front(), lst.pop_back());
+    let orator = match lst.pop_front() {
+        Some(tok) => match tok {
+            Token::Orator(op) => op,
+            _ => return Err(InvalidExprError::new()),
+        },
+        None => return Err(InvalidExprError::new()),
+    };
+    let orands = (
+        match lst_orand.0 {
+            Some(tok) => match tok {
+                Token::Orand(or) => or,
+                _ => return Err(BadUseOperatorError::new(orator.symbol())),
+            },
+            None => return Err(InvalidExprError::new()),
+        },
+        match lst_orand.1 {
+            Some(tok) => match tok {
+                Token::Orand(or) => or,
+                _ => return Err(BadUseOperatorError::new(orator.symbol())),
+            },
+            None => return Err(InvalidExprError::new()),
+        },
+    );
+    let op_result = orator.exec(&orands.0, &orands.1)?;
+    remain.push_front(Token::Orand(op_result));
+    return Ok(remain);
 }
