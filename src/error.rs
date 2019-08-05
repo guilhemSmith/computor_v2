@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/26 09:36:25 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/05 17:49:39 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/05 18:28:53 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ pub enum ComputorError {
 pub fn log_error(error: ComputorError, position: u32) {
     match error {
         ComputorError::BadUseOperator(err) => {
-            eprintln!("[err-syntax:c{}] - {}", position, err)
+            eprintln!("[err-syntax] - {}", err)
         }
         ComputorError::DivByZero(err) => {
             eprintln!("[err-math:c{}] - {}", position, err)

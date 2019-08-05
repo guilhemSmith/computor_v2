@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 16:54:57 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/05 18:23:32 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,9 +67,9 @@ impl Operand {
         rhs: &Operand,
     ) -> Result<(Operand), ComputorError> {
         if rhs.value != Imaginary::zero() {
-            Ok((Operand {
+            Ok(Operand {
                 value: lhs.value / rhs.value,
-            }))
+            })
         } else {
             Err(DivByZeroError::new(
                 format!("{}", lhs.value),

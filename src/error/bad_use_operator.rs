@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:48:53 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 14:58:52 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/05 18:27:53 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ impl fmt::Display for BadUseOperatorError {
             "Operator: '{}', {}, and {}",
             self.symbol,
             "must be preceded by a value",
-            "followed by a another value"
+            "followed by a another value."
         )
     }
 }

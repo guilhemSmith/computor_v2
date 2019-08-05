@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/05 17:17:30 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/05 18:23:59 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,23 +27,7 @@ impl fmt::Display for Token {
             Token::Expr(exp) => write!(f, "{}", exp),
             Token::Orand(orand) => write!(f, "{}", orand),
             Token::Orator(orator) => write!(f, "{}", orator),
-            Token::Invalid(err, pos) => write!(f, "[err:pos{}]", pos),
-        }
-    }
-}
-
-impl Token {
-    pub fn is_orand(&self) -> bool {
-        match self {
-            Token::Orand(_) => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_orator(&self) -> bool {
-        match self {
-            Token::Orator(_) => true,
-            _ => false,
+            Token::Invalid(_, pos) => write!(f, "[err:pos{}]", pos),
         }
     }
 }
