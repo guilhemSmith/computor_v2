@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/08/06 13:17:47 by gsmith           ###   ########.fr        #
+#    Updated: 2019/08/06 18:27:42 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,11 +16,13 @@ NAME		= computorv2
 DEBUG_BIN	= target/debug/$(NAME)
 RELEASE_BIN	= target/release/$(NAME)
 SRC			= $(addprefix src/, \
+				arg_parse.rs \
 				main.rs \
 				error.rs \
 				$(addprefix error/, \
 					bad_use_operator.rs \
 					div_by_zero.rs \
+					incomplete_expr.rs
 					invalid_expr.rs \
 					invalid_operand.rs \
 					invalid_operator.rs \
