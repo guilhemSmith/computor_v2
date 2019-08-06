@@ -6,14 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:48:53 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/05 18:27:53 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 12:50:42 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::ComputorError::{self, BadUseOperator};
 use std::{error::Error, fmt};
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct BadUseOperatorError {
     symbol: char,
 }

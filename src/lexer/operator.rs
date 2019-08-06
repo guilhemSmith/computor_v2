@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/05 19:23:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 12:50:14 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,13 @@ use super::Operand;
 use crate::error::{ComputorError, InvalidOperatorError};
 use std::fmt;
 
+#[derive(Clone)]
 enum Operation {
     Basic(fn(&Operand, &Operand) -> Operand),
     Divide(fn(&Operand, &Operand) -> Result<(Operand), ComputorError>),
 }
 
+#[derive(Clone)]
 pub struct Operator {
     symbol: char,
     op: Operation,

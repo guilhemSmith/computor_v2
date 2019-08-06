@@ -6,14 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/26 11:00:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/05 18:27:49 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 12:51:03 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::ComputorError::{self, InvalidOperand};
 use std::{error::Error, fmt};
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct InvalidOperandError {
     raw_value: String,
 }

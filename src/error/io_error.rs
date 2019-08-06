@@ -1,31 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   invalid_expr.rs                                    :+:      :+:    :+:   */
+/*   io_error.rs                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/08/05 17:46:36 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 12:50:57 by gsmith           ###   ########.fr       */
+/*   Created: 2019/08/06 12:52:13 by gsmith            #+#    #+#             */
+/*   Updated: 2019/08/06 12:54:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::ComputorError::{self, InvalidExpr};
-use std::{error::Error, fmt};
+use super::ComputorError::{self, IO};
+use std::{error::Error, fmt, io::Error as IOErr};
 
 #[derive(Debug,Clone)]
-pub struct InvalidExprError {}
+pub struct IOError {
+	description: String,
+}
 
-impl Error for InvalidExprError {}
+impl Error for IOError {}
 
-impl fmt::Display for InvalidExprError {
+impl fmt::Display for IOError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Error while computing token from an expression.")
+        write!(f, "{}", self.description)
     }
 }
 
-impl InvalidExprError {
-    pub fn new() -> ComputorError {
-        InvalidExpr(InvalidExprError {})
+impl IOError {
+    pub fn new(err: IOErr) -> ComputorError {
+        IO(IOError {
+			description: format!("{}", err)
+		})
     }
 }

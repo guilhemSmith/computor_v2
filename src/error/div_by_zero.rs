@@ -6,14 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/26 11:17:33 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 11:28:35 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 12:50:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::ComputorError::{self, DivByZero};
 use std::{error::Error, fmt};
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct DivByZeroError {
     left_op: String,
     right_op: String,

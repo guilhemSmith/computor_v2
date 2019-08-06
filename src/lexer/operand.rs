@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/05 19:23:46 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 12:49:53 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ use crate::error::{ComputorError, DivByZeroError, InvalidOperandError};
 use crate::types::{Imaginary, Raw};
 use std::fmt;
 
+#[derive(Clone)]
 pub struct Operand {
     value: Imaginary,
 }

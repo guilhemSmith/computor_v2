@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/05 18:25:33 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 13:10:42 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ fn main() {
                     break;
                 }
                 match expr.compute(true) {
-                    Ok(_) => println!("{}", expr),
+                    Ok(result) => println!("orignal: {}\nresult: {}", expr, result),
                     Err(err) => log_error(err, 0),
                 };
             }

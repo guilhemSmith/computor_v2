@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/30 14:44:17 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 12:56:49 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ pub use operand::Operand;
 pub use operator::Operator;
 pub use token::Token;
 
-use crate::error::ComputorError;
+use crate::error::{ComputorError, IOError};
 use std::io::{self, prelude::Write};
 
 const PROMPT: &str = "> ";
@@ -38,11 +38,11 @@ impl Lexer {
         let mut input = String::new();
 
         match print_prompt() {
-            Err(err) => return Err(ComputorError::IO(err)),
+            Err(err) => return Err(IOError::new(err)),
             _ => {}
         };
         match io::stdin().read_line(&mut input) {
-            Err(err) => return Err(ComputorError::IO(err)),
+            Err(err) => return Err(IOError::new(err)),
             Ok(len) => {
                 if len < 1 {
                     println!("");
