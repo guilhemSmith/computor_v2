@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 13:09:59 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 14:05:20 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,16 +21,7 @@ pub struct Expression {
 
 impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut tokens_str = String::new();
-        let mut iter_token = self.tokens.iter();
-
-        loop {
-            match iter_token.next() {
-                Some(tok) => tokens_str = format!("{}{}", tokens_str, tok),
-                None => break,
-            };
-        }
-        write!(f, "[expr: {}]", tokens_str)
+        write!(f, "[expr: {}]", tokens_to_string(&self.tokens))
     }
 }
 
@@ -76,17 +67,6 @@ impl Expression {
         return Ok(expr);
     }
 
-    pub fn compute(&mut self, verbose: bool) -> Result<Self, ComputorError> {
-        if verbose {
-            println!("[V:computor] - {}", self);
-        }
-        let mut result = self.tokens.clone();
-        while result.len() > 1 {
-            result = compute_op(result)?;
-        }
-        Ok(Expression { tokens:result })
-    }
-
     pub fn push(&mut self, tok: Token) {
         self.tokens.push_back(tok);
     }
@@ -94,6 +74,89 @@ impl Expression {
     pub fn is_empty(&self) -> bool {
         self.tokens.len() == 0
     }
+
+    pub fn compute(&self, verbose: bool) -> Result<Self, ComputorError> {
+        if verbose {
+            println!("[V:computor] - {}", self);
+        }
+        let mut result = self.tokens.clone();
+        result = compute_all(result, true)?;
+        if verbose {
+            println!(
+                "[V:computor] - prior operations computed : {}",
+                tokens_to_string(&result)
+            );
+        }
+        result = compute_all(result, false)?;
+        if verbose {
+            println!(
+                "[V:computor] - remaining operations computed : {}",
+                tokens_to_string(&result)
+            );
+        }
+        Ok(Expression { tokens: result })
+    }
+}
+
+fn compute_all(
+    mut lst: LinkedList<Token>,
+    prior: bool,
+) -> Result<LinkedList<Token>, ComputorError> {
+    let mut result: LinkedList<Token> = LinkedList::new();
+    while lst.len() > 2 {
+        let mut reduced = compute_op(&mut lst, prior)?;
+        result.append(&mut reduced);
+    }
+    loop {
+        match lst.pop_front() {
+            Some(tok) => result.push_back(tok),
+            None => break,
+        };
+    }
+    Ok(result)
+}
+
+fn compute_op(
+    lst: &mut LinkedList<Token>,
+    prior: bool,
+) -> Result<LinkedList<Token>, ComputorError> {
+    let remain = lst.split_off(3);
+    let lst_orand = (lst.pop_front(), lst.pop_back());
+    let orator = match lst.pop_front() {
+        Some(tok) => match tok {
+            Token::Orator(op) => op,
+            _ => return Err(InvalidExprError::new()),
+        },
+        None => return Err(InvalidExprError::new()),
+    };
+    *lst = remain;
+    let orands = (
+        match lst_orand.0 {
+            Some(tok) => match tok {
+                Token::Orand(or) => or,
+                _ => return Err(BadUseOperatorError::new(orator.symbol())),
+            },
+            None => return Err(InvalidExprError::new()),
+        },
+        match lst_orand.1 {
+            Some(tok) => match tok {
+                Token::Orand(or) => or,
+                _ => return Err(BadUseOperatorError::new(orator.symbol())),
+            },
+            None => return Err(InvalidExprError::new()),
+        },
+    );
+
+    let mut result: LinkedList<Token> = LinkedList::new();
+    if orator.prior() == prior {
+        let op_result = orator.exec(&orands.0, &orands.1)?;
+        lst.push_front(Token::Orand(op_result));
+    } else {
+        lst.push_front(Token::Orand(orands.1));
+        result.push_front(Token::Orator(orator));
+        result.push_front(Token::Orand(orands.0));
+    }
+    return Ok(result);
 }
 
 fn read_operand(raw_operand: &str, pos: usize) -> Token {
@@ -119,35 +182,15 @@ fn read_operand(raw_operand: &str, pos: usize) -> Token {
     }
 }
 
-fn compute_op(
-    mut lst: LinkedList<Token>,
-) -> Result<LinkedList<Token>, ComputorError> {
-    let mut remain = lst.split_off(3);
-    let lst_orand = (lst.pop_front(), lst.pop_back());
-    let orator = match lst.pop_front() {
-        Some(tok) => match tok {
-            Token::Orator(op) => op,
-            _ => return Err(InvalidExprError::new()),
-        },
-        None => return Err(InvalidExprError::new()),
-    };
-    let orands = (
-        match lst_orand.0 {
-            Some(tok) => match tok {
-                Token::Orand(or) => or,
-                _ => return Err(BadUseOperatorError::new(orator.symbol())),
-            },
-            None => return Err(InvalidExprError::new()),
-        },
-        match lst_orand.1 {
-            Some(tok) => match tok {
-                Token::Orand(or) => or,
-                _ => return Err(BadUseOperatorError::new(orator.symbol())),
-            },
-            None => return Err(InvalidExprError::new()),
-        },
-    );
-    let op_result = orator.exec(&orands.0, &orands.1)?;
-    remain.push_front(Token::Orand(op_result));
-    return Ok(remain);
+fn tokens_to_string(lst: &LinkedList<Token>) -> String {
+    let mut tokens_str = String::new();
+    let mut iter_token = lst.iter();
+
+    loop {
+        match iter_token.next() {
+            Some(tok) => tokens_str = format!("{}{}", tokens_str, tok),
+            None => break,
+        };
+    }
+    return tokens_str;
 }

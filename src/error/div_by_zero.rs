@@ -13,7 +13,7 @@
 use super::ComputorError::{self, DivByZero};
 use std::{error::Error, fmt};
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct DivByZeroError {
     left_op: String,
     right_op: String,

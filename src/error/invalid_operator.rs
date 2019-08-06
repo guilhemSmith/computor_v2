@@ -13,7 +13,7 @@
 use super::ComputorError::{self, InvalidOperator};
 use std::{error::Error, fmt};
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct InvalidOperatorError {
     symbol: char,
 }

@@ -13,7 +13,7 @@
 use super::ComputorError::{self, InvalidOperand};
 use std::{error::Error, fmt};
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct InvalidOperandError {
     raw_value: String,
 }

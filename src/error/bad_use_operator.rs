@@ -13,7 +13,7 @@
 use super::ComputorError::{self, BadUseOperator};
 use std::{error::Error, fmt};
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct BadUseOperatorError {
     symbol: char,
 }

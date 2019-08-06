@@ -13,9 +13,9 @@
 use super::ComputorError::{self, IO};
 use std::{error::Error, fmt, io::Error as IOErr};
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct IOError {
-	description: String,
+    description: String,
 }
 
 impl Error for IOError {}
@@ -29,7 +29,7 @@ impl fmt::Display for IOError {
 impl IOError {
     pub fn new(err: IOErr) -> ComputorError {
         IO(IOError {
-			description: format!("{}", err)
-		})
+            description: format!("{}", err),
+        })
     }
 }

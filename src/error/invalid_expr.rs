@@ -13,7 +13,7 @@
 use super::ComputorError::{self, InvalidExpr};
 use std::{error::Error, fmt};
 
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct InvalidExprError {}
 
 impl Error for InvalidExprError {}
