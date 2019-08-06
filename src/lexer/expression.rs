@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 15:36:31 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 15:40:36 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,20 +131,20 @@ impl Expression {
 
     pub fn compute(&self, verbose: bool) -> Result<Self, ComputorError> {
         if verbose {
-            println!("[V:computor] - {}", self);
+            println!("[V:computor] - computing expression: {}", self);
         }
         let mut result = self.tokens.clone();
         result = compute_all(result, true)?;
         if verbose {
             println!(
-                "[V:computor] - prior operations computed : {}",
+                "[V:computor] - prior operations computed: {}",
                 tokens_to_string(&result)
             );
         }
         result = compute_all(result, false)?;
         if verbose {
             println!(
-                "[V:computor] - remaining operations computed : {}",
+                "[V:computor] - remaining operations computed: {}",
                 tokens_to_string(&result)
             );
         }
