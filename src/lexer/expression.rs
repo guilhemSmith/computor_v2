@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 15:45:06 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 17:23:09 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,81 +29,89 @@ impl fmt::Display for Expression {
 }
 
 impl Expression {
-    pub fn new(
-        input_trimed: String,
-        start: usize,
-    ) -> Result<Self, ComputorError> {
+    pub fn new(input: String, start: usize) -> Result<Self, ComputorError> {
         let mut expr = Expression {
             tokens: LinkedList::new(),
         };
-        let mut operand_index: i32 = -1;
-        let mut iter_char = input_trimed.char_indices();
+        let mut op_index: i64 = -1;
+        let last = input.len();
+        let mut iter_char = input.char_indices();
 
         loop {
             match iter_char.next() {
                 Some((i, ch))
                     if ch == '+' || ch == '-' || ch == '*' || ch == '/' =>
                 {
-                    if operand_index >= 0 {
-                        expr.push(read_operand(
-                            &input_trimed[operand_index as usize..i],
-                            operand_index as usize + start,
-                        ));
-                        operand_index = -1;
-                    }
+                    expr.push_orand(&mut op_index, &input, i, start);
                     let orator = Operator::new(ch)?;
                     expr.push(Token::Orator(orator));
                 }
                 Some((i, ch)) if ch == '(' => {
-                    if operand_index >= 0 {
-                        expr.push(read_operand(
-                            &input_trimed[operand_index as usize..i],
-                            operand_index as usize + start,
-                        ));
-                        operand_index = -1;
-                    }
-                    let start_exp = i + 1;
-                    let mut end_exp = i + 1;
-                    let mut opening = 1;
-                    while opening > 0 {
-                        match iter_char.next() {
-                            Some((_, ch)) => {
-                                end_exp += 1;
-                                if ch == ')' {
-                                    opening -= 1;
-                                } else if ch == '(' {
-                                    opening += 1;
-                                }
-                            }
-                            None => {
-                                return Err(IncompleteExprError::new(
-                                    &input_trimed[start_exp - 1..],
-                                ))
-                            }
-                        }
-                    }
-                    expr.push(Token::Expr(Expression::new(
-                        String::from(&input_trimed[start_exp..end_exp - 1]),
-                        start + start_exp + 1,
-                    )?))
+                    expr.push_orand(&mut op_index, &input, i, start);
+                    expr.push_expr(i + 1, &mut iter_char, &input, start)?;
                 }
                 Some((i, _)) => {
-                    if operand_index < 0 {
-                        operand_index = i as i32;
+                    if op_index < 0 {
+                        op_index = i as i64;
                     }
                 }
                 None => {
-                    if operand_index >= 0 {
-                        expr.push(read_operand(
-                            &input_trimed[operand_index as usize..],
-                            operand_index as usize + start,
-                        ));
-                    }
+                    expr.push_orand(&mut op_index, &input, last, start);
                     break;
                 }
             }
         }
         return Ok(expr);
+    }
+
+    fn push_orand(
+        &mut self,
+        start_index: &mut i64,
+        input: &String,
+        current: usize,
+        start_expr: usize,
+    ) {
+        let i = *start_index;
+        if i >= 0 {
+            let u = i as usize;
+            self.push(read_operand(&input[u..current], u + start_expr));
+            *start_index = -1;
+        }
+    }
+
+    fn push_expr(
+        &mut self,
+        index: usize,
+        iter: &mut std::str::CharIndices<'_>,
+        input: &String,
+        start: usize,
+    ) -> Result<(), ComputorError> {
+        let mut end_exp = index;
+        let mut opening = 1;
+        while opening > 0 {
+            match iter.next() {
+                Some((_, ch)) => {
+                    end_exp += 1;
+                    if ch == ')' {
+                        opening -= 1;
+                        continue;
+                    }
+                    if ch == '(' {
+                        opening += 1;
+                        continue;
+                    }
+                }
+                None => {
+                    return Err(IncompleteExprError::new(&input[index - 1..]))
+                }
+            }
+        }
+        let tok = Token::Expr(Expression::new(
+            String::from(&input[index..end_exp - 1]),
+            start + index + 1,
+        )?);
+        self.push(tok);
+        Ok(())
     }
 
     fn push(&mut self, tok: Token) {
