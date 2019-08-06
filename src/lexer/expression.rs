@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 14:35:14 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 15:11:16 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,8 @@ impl Expression {
 
         loop {
             match iter_char.next() {
-                Some((i, op))
-                    if op == '+' || op == '-' || op == '*' || op == '/' =>
+                Some((i, ch))
+                    if ch == '+' || ch == '-' || ch == '*' || ch == '/' =>
                 {
                     if operand_index >= 0 {
                         expr.push(read_operand(
@@ -47,7 +47,7 @@ impl Expression {
                         ));
                         operand_index = -1;
                     }
-                    let orator = Operator::new(op)?;
+                    let orator = Operator::new(ch)?;
                     expr.push(Token::Orator(orator));
                 }
                 Some((i, _)) => {
@@ -87,6 +87,7 @@ impl Expression {
                         count += 1;
                         log_error(err, Some(pos));
                     }
+                    Token::Expr(expr) => count += expr.check_errors(),
                     _ => {}
                 },
                 None => break,
@@ -180,20 +181,21 @@ fn compute_op(
 }
 
 fn read_operand(raw_operand: &str, pos: usize) -> Token {
-    let is_real = if raw_operand.len() > 1 {
-        match raw_operand.chars().rev().next() {
-            Some(c) => c != 'i',
-            None => true,
-        }
-    } else {
-        true
+    let is_real = match raw_operand.chars().rev().next() {
+        Some(c) => c != 'i',
+        None => true,
     };
 
     match Operand::new(
         if is_real {
             raw_operand
         } else {
-            &raw_operand[..raw_operand.len() - 1]
+            let len = raw_operand.len();
+            if len > 1 {
+                &raw_operand[..raw_operand.len() - 1]
+            } else {
+                "1"
+            }
         },
         is_real,
     ) {
