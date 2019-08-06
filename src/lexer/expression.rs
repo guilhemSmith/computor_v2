@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 15:40:36 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 15:45:06 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,10 @@ impl fmt::Display for Expression {
 }
 
 impl Expression {
-    pub fn new(input_trimed: String) -> Result<Self, ComputorError> {
+    pub fn new(
+        input_trimed: String,
+        start: usize,
+    ) -> Result<Self, ComputorError> {
         let mut expr = Expression {
             tokens: LinkedList::new(),
         };
@@ -44,7 +47,7 @@ impl Expression {
                     if operand_index >= 0 {
                         expr.push(read_operand(
                             &input_trimed[operand_index as usize..i],
-                            operand_index as usize,
+                            operand_index as usize + start,
                         ));
                         operand_index = -1;
                     }
@@ -55,7 +58,7 @@ impl Expression {
                     if operand_index >= 0 {
                         expr.push(read_operand(
                             &input_trimed[operand_index as usize..i],
-                            operand_index as usize,
+                            operand_index as usize + start,
                         ));
                         operand_index = -1;
                     }
@@ -79,9 +82,10 @@ impl Expression {
                             }
                         }
                     }
-                    expr.push(Token::Expr(Expression::new(String::from(
-                        &input_trimed[start_exp..end_exp - 1],
-                    ))?))
+                    expr.push(Token::Expr(Expression::new(
+                        String::from(&input_trimed[start_exp..end_exp - 1]),
+                        start + start_exp + 1,
+                    )?))
                 }
                 Some((i, _)) => {
                     if operand_index < 0 {
@@ -92,7 +96,7 @@ impl Expression {
                     if operand_index >= 0 {
                         expr.push(read_operand(
                             &input_trimed[operand_index as usize..],
-                            operand_index as usize,
+                            operand_index as usize + start,
                         ));
                     }
                     break;

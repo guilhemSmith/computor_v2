@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 12:56:49 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 15:45:29 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ impl Lexer {
         if self.verbose {
             println!("[V:Lexer] - input read: '{}'", input.trim());
         }
-        Expression::new(self.clear_input(input))
+        Expression::new(self.clear_input(input), 0)
     }
 
     fn clear_input(&self, raw_input: String) -> String {
