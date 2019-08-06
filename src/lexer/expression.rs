@@ -6,12 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 14:05:20 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 14:35:14 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{Operand, Operator, Token};
-use crate::error::{BadUseOperatorError, ComputorError, InvalidExprError};
+use crate::error::{
+    log_error, BadUseOperatorError, ComputorError, InvalidExprError,
+};
 use std::{collections::LinkedList, fmt};
 
 #[derive(Clone)]
@@ -73,6 +75,24 @@ impl Expression {
 
     pub fn is_empty(&self) -> bool {
         self.tokens.len() == 0
+    }
+
+    pub fn check_errors(&self) -> u32 {
+        let mut count = 0;
+        let mut iter = self.tokens.iter();
+        loop {
+            match iter.next() {
+                Some(tok) => match tok {
+                    Token::Invalid(err, pos) => {
+                        count += 1;
+                        log_error(err, Some(pos));
+                    }
+                    _ => {}
+                },
+                None => break,
+            }
+        }
+        return count;
     }
 
     pub fn compute(&self, verbose: bool) -> Result<Self, ComputorError> {

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/26 09:36:25 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 12:53:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 14:36:11 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,21 +34,24 @@ pub enum ComputorError {
     InvalidExpr(InvalidExprError),
 }
 
-pub fn log_error(error: ComputorError, position: u32) {
-    match error {
-        ComputorError::BadUseOperator(err) => {
+pub fn log_error(error: &ComputorError, position: Option<&usize>) {
+    match (error, position) {
+        (ComputorError::BadUseOperator(err), None) => {
             eprintln!("[err-syntax] - {}", err)
         }
-        ComputorError::DivByZero(err) => {
-            eprintln!("[err-math:c{}] - {}", position, err)
+        (ComputorError::DivByZero(err), Some(pos)) => {
+            eprintln!("[err-math:c{}] - {}", pos, err)
         }
-        ComputorError::InvalidOperand(err) => {
-            eprintln!("[err-input:c{}] - {}", position, err)
+        (ComputorError::InvalidOperand(err), Some(pos)) => {
+            eprintln!("[err-input:c{}] - {}", pos, err)
         }
-        ComputorError::InvalidOperator(err) => {
-            eprintln!("[err-input:c{}] - {}", position, err)
+        (ComputorError::InvalidOperator(err), Some(pos)) => {
+            eprintln!("[err-input:c{}] - {}", pos, err)
         }
-        ComputorError::InvalidExpr(err) => eprintln!("[err-input:] - {}", err),
-        ComputorError::IO(err) => eprintln!("[err-io] - {}", err),
+        (ComputorError::InvalidExpr(err), None) => {
+            eprintln!("[err-input:] - {}", err)
+        }
+        (ComputorError::IO(err), None) => eprintln!("[err-io] - {}", err),
+        _ => eprintln!("[err-error:] - Invalid error format."),
     }
 }

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 13:58:58 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 14:36:37 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,14 +26,20 @@ fn main() {
                 if expr.is_empty() {
                     break;
                 }
-                match expr.compute(true) {
-                    Ok(result) => {
-                        println!("orignal: {}\nresult: {}", expr, result)
-                    }
-                    Err(err) => log_error(err, 0),
+                match expr.check_errors() {
+                    nb if nb > 0 => eprintln!(
+                        "[err-Lexer:] - {} error(s) detected. {}.",
+                        nb, "Expression computing aborted"
+                    ),
+                    _ => match expr.compute(true) {
+                        Ok(result) => {
+                            println!("orignal: {}\nresult: {}", expr, result)
+                        }
+                        Err(err) => log_error(&err, None),
+                    },
                 };
             }
-            Err(err) => log_error(err, 0),
+            Err(err) => log_error(&err, None),
         }
     }
 }
