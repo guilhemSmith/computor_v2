@@ -6,13 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 15:11:16 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 15:36:31 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{Operand, Operator, Token};
 use crate::error::{
-    log_error, BadUseOperatorError, ComputorError, InvalidExprError,
+    log_error, BadUseOperatorError, ComputorError, IncompleteExprError,
+    InvalidExprError,
 };
 use std::{collections::LinkedList, fmt};
 
@@ -50,6 +51,38 @@ impl Expression {
                     let orator = Operator::new(ch)?;
                     expr.push(Token::Orator(orator));
                 }
+                Some((i, ch)) if ch == '(' => {
+                    if operand_index >= 0 {
+                        expr.push(read_operand(
+                            &input_trimed[operand_index as usize..i],
+                            operand_index as usize,
+                        ));
+                        operand_index = -1;
+                    }
+                    let start_exp = i + 1;
+                    let mut end_exp = i + 1;
+                    let mut opening = 1;
+                    while opening > 0 {
+                        match iter_char.next() {
+                            Some((_, ch)) => {
+                                end_exp += 1;
+                                if ch == ')' {
+                                    opening -= 1;
+                                } else if ch == '(' {
+                                    opening += 1;
+                                }
+                            }
+                            None => {
+                                return Err(IncompleteExprError::new(
+                                    &input_trimed[start_exp - 1..],
+                                ))
+                            }
+                        }
+                    }
+                    expr.push(Token::Expr(Expression::new(String::from(
+                        &input_trimed[start_exp..end_exp - 1],
+                    ))?))
+                }
                 Some((i, _)) => {
                     if operand_index < 0 {
                         operand_index = i as i32;
@@ -69,7 +102,7 @@ impl Expression {
         return Ok(expr);
     }
 
-    pub fn push(&mut self, tok: Token) {
+    fn push(&mut self, tok: Token) {
         self.tokens.push_back(tok);
     }
 

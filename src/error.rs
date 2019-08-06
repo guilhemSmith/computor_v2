@@ -6,12 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/26 09:36:25 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 14:36:11 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/06 15:27:32 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod bad_use_operator;
 mod div_by_zero;
+mod incomplete_expr;
 mod invalid_expr;
 mod invalid_operand;
 mod invalid_operator;
@@ -19,6 +20,7 @@ mod io_error;
 
 pub use bad_use_operator::BadUseOperatorError;
 pub use div_by_zero::DivByZeroError;
+pub use incomplete_expr::IncompleteExprError;
 pub use invalid_expr::InvalidExprError;
 pub use invalid_operand::InvalidOperandError;
 pub use invalid_operator::InvalidOperatorError;
@@ -32,11 +34,15 @@ pub enum ComputorError {
     IO(IOError),
     BadUseOperator(BadUseOperatorError),
     InvalidExpr(InvalidExprError),
+    IncompleteExpr(IncompleteExprError),
 }
 
 pub fn log_error(error: &ComputorError, position: Option<&usize>) {
     match (error, position) {
         (ComputorError::BadUseOperator(err), None) => {
+            eprintln!("[err-syntax] - {}", err)
+        }
+        (ComputorError::IncompleteExpr(err), None) => {
             eprintln!("[err-syntax] - {}", err)
         }
         (ComputorError::DivByZero(err), Some(pos)) => {
@@ -49,9 +55,9 @@ pub fn log_error(error: &ComputorError, position: Option<&usize>) {
             eprintln!("[err-input:c{}] - {}", pos, err)
         }
         (ComputorError::InvalidExpr(err), None) => {
-            eprintln!("[err-input:] - {}", err)
+            eprintln!("[err-input] - {}", err)
         }
         (ComputorError::IO(err), None) => eprintln!("[err-io] - {}", err),
-        _ => eprintln!("[err-error:] - Invalid error format."),
+        _ => eprintln!("[err-error] - Invalid error format."),
     }
 }
