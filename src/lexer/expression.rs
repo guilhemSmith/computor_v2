@@ -6,14 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 17:23:09 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 12:52:13 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{Operand, Operator, Token};
 use crate::error::{
-    log_error, BadUseOperatorError, ComputorError, IncompleteExprError,
-    InvalidExprError,
+    log_error, ComputorError, IncompleteExprError, InvalidExprError,
 };
 use std::{collections::LinkedList, fmt};
 
@@ -198,29 +197,26 @@ fn compute_op(
     *lst = remain;
     let orands = (
         match lst_orand.0 {
-            Some(tok) => match tok {
-                Token::Orand(or) => or,
-                _ => return Err(BadUseOperatorError::new(orator.symbol())),
-            },
+            Some(tok) => tok,
             None => return Err(InvalidExprError::new()),
         },
         match lst_orand.1 {
-            Some(tok) => match tok {
-                Token::Orand(or) => or,
-                _ => return Err(BadUseOperatorError::new(orator.symbol())),
-            },
+            Some(tok) => tok,
             None => return Err(InvalidExprError::new()),
         },
     );
 
     let mut result: LinkedList<Token> = LinkedList::new();
     if orator.prior() == prior {
-        let op_result = orator.exec(&orands.0, &orands.1)?;
-        lst.push_front(Token::Orand(op_result));
+        let mut op_result = orator.exec(&orands.0, &orands.1)?;
+        match op_result.pop_back() {
+            Some(tok) => lst.push_front(tok),
+            None => lst.push_front(orands.1),
+        };
     } else {
-        lst.push_front(Token::Orand(orands.1));
+        lst.push_front(orands.1);
         result.push_front(Token::Orator(orator));
-        result.push_front(Token::Orand(orands.0));
+        result.push_front(orands.0);
     }
     return Ok(result);
 }
