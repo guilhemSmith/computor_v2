@@ -6,10 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 13:00:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 15:05:09 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+use super::Token;
 use crate::error::{ComputorError, DivByZeroError, InvalidOperandError};
 use crate::types::{Imaginary, Raw};
 use std::fmt;
@@ -45,32 +46,32 @@ impl Operand {
         }
     }
 
-    pub fn add_orand(lhs: &Operand, rhs: &Operand) -> Operand {
-        Operand {
+    pub fn add_orand(lhs: &Operand, rhs: &Operand) -> Token {
+        Token::Orand(Operand {
             value: lhs.value + rhs.value,
-        }
+        })
     }
 
-    pub fn sub_orand(lhs: &Operand, rhs: &Operand) -> Operand {
-        Operand {
+    pub fn sub_orand(lhs: &Operand, rhs: &Operand) -> Token {
+        Token::Orand(Operand {
             value: lhs.value - rhs.value,
-        }
+        })
     }
 
-    pub fn mul_orand(lhs: &Operand, rhs: &Operand) -> Operand {
-        Operand {
+    pub fn mul_orand(lhs: &Operand, rhs: &Operand) -> Token {
+        Token::Orand(Operand {
             value: lhs.value * rhs.value,
-        }
+        })
     }
 
     pub fn div_orand(
         lhs: &Operand,
         rhs: &Operand,
-    ) -> Result<(Operand), ComputorError> {
+    ) -> Result<(Token), ComputorError> {
         if rhs.value != Imaginary::zero() {
-            Ok(Operand {
+            Ok(Token::Orand(Operand {
                 value: lhs.value / rhs.value,
-            })
+            }))
         } else {
             Err(DivByZeroError::new(
                 format!("{}", lhs.value),

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 14:22:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 14:50:44 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ pub enum Token {
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Token::Expr(exp) => write!(f, "{}", exp),
+            Token::Expr(exp) => write!(f, "({})", exp),
             Token::Orand(orand) => write!(f, "{}", orand),
             Token::Orator(orator) => write!(f, "{}", orator),
             Token::Invalid(_, pos) => write!(f, "[err:pos{}]", pos),

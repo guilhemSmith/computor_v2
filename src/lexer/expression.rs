@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 13:00:40 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 15:04:33 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ impl Expression {
                 {
                     expr.push_orand(&mut op_index, &input, i, start);
                     let orator = Operator::new(ch)?;
-                    expr.push(Token::Orator(orator));
+                    expr.push_back(Token::Orator(orator));
                 }
                 Some((i, ch)) if ch == '(' => {
                     expr.push_orand(&mut op_index, &input, i, start);
@@ -63,6 +63,10 @@ impl Expression {
         return Ok(expr);
     }
 
+    pub fn from_tokens(tokens: LinkedList<Token>) -> Self {
+        Expression { tokens: tokens }
+    }
+
     fn push_orand(
         &mut self,
         start_index: &mut i64,
@@ -73,7 +77,7 @@ impl Expression {
         let i = *start_index;
         if i >= 0 {
             let u = i as usize;
-            self.push(read_operand(&input[u..current], u + start_expr));
+            self.push_back(read_operand(&input[u..current], u + start_expr));
             *start_index = -1;
         }
     }
@@ -109,16 +113,28 @@ impl Expression {
             String::from(&input[index..end_exp - 1]),
             start + index + 1,
         )?);
-        self.push(tok);
+        self.push_back(tok);
         Ok(())
     }
 
-    fn push(&mut self, tok: Token) {
+    fn push_back(&mut self, tok: Token) {
         self.tokens.push_back(tok);
+    }
+
+    // pub fn push_front(&mut self, tok: Token) {
+    //     self.tokens.push_front(tok);
+    // }
+
+    pub fn len(&self) -> usize {
+        self.tokens.len()
     }
 
     pub fn is_empty(&self) -> bool {
         self.tokens.len() == 0
+    }
+
+    pub fn front(&self) -> Option<&Token> {
+        self.tokens.front()
     }
 
     pub fn check_errors(&self) -> u32 {
@@ -145,14 +161,14 @@ impl Expression {
             println!("[V:computor] - computing expression: {}", self);
         }
         let mut result = self.tokens.clone();
-        result = compute_all(result, true)?;
+        result = compute_all(result, true, verbose)?;
         if verbose {
             println!(
                 "[V:computor] - prior operations computed: {}",
                 tokens_to_string(&result)
             );
         }
-        result = compute_all(result, false)?;
+        result = compute_all(result, false, verbose)?;
         if verbose {
             println!(
                 "[V:computor] - remaining operations computed: {}",
@@ -166,10 +182,11 @@ impl Expression {
 fn compute_all(
     mut lst: LinkedList<Token>,
     prior: bool,
+    verbose: bool,
 ) -> Result<LinkedList<Token>, ComputorError> {
     let mut result: LinkedList<Token> = LinkedList::new();
     while lst.len() > 2 {
-        let mut reduced = compute_op(&mut lst, prior)?;
+        let mut reduced = compute_op(&mut lst, prior, verbose)?;
         result.append(&mut reduced);
     }
     loop {
@@ -184,6 +201,7 @@ fn compute_all(
 fn compute_op(
     lst: &mut LinkedList<Token>,
     prior: bool,
+    verbose: bool,
 ) -> Result<LinkedList<Token>, ComputorError> {
     let remain = lst.split_off(3);
     let lst_orand = (lst.pop_front(), lst.pop_back());
@@ -208,7 +226,7 @@ fn compute_op(
 
     let mut result: LinkedList<Token> = LinkedList::new();
     if orator.prior() == prior {
-        let mut op_result = orator.exec(&orands.0, &orands.1)?;
+        let mut op_result = orator.exec(&orands.0, &orands.1, verbose)?;
         match op_result.pop_back() {
             Some(tok) => lst.push_front(tok),
             None => lst.push_front(orands.1),
