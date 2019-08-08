@@ -33,7 +33,10 @@ pub struct Lexer {
 
 impl Lexer {
     pub fn new(verbose: bool, bench: bool) -> Self {
-        Lexer { verbose: verbose, bench: bench }
+        Lexer {
+            verbose: verbose,
+            bench: bench,
+        }
     }
 
     pub fn read_input(&self) -> Result<Expression, ComputorError> {
@@ -52,19 +55,23 @@ impl Lexer {
         }
     }
 
-    fn lexing_input(&self, input: String, line: Result<usize, std::io::Error>) -> Result<Expression, ComputorError> {
-            match line {
-                Err(err) => return Err(IOError::new(err)),
-                Ok(len) => {
-                    if len < 1 {
-                        println!("");
-                    }
+    fn lexing_input(
+        &self,
+        input: String,
+        line: Result<usize, std::io::Error>,
+    ) -> Result<Expression, ComputorError> {
+        match line {
+            Err(err) => return Err(IOError::new(err)),
+            Ok(len) => {
+                if len < 1 {
+                    println!("");
                 }
-            };
-            if self.verbose {
-                println!("[V:Lexer] - input read: '{}'", input.trim());
             }
-            Expression::new(self.clear_input(input), 0)
+        };
+        if self.verbose {
+            println!("[V:Lexer] - input read: '{}'", input.trim());
+        }
+        Expression::new(self.clear_input(input), 0)
     }
 
     fn clear_input(&self, raw_input: String) -> String {
