@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 12:52:13 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 13:00:40 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ pub struct Expression {
 
 impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "[expr: {}]", tokens_to_string(&self.tokens))
+        write!(f, "{}", tokens_to_string(&self.tokens))
     }
 }
 

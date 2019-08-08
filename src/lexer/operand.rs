@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 12:49:53 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 13:00:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ pub struct Operand {
 
 impl fmt::Display for Operand {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "[{}]", self.value)
+        write!(f, "{}", self.value)
     }
 }
 
@@ -45,25 +45,25 @@ impl Operand {
         }
     }
 
-    pub fn add(lhs: &Operand, rhs: &Operand) -> Operand {
+    pub fn add_orand(lhs: &Operand, rhs: &Operand) -> Operand {
         Operand {
             value: lhs.value + rhs.value,
         }
     }
 
-    pub fn sub(lhs: &Operand, rhs: &Operand) -> Operand {
+    pub fn sub_orand(lhs: &Operand, rhs: &Operand) -> Operand {
         Operand {
             value: lhs.value - rhs.value,
         }
     }
 
-    pub fn mul(lhs: &Operand, rhs: &Operand) -> Operand {
+    pub fn mul_orand(lhs: &Operand, rhs: &Operand) -> Operand {
         Operand {
             value: lhs.value * rhs.value,
         }
     }
 
-    pub fn div(
+    pub fn div_orand(
         lhs: &Operand,
         rhs: &Operand,
     ) -> Result<(Operand), ComputorError> {

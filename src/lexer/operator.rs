@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 12:52:49 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 13:01:30 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ pub struct Operator {
 
 impl fmt::Display for Operator {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "[{}]", self.symbol)
+        write!(f, "{}", self.symbol)
     }
 }
 
@@ -59,7 +59,7 @@ impl Operator {
         // }
     }
 
-    // pub fn symbol(&self) -> char {
+    // pub fn symbo_orandl(&self) -> char {
     //     self.symbol
     // }
 
@@ -72,7 +72,7 @@ fn add(val_a: &Token, val_b: &Token) -> Result<(LList<Token>), ComputorError> {
     let mut result: LList<Token> = LList::new();
     match (val_a, val_b) {
         (Token::Orand(op_a), Token::Orand(op_b)) => {
-            result.push_back(Token::Orand(Operand::add(op_a, op_b)))
+            result.push_back(Token::Orand(Operand::add_orand(op_a, op_b)))
         }
         _ => return Err(BadUseOperatorError::new('+')),
     };
@@ -83,7 +83,7 @@ fn sub(val_a: &Token, val_b: &Token) -> Result<(LList<Token>), ComputorError> {
     let mut result: LList<Token> = LList::new();
     match (val_a, val_b) {
         (Token::Orand(op_a), Token::Orand(op_b)) => {
-            result.push_back(Token::Orand(Operand::sub(op_a, op_b)))
+            result.push_back(Token::Orand(Operand::sub_orand(op_a, op_b)))
         }
         _ => return Err(BadUseOperatorError::new('-')),
     };
@@ -94,7 +94,7 @@ fn mul(val_a: &Token, val_b: &Token) -> Result<(LList<Token>), ComputorError> {
     let mut result: LList<Token> = LList::new();
     match (val_a, val_b) {
         (Token::Orand(op_a), Token::Orand(op_b)) => {
-            result.push_back(Token::Orand(Operand::mul(op_a, op_b)))
+            result.push_back(Token::Orand(Operand::mul_orand(op_a, op_b)))
         }
         _ => return Err(BadUseOperatorError::new('*')),
     };
@@ -105,7 +105,7 @@ fn div(val_a: &Token, val_b: &Token) -> Result<(LList<Token>), ComputorError> {
     let mut result: LList<Token> = LList::new();
     match (val_a, val_b) {
         (Token::Orand(op_a), Token::Orand(op_b)) => {
-            result.push_back(Token::Orand(Operand::div(op_a, op_b)?))
+            result.push_back(Token::Orand(Operand::div_orand(op_a, op_b)?))
         }
         _ => return Err(BadUseOperatorError::new('/')),
     };
