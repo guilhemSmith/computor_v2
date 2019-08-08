@@ -18,7 +18,7 @@ enum Arg {
 pub struct Param {
     bin_path: String,
     verbose: bool,
-	run: bool,
+    run: bool,
 }
 
 impl Param {
@@ -26,7 +26,7 @@ impl Param {
         let mut param = Param {
             bin_path: argv[0].clone(),
             verbose: false,
-			run: true
+            run: true,
         };
         let mut i: usize = 1;
         while i < argc {
@@ -50,9 +50,9 @@ impl Param {
         self.verbose
     }
 
-	pub fn run(&self) -> bool {
-		self.run
-	}
+    pub fn run(&self) -> bool {
+        self.run
+    }
 }
 
 fn parse_arg(arg: &String) -> Arg {
@@ -74,5 +74,5 @@ fn usage(param: &mut Param) {
         "-h, --help: Show this message.",
         "-v --verbose: Show additionnal informations per stage of execution."
     );
-	param.run = false;
+    param.run = false;
 }

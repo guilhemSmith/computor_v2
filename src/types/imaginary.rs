@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/07/25 16:29:45 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 12:19:23 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,13 +45,24 @@ impl fmt::Display for Imaginary {
                 self.real,
                 if self.irreal != Rational::zero() {
                     format!(
-                        " {}{}i",
+                        " {}i",
                         if self.irreal > Rational::zero() {
-                            "+ "
+                            format!(
+                                "+ {}",
+                                if self.irreal != Rational::new(Raw::Float(1.0))
+                                {
+                                    format!("{}", self.irreal)
+                                } else {
+                                    String::new()
+                                }
+                            )
                         } else {
-                            ""
+                            if self.irreal != Rational::new(Raw::Float(-1.0)) {
+                                format!("{}", self.irreal)
+                            } else {
+                                String::from("- ")
+                            }
                         },
-                        self.irreal
                     )
                 } else {
                     String::from("")
@@ -61,10 +72,12 @@ impl fmt::Display for Imaginary {
             write!(
                 f,
                 "{}",
-                if self.irreal != Rational::zero() {
-                    format!("{}i", self.irreal)
-                } else {
-                    String::from("0")
+                match self.irreal {
+                    zero if zero == Rational::zero() => String::from("0"),
+                    one if one == Rational::new(Raw::Float(1.0)) => {
+                        String::from("i")
+                    }
+                    other => format!("{}i", other),
                 }
             )
         }

@@ -33,7 +33,7 @@ fn computor(argc: usize, argv: Vec<String>) -> u32 {
         Some(p) => p,
         None => return 1,
     };
-    if ! param.run() {
+    if !param.run() {
         return 0;
     }
     let mut lex = Lexer::new(param.verbose());
