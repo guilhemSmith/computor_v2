@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 15:03:04 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 16:01:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ impl Operator {
         exp_right: bool,
         verbose: bool,
     ) -> Result<Token, ComputorError> {
-        let exp = exp_tok.compute(true)?;
+        let exp = exp_tok.compute(verbose)?;
         let orand = Token::Orand(op_tok.clone());
         if exp.len() == 1 {
             match exp.front() {
