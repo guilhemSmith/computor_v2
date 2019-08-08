@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 16:01:05 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 16:02:59 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,10 +59,6 @@ impl Operator {
         verbose: bool,
     ) -> Result<(LList<Token>), ComputorError> {
         (self.op)(self, val_a, val_b, verbose)
-        // match self.op {
-        //     Operation::Basic(operation) => Ok(operation(val_a, val_b)),
-        //     Operation::Divide(operation) => operation(val_a, val_b),
-        // }
     }
 
     // pub fn symbol(&self) -> char {
@@ -73,7 +69,7 @@ impl Operator {
         self.symbol == '*' || self.symbol == '/' || self.symbol == '%'
     }
 
-    pub fn add(
+    fn add(
         &self,
         val_a: &Token,
         val_b: &Token,
@@ -95,7 +91,7 @@ impl Operator {
         return Ok(result);
     }
 
-    pub fn sub(
+    fn sub(
         &self,
         val_a: &Token,
         val_b: &Token,
@@ -117,7 +113,7 @@ impl Operator {
         return Ok(result);
     }
 
-    pub fn mul(
+    fn mul(
         &self,
         val_a: &Token,
         val_b: &Token,
@@ -139,7 +135,7 @@ impl Operator {
         return Ok(result);
     }
 
-    pub fn div(
+    fn div(
         &self,
         val_a: &Token,
         val_b: &Token,
@@ -161,7 +157,7 @@ impl Operator {
         return Ok(result);
     }
 
-    pub fn with_expr(
+    fn with_expr(
         &self,
         op_tok: &Operand,
         exp_tok: &Expression,
