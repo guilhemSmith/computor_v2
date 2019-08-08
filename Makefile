@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/08/07 16:07:36 by gsmith           ###   ########.fr        #
+#    Updated: 2019/08/08 16:52:38 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,7 @@ SRC			= $(addprefix src/, \
 					operand.rs \
 					operator.rs \
 					token.rs) \
+				timer.rs \
 				types.rs \
 				$(addprefix types/, \
 					imaginary.rs \
