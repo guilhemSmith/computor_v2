@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 16:52:47 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 18:05:01 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,10 +121,6 @@ impl Expression {
         self.tokens.push_back(tok);
     }
 
-    // pub fn push_front(&mut self, tok: Token) {
-    //     self.tokens.push_front(tok);
-    // }
-
     pub fn len(&self) -> usize {
         self.tokens.len()
     }
@@ -168,12 +164,14 @@ impl Expression {
                 tokens_to_string(&result)
             );
         }
-        result = compute_all(result, false, verbose)?;
-        if verbose {
-            println!(
-                "[V:computor] - remaining operations computed: {}",
-                tokens_to_string(&result)
-            );
+        if result.len() > 1 {
+            result = compute_all(result, false, verbose)?;
+            if verbose {
+                println!(
+                    "[V:computor] - remaining operations computed: {}",
+                    tokens_to_string(&result)
+                );
+            }
         }
         Ok(Expression { tokens: result })
     }
@@ -269,9 +267,9 @@ fn tokens_to_string(lst: &LinkedList<Token>) -> String {
 
     loop {
         match iter_token.next() {
-            Some(tok) => tokens_str = format!("{}{}", tokens_str, tok),
+            Some(tok) => tokens_str = format!("{} {}", tokens_str, tok),
             None => break,
         };
     }
-    return tokens_str;
+    return tokens_str.replace("- -", "+");
 }
