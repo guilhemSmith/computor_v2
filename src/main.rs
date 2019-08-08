@@ -6,16 +6,16 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 17:01:20 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/08 18:14:50 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod arg_parse;
 mod error;
 mod lexer;
-
 mod timer;
 mod types;
+
 use crate::arg_parse::Param;
 use crate::error::log_error;
 use crate::lexer::Lexer;
@@ -24,9 +24,14 @@ use std::{env, process};
 
 fn main() {
     let argv: Vec<String> = env::args().collect();
+
+    println!("Computor start.");
     match computor(argv.len(), argv) {
-        err if err > 0 => process::exit(1),
-        _ => {}
+        err if err > 0 => {
+            println!("Computor stop.");
+            process::exit(1)
+        }
+        _ => println!("Computor stop."),
     }
 }
 
