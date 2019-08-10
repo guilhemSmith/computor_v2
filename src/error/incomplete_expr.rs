@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/06 15:25:19 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 15:31:45 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/10 15:14:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::ComputorError::{self, IncompleteExpr};
+use super::ComputorError;
 use std::{error::Error, fmt};
 
 #[derive(Debug, Clone)]
@@ -27,9 +27,12 @@ impl fmt::Display for IncompleteExprError {
 }
 
 impl IncompleteExprError {
-    pub fn new(expr: &str) -> ComputorError {
-        IncompleteExpr(IncompleteExprError {
+    pub fn new(expr: &str) -> Self {
+        IncompleteExprError {
             expr: String::from(expr),
-        })
+        }
     }
 }
+ impl ComputorError for IncompleteExprError {
+     
+ }

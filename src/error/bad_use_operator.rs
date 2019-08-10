@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:48:53 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 12:50:42 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/10 15:13:03 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::ComputorError::{self, BadUseOperator};
+use super::ComputorError;
 use std::{error::Error, fmt};
 
 #[derive(Debug, Clone)]
@@ -33,7 +33,11 @@ impl fmt::Display for BadUseOperatorError {
 }
 
 impl BadUseOperatorError {
-    pub fn new(op: char) -> ComputorError {
-        BadUseOperator(BadUseOperatorError { symbol: op })
+    pub fn new(op: char) -> Self {
+        BadUseOperatorError { symbol: op }
     }
+}
+
+impl ComputorError for BadUseOperatorError {
+
 }

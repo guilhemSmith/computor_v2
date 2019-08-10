@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/26 11:00:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 12:51:03 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/10 15:15:28 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::ComputorError::{self, InvalidOperand};
+use super::ComputorError;
 use std::{error::Error, fmt};
 
 #[derive(Debug, Clone)]
@@ -31,9 +31,13 @@ impl fmt::Display for InvalidOperandError {
 }
 
 impl InvalidOperandError {
-    pub fn new(raw_str: &str, is_real: bool) -> ComputorError {
-        InvalidOperand(InvalidOperandError {
+    pub fn new(raw_str: &str, is_real: bool) -> Self {
+        InvalidOperandError {
             raw_value: format!("{}{}", raw_str, if is_real { "" } else { "i" }),
-        })
+        }
     }
+}
+
+impl ComputorError for InvalidOperandError {
+    
 }

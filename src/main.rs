@@ -6,11 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 18:16:25 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/10 15:47:58 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod arg_parse;
+mod computor_error;
 mod error;
 mod lexer;
 mod memory;

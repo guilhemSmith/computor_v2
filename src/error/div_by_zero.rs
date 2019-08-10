@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/26 11:17:33 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 12:50:54 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/10 15:14:04 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::ComputorError::{self, DivByZero};
+use super::ComputorError;
 use std::{error::Error, fmt};
 
 #[derive(Debug, Clone)]
@@ -33,11 +33,15 @@ impl fmt::Display for DivByZeroError {
 }
 
 impl DivByZeroError {
-    pub fn new(left_op: String, right_op: String, op: char) -> ComputorError {
-        DivByZero(DivByZeroError {
+    pub fn new(left_op: String, right_op: String, op: char) -> Self {
+        DivByZeroError {
             left_op: left_op,
             right_op: right_op,
             op: op,
-        })
+        }
     }
+}
+
+impl ComputorError for DivByZeroError {
+
 }

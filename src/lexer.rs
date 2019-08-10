@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 17:00:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/10 15:34:00 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ impl Lexer {
         }
     }
 
-    pub fn read_input(&self) -> Result<Expression, ComputorError> {
+    pub fn read_input(&self) -> Result<Expression, Box<dyn ComputorError>> {
         let mut input = String::new();
 
         match print_prompt() {

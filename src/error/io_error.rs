@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/06 12:52:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/06 12:54:54 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/10 15:17:26 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::ComputorError::{self, IO};
+use super::ComputorError;
 use std::{error::Error, fmt, io::Error as IOErr};
 
 #[derive(Debug, Clone)]
@@ -27,9 +27,13 @@ impl fmt::Display for IOError {
 }
 
 impl IOError {
-    pub fn new(err: IOErr) -> ComputorError {
-        IO(IOError {
+    pub fn new(err: IOErr) -> Self {
+        IOError {
             description: format!("{}", err),
-        })
+        }
     }
+}
+
+impl ComputorError for IOError {
+    
 }
