@@ -15,31 +15,31 @@ use crate::lexer::Expression;
 use std::collections::HashMap;
 
 pub struct Function<'v> {
-	name: String,
-	var: HashMap<&'v String, &'v Variable>,
-	expr: Option<Expression>,
+    name: String,
+    var: HashMap<&'v String, &'v Variable>,
+    expr: Option<Expression>,
 }
 
 impl<'v> Function<'v> {
-	pub fn new(name: String) -> Self {
-		Function {
-			name: name,
-			var: HashMap::new(),
-			expr: None
-		}
-	}
+    pub fn new(name: String) -> Self {
+        Function {
+            name: name,
+            var: HashMap::new(),
+            expr: None,
+        }
+    }
 
-	pub fn set(&mut self, mut vars: Vec<&'v Variable>, expr: Expression) {
-		loop {
-			match vars.pop() {
-				Some(var) => self.var.insert(var.name(), var),
-				None => break,
-			};
-		}
-		self.expr = Some(expr);
-	}
+    pub fn set(&mut self, mut vars: Vec<&'v Variable>, expr: Expression) {
+        loop {
+            match vars.pop() {
+                Some(var) => self.var.insert(var.name(), var),
+                None => break,
+            };
+        }
+        self.expr = Some(expr);
+    }
 
-	pub fn name(&self) -> &String {
-		&self.name
-	}
+    pub fn name(&self) -> &String {
+        &self.name
+    }
 }

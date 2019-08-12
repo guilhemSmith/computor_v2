@@ -13,23 +13,23 @@
 use crate::types::Imaginary;
 
 pub struct Variable {
-	name: String, 
-	value: Option<Imaginary>,
+    name: String,
+    value: Option<Imaginary>,
 }
 
 impl Variable {
-	pub fn new(name: String) -> Self {
-		Variable {
-			name: name,
-			value: None
-		}
-	}
+    pub fn new(name: String) -> Self {
+        Variable {
+            name: name,
+            value: None,
+        }
+    }
 
-	pub fn set(&mut self, im: Imaginary) {
-		self.value = Some(im);
-	}
+    pub fn set(&mut self, im: Imaginary) {
+        self.value = Some(im);
+    }
 
-	pub fn name(&self) -> &String {
-		&self.name
-	}
+    pub fn name(&self) -> &String {
+        &self.name
+    }
 }

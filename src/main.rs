@@ -6,12 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/10 15:47:58 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 11:27:44 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod arg_parse;
-mod computor_error;
 mod error;
 mod lexer;
 mod memory;
@@ -19,7 +18,6 @@ mod timer;
 mod types;
 
 use crate::arg_parse::Param;
-use crate::error::log_error;
 use crate::lexer::Lexer;
 use crate::timer::Timer;
 use std::{env, process};
@@ -81,13 +79,13 @@ fn computor(argc: usize, argv: Vec<String>) -> u32 {
                                 },
                                 expr
                             ),
-                            Err(err) => log_error(&err, None),
+                            Err(err) => println!("{}", err),
                         };
                     }
                 };
             }
             Err(err) => {
-                log_error(&err, None);
+                println!("{}", err);
                 return 2;
             }
         }

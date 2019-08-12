@@ -5,63 +5,138 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/07/26 09:36:25 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/10 15:20:05 by gsmith           ###   ########.fr       */
+/*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
+/*   Updated: 2019/08/12 12:03:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-mod bad_use_operator;
-mod div_by_zero;
-mod incomplete_expr;
-mod invalid_expr;
-mod invalid_operand;
-mod invalid_operator;
-mod io_error;
+use std::{error::Error, fmt, io::Error as IOErr};
 
-pub use bad_use_operator::BadUseOperatorError;
-pub use div_by_zero::DivByZeroError;
-pub use incomplete_expr::IncompleteExprError;
-pub use invalid_expr::InvalidExprError;
-pub use invalid_operand::InvalidOperandError;
-pub use invalid_operator::InvalidOperatorError;
-pub use io_error::IOError;
+#[derive(Debug, Clone)]
+enum ErrorKind {
+    BadUseOperator,
+    DivByZero,
+    IncompleteExpr,
+    InvalidExpr,
+    InvalidOperand,
+    InvalidOperator,
+    IO,
+}
 
-// #[derive(Clone)]
-// pub enum ComputorError {
-//     DivByZero(DivByZeroError),
-//     InvalidOperand(InvalidOperandError),
-//     InvalidOperator(InvalidOperatorError),
-//     IO(IOError),
-//     BadUseOperator(BadUseOperatorError),
-//     InvalidExpr(InvalidExprError),
-//     IncompleteExpr(IncompleteExprError),
-// }
+impl fmt::Display for ErrorKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ErrorKind::BadUseOperator => write!(f, "syntax"),
+            ErrorKind::DivByZero => write!(f, "math"),
+            ErrorKind::IncompleteExpr => write!(f, "syntax"),
+            ErrorKind::InvalidExpr => write!(f, "syntax"),
+            ErrorKind::InvalidOperand => write!(f, "syntax"),
+            ErrorKind::InvalidOperator => write!(f, "syntax"),
+            ErrorKind::IO => write!(f, "input"),
+        }
+    }
+}
 
-// pub fn log_error(error: &ComputorError, position: Option<&usize>) {
-//     match (error, position) {
-//         (ComputorError::BadUseOperator(err), None) => {
-//             eprintln!("[err-syntax] - {}", err)
-//         }
-//         (ComputorError::IncompleteExpr(err), None) => {
-//             eprintln!("[err-syntax] - {}", err)
-//         }
-//         (ComputorError::DivByZero(err), Some(pos)) => {
-//             eprintln!("[err-math:c{}] - {}", pos, err)
-//         }
-//         (ComputorError::InvalidOperand(err), Some(pos)) => {
-//             eprintln!("[err-input:c{}] - {}", pos, err)
-//         }
-//         (ComputorError::InvalidOperator(err), Some(pos)) => {
-//             eprintln!("[err-input:c{}] - {}", pos, err)
-//         }
-//         (ComputorError::InvalidExpr(err), None) => {
-//             eprintln!("[err-input] - {}", err)
-//         }
-//         (ComputorError::IO(err), None) => eprintln!("[err-io] - {}", err),
-//         _ => eprintln!("[err-error] - Invalid error format."),
-//     }
-// }
+#[derive(Debug, Clone)]
+pub enum ErrorPosition {
+    Char(usize),
+    Global,
+}
 
-pub trait ComputorError {
-    // fn log_error(&self); 
+impl fmt::Display for ErrorPosition {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ErrorPosition::Char(pos) => write!(f, "-char:{}", pos),
+            ErrorPosition::Global => write!(f, ""),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ComputorError {
+    kind: ErrorKind,
+    position: ErrorPosition,
+    info: String,
+}
+
+impl ComputorError {
+    pub fn set_pos(&mut self, pos: ErrorPosition) -> &Self {
+        self.position = pos;
+        return self;
+    }
+
+    pub fn bad_use_op(op: char) -> Self {
+        ComputorError {
+            kind: ErrorKind::BadUseOperator,
+            position: ErrorPosition::Global,
+            info: format!(
+                "Operator: '{}', {}, and {}",
+                op,
+                "must be preceded by a value",
+                "followed by a another value."
+            ),
+        }
+    }
+
+    pub fn div_by_zero(left_op: String, right_op: String, op: char) -> Self {
+        ComputorError {
+            kind: ErrorKind::DivByZero,
+            position: ErrorPosition::Global,
+            info: format!(
+                "Division by zero is not allowed : {} {} {}",
+                left_op, op, right_op
+            ),
+        }
+    }
+
+    pub fn incomplete_expr(expr: &str) -> Self {
+        ComputorError {
+            kind: ErrorKind::IncompleteExpr,
+            position: ErrorPosition::Global,
+            info: format!("Incomplete expression can't be parsed : '{}'", expr),
+        }
+    }
+
+    pub fn invalid_expr() -> Self {
+        ComputorError {
+            kind: ErrorKind::InvalidExpr,
+            position: ErrorPosition::Global,
+            info: format!("Error while computing token from an expression."),
+        }
+    }
+
+    pub fn invalid_operand(raw_str: &str, is_real: bool) -> Self {
+        ComputorError {
+            kind: ErrorKind::InvalidOperand,
+            position: ErrorPosition::Global,
+            info: format!(
+                "Operand can't be interpreted as a numeric value : {}{}",
+                raw_str,
+                if is_real { "" } else { "i" }
+            ),
+        }
+    }
+    pub fn invalid_operator(symbol: char) -> Self {
+        ComputorError {
+            kind: ErrorKind::InvalidOperator,
+            position: ErrorPosition::Global,
+            info: format!("Invalid operator symbol caught : {}", symbol),
+        }
+    }
+
+    pub fn io(err: IOErr) -> Self {
+        ComputorError {
+            kind: ErrorKind::IO,
+            position: ErrorPosition::Global,
+            info: format!("{}", err),
+        }
+    }
+}
+
+impl Error for ComputorError {}
+
+impl fmt::Display for ComputorError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[err:{}{}] -> {}", self.kind, self.position, self.info)
+    }
 }

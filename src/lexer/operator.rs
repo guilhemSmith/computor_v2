@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 16:02:59 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 12:04:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{Expression, Operand, Token};
-use crate::error::{BadUseOperatorError, ComputorError, InvalidOperatorError};
+use crate::error::ComputorError;
 use std::{collections::LinkedList as LList, fmt};
 
 // #[derive(Clone)]
@@ -44,7 +44,7 @@ impl Operator {
             '-' => Operator::sub,
             '*' => Operator::mul,
             '/' => Operator::div,
-            _ => return Err(InvalidOperatorError::new(symbol)),
+            _ => return Err(ComputorError::invalid_operator(symbol)),
         };
         Ok(Operator {
             symbol: symbol,
@@ -86,7 +86,7 @@ impl Operator {
             (Token::Expr(ep_a), Token::Orand(op_b)) => {
                 result.push_back(self.with_expr(op_b, ep_a, false, verbose)?)
             }
-            _ => return Err(BadUseOperatorError::new('+')),
+            _ => return Err(ComputorError::bad_use_op('+')),
         };
         return Ok(result);
     }
@@ -108,7 +108,7 @@ impl Operator {
             (Token::Expr(ep_a), Token::Orand(op_b)) => {
                 result.push_back(self.with_expr(op_b, ep_a, false, verbose)?)
             }
-            _ => return Err(BadUseOperatorError::new('-')),
+            _ => return Err(ComputorError::bad_use_op('-')),
         };
         return Ok(result);
     }
@@ -130,7 +130,7 @@ impl Operator {
             (Token::Expr(ep_a), Token::Orand(op_b)) => {
                 result.push_back(self.with_expr(op_b, ep_a, false, verbose)?)
             }
-            _ => return Err(BadUseOperatorError::new('*')),
+            _ => return Err(ComputorError::bad_use_op('*')),
         };
         return Ok(result);
     }
@@ -152,7 +152,7 @@ impl Operator {
             (Token::Expr(ep_a), Token::Orand(op_b)) => {
                 result.push_back(self.with_expr(op_b, ep_a, false, verbose)?)
             }
-            _ => return Err(BadUseOperatorError::new('/')),
+            _ => return Err(ComputorError::bad_use_op('/')),
         };
         return Ok(result);
     }

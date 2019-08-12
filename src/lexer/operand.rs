@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 15:05:09 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 12:04:28 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Token;
-use crate::error::{ComputorError, DivByZeroError, InvalidOperandError};
+use crate::error::ComputorError;
 use crate::types::{Imaginary, Raw};
 use std::fmt;
 
@@ -31,7 +31,7 @@ impl Operand {
         let fl_value = match raw_str.parse::<f64>() {
             Ok(val) => val,
             Err(_err) => {
-                return Err(InvalidOperandError::new(raw_str, is_real));
+                return Err(ComputorError::invalid_operand(raw_str, is_real));
             }
         };
 
@@ -73,7 +73,7 @@ impl Operand {
                 value: lhs.value / rhs.value,
             }))
         } else {
-            Err(DivByZeroError::new(
+            Err(ComputorError::div_by_zero(
                 format!("{}", lhs.value),
                 format!("{}", rhs.value),
                 '/',

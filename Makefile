@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/08/08 16:52:38 by gsmith           ###   ########.fr        #
+#    Updated: 2019/08/12 11:27:20 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,16 +17,8 @@ DEBUG_BIN	= target/debug/$(NAME)
 RELEASE_BIN	= target/release/$(NAME)
 SRC			= $(addprefix src/, \
 				arg_parse.rs \
-				main.rs \
 				error.rs \
-				$(addprefix error/, \
-					bad_use_operator.rs \
-					div_by_zero.rs \
-					incomplete_expr.rs \
-					invalid_expr.rs \
-					invalid_operand.rs \
-					invalid_operator.rs \
-					io_error.rs) \
+				main.rs \
 				lexer.rs \
 				$(addprefix lexer/, \
 					expression.rs \

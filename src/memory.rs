@@ -16,19 +16,19 @@ mod variable;
 pub use function::Function;
 pub use variable::Variable;
 
-use crate:: types::Imaginary;
+use crate::types::Imaginary;
 use std::collections::HashMap;
 
-pub struct Memory<'v,'f> {
-	var: HashMap<&'v String, Variable>,
-	fun: HashMap<&'f String, Function<'v>>
+pub struct Memory<'v, 'f> {
+    var: HashMap<&'v String, Variable>,
+    fun: HashMap<&'f String, Function<'v>>,
 }
 
-impl<'v,'f> Memory<'v,'f> {
-	pub fn new() -> Self {
-		Memory {
-			var: HashMap::new(),
-			fun: HashMap::new()
-		}
-	}
+impl<'v, 'f> Memory<'v, 'f> {
+    pub fn new() -> Self {
+        Memory {
+            var: HashMap::new(),
+            fun: HashMap::new(),
+        }
+    }
 }

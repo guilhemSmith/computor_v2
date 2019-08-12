@@ -6,14 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 18:05:01 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 12:04:26 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{Operand, Operator, Token};
-use crate::error::{
-    log_error, ComputorError, IncompleteExprError, InvalidExprError,
-};
+use crate::error::{ComputorError, ErrorPosition};
 use std::{collections::LinkedList, fmt};
 
 #[derive(Clone)]
@@ -105,7 +103,9 @@ impl Expression {
                     }
                 }
                 None => {
-                    return Err(IncompleteExprError::new(&input[index - 1..]))
+                    return Err(ComputorError::incomplete_expr(
+                        &input[index - 1..],
+                    ))
                 }
             }
         }
@@ -139,9 +139,9 @@ impl Expression {
         loop {
             match iter.next() {
                 Some(tok) => match tok {
-                    Token::Invalid(err, pos) => {
+                    Token::Invalid(err) => {
                         count += 1;
-                        log_error(err, Some(pos));
+                        println!("{}", err);
                     }
                     Token::Expr(expr) => count += expr.check_errors(),
                     _ => {}
@@ -206,19 +206,19 @@ fn compute_op(
     let orator = match lst.pop_front() {
         Some(tok) => match tok {
             Token::Orator(op) => op,
-            _ => return Err(InvalidExprError::new()),
+            _ => return Err(ComputorError::invalid_expr()),
         },
-        None => return Err(InvalidExprError::new()),
+        None => return Err(ComputorError::invalid_expr()),
     };
     *lst = remain;
     let orands = (
         match lst_orand.0 {
             Some(tok) => tok,
-            None => return Err(InvalidExprError::new()),
+            None => return Err(ComputorError::invalid_expr()),
         },
         match lst_orand.1 {
             Some(tok) => tok,
-            None => return Err(InvalidExprError::new()),
+            None => return Err(ComputorError::invalid_expr()),
         },
     );
 
@@ -257,7 +257,10 @@ fn read_operand(raw_operand: &str, pos: usize) -> Token {
         is_real,
     ) {
         Ok(orand) => Token::Orand(orand),
-        Err(err) => Token::Invalid(err, pos),
+        Err(mut err) => {
+            err.set_pos(ErrorPosition::Char(pos));
+            Token::Invalid(err)
+        }
     }
 }
 

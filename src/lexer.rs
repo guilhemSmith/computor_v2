@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/10 15:34:00 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 12:04:29 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ pub use operand::Operand;
 pub use operator::Operator;
 pub use token::Token;
 
-use crate::error::{ComputorError, IOError};
+use crate::error::ComputorError;
 use crate::Timer;
 use std::io::{self, prelude::Write};
 
@@ -39,11 +39,11 @@ impl Lexer {
         }
     }
 
-    pub fn read_input(&self) -> Result<Expression, Box<dyn ComputorError>> {
+    pub fn read_input(&self) -> Result<Expression, ComputorError> {
         let mut input = String::new();
 
         match print_prompt() {
-            Err(err) => return Err(IOError::new(err)),
+            Err(err) => return Err(ComputorError::io(err)),
             _ => {}
         };
         let line = io::stdin().read_line(&mut input);
@@ -61,7 +61,7 @@ impl Lexer {
         line: Result<usize, std::io::Error>,
     ) -> Result<Expression, ComputorError> {
         match line {
-            Err(err) => return Err(IOError::new(err)),
+            Err(err) => return Err(ComputorError::io(err)),
             Ok(len) => {
                 if len < 1 {
                     println!("");
