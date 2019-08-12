@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 11:54:40 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 13:21:55 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ impl fmt::Display for Token {
             Token::Expr(exp) => write!(f, "({})", exp),
             Token::Orand(orand) => write!(f, "{}", orand),
             Token::Orator(orator) => write!(f, "{}", orator),
-            Token::Invalid(err) => write!(f, "{{{:.10}}}", err),
+            Token::Invalid(err) => write!(f, "{{{}}}", err.kind()),
         }
     }
 }

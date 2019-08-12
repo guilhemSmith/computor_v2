@@ -6,14 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 12:03:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 13:23:48 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use std::{error::Error, fmt, io::Error as IOErr};
 
 #[derive(Debug, Clone)]
-enum ErrorKind {
+pub enum ErrorKind {
     BadUseOperator,
     DivByZero,
     IncompleteExpr,
@@ -26,9 +26,9 @@ enum ErrorKind {
 impl fmt::Display for ErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            ErrorKind::BadUseOperator => write!(f, "syntax"),
+            ErrorKind::BadUseOperator => write!(f, "bad use"),
             ErrorKind::DivByZero => write!(f, "math"),
-            ErrorKind::IncompleteExpr => write!(f, "syntax"),
+            ErrorKind::IncompleteExpr => write!(f, "incomplete"),
             ErrorKind::InvalidExpr => write!(f, "syntax"),
             ErrorKind::InvalidOperand => write!(f, "syntax"),
             ErrorKind::InvalidOperator => write!(f, "syntax"),
@@ -63,6 +63,10 @@ impl ComputorError {
     pub fn set_pos(&mut self, pos: ErrorPosition) -> &Self {
         self.position = pos;
         return self;
+    }
+
+    pub fn kind(&self) -> &ErrorKind {
+        &self.kind
     }
 
     pub fn bad_use_op(op: char) -> Self {

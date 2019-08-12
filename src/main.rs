@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 11:27:44 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 13:19:48 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ fn computor(argc: usize, argv: Vec<String>) -> u32 {
                     }
                     break;
                 }
-                match expr.check_errors() {
+                match expr.check_errors(param.verbose()) {
                     nb if nb > 0 => eprintln!(
                         "[err-Lexer:] - {} error(s) detected. {}.",
                         nb, "Expression computing aborted"

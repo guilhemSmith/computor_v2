@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 12:04:26 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 13:19:39 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,9 +133,12 @@ impl Expression {
         self.tokens.front()
     }
 
-    pub fn check_errors(&self) -> u32 {
+    pub fn check_errors(&self, verbose: bool) -> u32 {
         let mut count = 0;
         let mut iter = self.tokens.iter();
+        if verbose {
+            println!("[V:computor] - collecting errors in : {}", self);
+        }
         loop {
             match iter.next() {
                 Some(tok) => match tok {
@@ -143,7 +146,7 @@ impl Expression {
                         count += 1;
                         println!("{}", err);
                     }
-                    Token::Expr(expr) => count += expr.check_errors(),
+                    Token::Expr(expr) => count += expr.check_errors(verbose),
                     _ => {}
                 },
                 None => break,
