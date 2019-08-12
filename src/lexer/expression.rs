@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 14:32:05 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 14:38:25 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,6 +182,9 @@ impl Expression {
                     tokens_to_string(&result)
                 );
             }
+        }
+        if result.len() % 2 == 0 {
+            return Err(ComputorError::invalid_expr());
         }
         Ok(Expression { tokens: result })
     }

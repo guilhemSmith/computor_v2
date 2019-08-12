@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 13:23:48 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 14:39:17 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::InvalidExpr,
             position: ErrorPosition::Global,
-            info: format!("Error while computing token from an expression."),
+            info: format!("An expression contains incoherent tokens."),
         }
     }
 
