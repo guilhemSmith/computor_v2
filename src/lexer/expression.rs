@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 13:19:39 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 14:32:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,13 @@ impl Expression {
             println!("[V:computor] - computing expression: {}", self);
         }
         let mut result = self.tokens.clone();
+        result = compute_expr(result, verbose)?;
+        if verbose {
+            println!(
+                "[V:computor] - sub expressions computed: {}",
+                tokens_to_string(&result)
+            );
+        }
         result = compute_all(result, true, verbose)?;
         if verbose {
             println!(
@@ -178,6 +185,33 @@ impl Expression {
         }
         Ok(Expression { tokens: result })
     }
+}
+
+fn compute_expr(
+    mut lst: LinkedList<Token>,
+    verbose: bool,
+) -> Result<LinkedList<Token>, ComputorError> {
+    let mut result: LinkedList<Token> = LinkedList::new();
+    loop {
+        match lst.pop_front() {
+            Some(tok) => match tok {
+                Token::Expr(exp) => {
+                    let computed = exp.compute(verbose)?;
+                    if computed.len() == 1 {
+                        match computed.front() {
+                            Some(tok_res) => result.push_back(tok_res.clone()),
+                            None => result.push_back(Token::Expr(computed)),
+                        };
+                    } else {
+                        result.push_back(Token::Expr(computed));
+                    }
+                }
+                _ => result.push_back(tok),
+            },
+            None => break,
+        }
+    }
+    return Ok(result);
 }
 
 fn compute_all(
@@ -277,5 +311,5 @@ fn tokens_to_string(lst: &LinkedList<Token>) -> String {
             None => break,
         };
     }
-    return tokens_str.replace("- -", "+");
+    return tokens_str.trim_start().replace("- -", "+");
 }
