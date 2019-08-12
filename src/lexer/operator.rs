@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 14:29:32 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 17:45:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,6 @@ impl Operator {
     ) -> Result<(LList<Token>), ComputorError> {
         (self.op)(self, val_a, val_b, verbose)
     }
-
-    // pub fn symbol(&self) -> char {
-    //     self.symbol
-    // }
 
     pub fn prior(&self) -> bool {
         self.symbol == '*' || self.symbol == '/' || self.symbol == '%'

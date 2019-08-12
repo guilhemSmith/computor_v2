@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/08/12 11:27:20 by gsmith           ###   ########.fr        #
+#    Updated: 2019/08/12 14:42:37 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,10 @@ SRC			= $(addprefix src/, \
 				arg_parse.rs \
 				error.rs \
 				main.rs \
+				memory.rs \
+				$(addprefix memory/, \
+					function.rs \
+					variable.rs) \
 				lexer.rs \
 				$(addprefix lexer/, \
 					expression.rs \
