@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 14:38:25 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 18:55:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,10 +123,6 @@ impl Expression {
 
     pub fn len(&self) -> usize {
         self.tokens.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.tokens.len() == 0
     }
 
     pub fn front(&self) -> Option<&Token> {

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 12:04:29 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 18:50:43 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,19 @@ pub use operand::Operand;
 pub use operator::Operator;
 pub use token::Token;
 
+extern crate rustyline;
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
+
 use crate::error::ComputorError;
 use crate::Timer;
-use std::io::{self, prelude::Write};
 
 const PROMPT: &str = "> ";
 
 pub struct Lexer {
     verbose: bool,
     bench: bool,
+    line: Editor<()>,
 }
 
 impl Lexer {
@@ -36,38 +40,29 @@ impl Lexer {
         Lexer {
             verbose: verbose,
             bench: bench,
+            line: Editor::new(),
         }
     }
 
-    pub fn read_input(&self) -> Result<Expression, ComputorError> {
-        let mut input = String::new();
-
-        match print_prompt() {
-            Err(err) => return Err(ComputorError::io(err)),
-            _ => {}
-        };
-        let line = io::stdin().read_line(&mut input);
-        if !self.bench {
-            self.lexing_input(input, line)
-        } else {
-            let _timer = Timer::new("Lexing");
-            self.lexing_input(input, line)
-        }
-    }
-
-    fn lexing_input(
-        &self,
-        input: String,
-        line: Result<usize, std::io::Error>,
-    ) -> Result<Expression, ComputorError> {
-        match line {
-            Err(err) => return Err(ComputorError::io(err)),
-            Ok(len) => {
-                if len < 1 {
-                    println!("");
+    pub fn read_input(&mut self) -> Result<Expression, ComputorError> {
+        let readline = self.line.readline(PROMPT);
+        match readline {
+            Ok(line) => {
+                self.line.add_history_entry(line.as_str());
+                if !self.bench {
+                    self.lexing_input(line)
+                } else {
+                    let _timer = Timer::new("Lexing");
+                    self.lexing_input(line)
                 }
             }
-        };
+            Err(ReadlineError::Interrupted) => Err(ComputorError::io_stop()),
+            Err(ReadlineError::Eof) => Err(ComputorError::io_stop()),
+            Err(err) => Err(ComputorError::io(&format!("{:?}", err))),
+        }
+    }
+
+    fn lexing_input(&self, input: String) -> Result<Expression, ComputorError> {
         if self.verbose {
             println!("[V:Lexer] - input read: '{}'", input.trim());
         }
@@ -90,12 +85,4 @@ impl Lexer {
             };
         }
     }
-}
-
-fn print_prompt() -> Result<(), io::Error> {
-    let mut stdout = io::stdout();
-
-    write!(&mut stdout, "{}", PROMPT)?;
-    stdout.flush()?;
-    Ok(())
 }

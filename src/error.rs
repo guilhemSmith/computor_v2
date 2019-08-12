@@ -6,13 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 14:39:17 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/12 18:54:55 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use std::{error::Error, fmt, io::Error as IOErr};
+use std::{error::Error, fmt};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ErrorKind {
     BadUseOperator,
     DivByZero,
@@ -21,6 +21,7 @@ pub enum ErrorKind {
     InvalidOperand,
     InvalidOperator,
     IO,
+    IOStop,
 }
 
 impl fmt::Display for ErrorKind {
@@ -33,6 +34,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::InvalidOperand => write!(f, "syntax"),
             ErrorKind::InvalidOperator => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
+            ErrorKind::IOStop => write!(f, "input"),
         }
     }
 }
@@ -128,11 +130,19 @@ impl ComputorError {
         }
     }
 
-    pub fn io(err: IOErr) -> Self {
+    pub fn io(cut: &str) -> Self {
         ComputorError {
             kind: ErrorKind::IO,
             position: ErrorPosition::Global,
-            info: format!("{}", err),
+            info: format!("{}", cut),
+        }
+    }
+
+    pub fn io_stop() -> Self {
+        ComputorError {
+            kind: ErrorKind::IOStop,
+            position: ErrorPosition::Global,
+            info: String::from("Input interrupted."),
         }
     }
 }
@@ -141,6 +151,13 @@ impl Error for ComputorError {}
 
 impl fmt::Display for ComputorError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "[err:{}{}] -> {}", self.kind, self.position, self.info)
+        match self.kind {
+            ErrorKind::IOStop => write!(f, "{}", self.info),
+            _ => write!(
+                f,
+                "[err:{}{}] -> {}",
+                self.kind, self.position, self.info
+            ),
+        }
     }
 }
