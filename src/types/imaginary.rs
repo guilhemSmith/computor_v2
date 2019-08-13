@@ -6,12 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 12:19:23 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/13 12:54:02 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::rational::Rational;
-use super::Raw;
 use std::{cmp, fmt, ops};
 
 #[derive(Eq, Copy, Clone, Debug)]
@@ -21,7 +20,7 @@ pub struct Imaginary {
 }
 
 impl Imaginary {
-    pub fn new(real: Raw, irreal: Raw) -> Self {
+    pub fn new(real: f64, irreal: f64) -> Self {
         Imaginary {
             real: Rational::new(real),
             irreal: Rational::new(irreal),
@@ -49,7 +48,7 @@ impl fmt::Display for Imaginary {
                         if self.irreal > Rational::zero() {
                             format!(
                                 "+ {}",
-                                if self.irreal != Rational::new(Raw::Float(1.0))
+                                if self.irreal != Rational::new(1.0)
                                 {
                                     format!("{}", self.irreal)
                                 } else {
@@ -57,7 +56,7 @@ impl fmt::Display for Imaginary {
                                 }
                             )
                         } else {
-                            if self.irreal != Rational::new(Raw::Float(-1.0)) {
+                            if self.irreal != Rational::new(-1.0) {
                                 format!("{}", self.irreal)
                             } else {
                                 String::from("- ")
@@ -74,7 +73,7 @@ impl fmt::Display for Imaginary {
                 "{}",
                 match self.irreal {
                     zero if zero == Rational::zero() => String::from("0"),
-                    one if one == Rational::new(Raw::Float(1.0)) => {
+                    one if one == Rational::new(1.0) => {
                         String::from("i")
                     }
                     other => format!("{}i", other),
@@ -137,17 +136,17 @@ impl ops::Div<Imaginary> for Imaginary {
 
 #[cfg(test)]
 mod operator {
-    use super::{Imaginary, Raw};
+    use super::Imaginary;
 
     #[test]
     fn add_imaginary() {
         let zero = Imaginary::zero();
-        let real_1 = Imaginary::new(Raw::Float(42.0), Raw::Zero);
-        let real_2 = Imaginary::new(Raw::Float(-13.00001456), Raw::Zero);
-        let irreal_1 = Imaginary::new(Raw::Zero, Raw::Float(81.0987));
-        let irreal_2 = Imaginary::new(Raw::Zero, Raw::Float(50.0));
-        let complex_1 = Imaginary::new(Raw::Float(42.0), Raw::Float(50.0));
-        let complex_2 = Imaginary::new(Raw::Float(-42.0), Raw::Float(-90.0));
+        let real_1 = Imaginary::new(42.0, 0.0);
+        let real_2 = Imaginary::new(-13.00001456, 0.0);
+        let irreal_1 = Imaginary::new(0.0, 81.0987);
+        let irreal_2 = Imaginary::new(0.0, 50.0);
+        let complex_1 = Imaginary::new(42.0, 50.0);
+        let complex_2 = Imaginary::new(-42.0, -90.0);
 
         assert_eq!(real_1 + zero, real_1);
         assert_eq!(zero + real_2, real_2);
@@ -161,17 +160,17 @@ mod operator {
     #[test]
     fn sub_imaginary() {
         let zero = Imaginary::zero();
-        let real_1 = Imaginary::new(Raw::Float(42.0), Raw::Zero);
-        let real_2 = Imaginary::new(Raw::Float(-13.00001456), Raw::Zero);
-        let irreal_1 = Imaginary::new(Raw::Zero, Raw::Float(81.0987));
-        let irreal_2 = Imaginary::new(Raw::Zero, Raw::Float(50.0));
-        let complex_1 = Imaginary::new(Raw::Float(42.0), Raw::Float(50.0));
-        let complex_2 = Imaginary::new(Raw::Float(-42.0), Raw::Float(50.0));
+        let real_1 = Imaginary::new(42.0, 0.0);
+        let real_2 = Imaginary::new(-13.00001456, 0.0);
+        let irreal_1 = Imaginary::new(0.0, 81.0987);
+        let irreal_2 = Imaginary::new(0.0, 50.0);
+        let complex_1 = Imaginary::new(42.0, 50.0);
+        let complex_2 = Imaginary::new(-42.0, 50.0);
 
         assert_eq!(real_1 - zero, real_1);
         assert_eq!(
             real_1 - real_2,
-            Imaginary::new(Raw::Float(42.0 + 13.00001456), Raw::Zero)
+            Imaginary::new(42.0 + 13.00001456, 0.0)
         );
         assert_eq!(irreal_1 - zero, irreal_1);
         assert_eq!(complex_1 - zero, complex_1);
@@ -181,10 +180,10 @@ mod operator {
     #[test]
     fn mul_imaginary() {
         let zero = Imaginary::zero();
-        let complex_1 = Imaginary::new(Raw::Float(42.0), Raw::Float(50.0));
-        let complex_2 = Imaginary::new(Raw::Float(2.0), Raw::Float(3.0));
-        let complex_3 = Imaginary::new(Raw::Float(3.0), Raw::Float(2.0));
-        let complex_4 = Imaginary::new(Raw::Float(0.0), Raw::Float(13.0));
+        let complex_1 = Imaginary::new(42.0, 50.0);
+        let complex_2 = Imaginary::new(2.0, 3.0);
+        let complex_3 = Imaginary::new(3.0, 2.0);
+        let complex_4 = Imaginary::new(0.0, 13.0);
 
         assert_eq!(complex_1 * zero, zero);
         assert_eq!(zero * complex_2, zero);
@@ -194,26 +193,26 @@ mod operator {
     #[test]
     fn div_imaginary() {
         let zero = Imaginary::zero();
-        let complex_2 = Imaginary::new(Raw::Float(2.0), Raw::Float(3.0));
-        let complex_3 = Imaginary::new(Raw::Float(3.0), Raw::Float(2.0));
-        let complex_4 = Imaginary::new(Raw::Couple(12, 13), Raw::Couple(5, 13));
+        let complex_2 = Imaginary::new(2.0, 3.0);
+        let complex_3 = Imaginary::new(3.0, 2.0);
+        let complex_4 = Imaginary::new(12.0, 5.0) / Imaginary::new(13.0, 0.0);
 
         assert_eq!(zero / complex_2, zero);
         assert_eq!(complex_2 / complex_3, complex_4);
     }
 
-    #[test]
-    fn cmp_0() {}
+    // #[test]
+    // fn cmp_0() {}
 
-    #[test]
-    fn cmp_1() {}
+    // #[test]
+    // fn cmp_1() {}
 
-    #[test]
-    fn cmp_2() {}
+    // #[test]
+    // fn cmp_2() {}
 
-    #[test]
-    fn cmp_3() {}
+    // #[test]
+    // fn cmp_3() {}
 
-    #[test]
-    fn cmp_4() {}
+    // #[test]
+    // fn cmp_4() {}
 }

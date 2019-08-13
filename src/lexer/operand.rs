@@ -6,13 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 12:04:28 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/13 10:26:41 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Token;
 use crate::error::ComputorError;
-use crate::types::{Imaginary, Raw};
+use crate::types::Imaginary;
 use std::fmt;
 
 #[derive(Clone)]
@@ -37,11 +37,11 @@ impl Operand {
 
         if is_real {
             Ok(Operand {
-                value: Imaginary::new(Raw::Float(fl_value), Raw::Zero),
+                value: Imaginary::new(fl_value, 0.0),
             })
         } else {
             Ok(Operand {
-                value: Imaginary::new(Raw::Zero, Raw::Float(fl_value)),
+                value: Imaginary::new(0.0, fl_value),
             })
         }
     }
