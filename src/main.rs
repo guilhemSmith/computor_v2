@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 18:57:03 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/13 13:24:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,32 +51,32 @@ fn computor(argc: usize, argv: Vec<String>) -> u32 {
     loop {
         match lex.read_input() {
             Ok(expr) => {
-                match expr.check_errors(param.verbose()) {
-                    nb if nb > 0 => eprintln!(
-                        "[err-Lexer:] - {} error(s) detected. {}.",
-                        nb, "Expression computing aborted"
-                    ),
-                    _ => {
-                        let result = if !param.bench() {
-                            expr.compute(param.verbose())
-                        } else {
-                            let _timer = Timer::new("Computing");
-                            expr.compute(param.verbose())
-                        };
-                        match result {
-                            Ok(expr) => println!(
-                                "{}{}",
-                                if param.verbose() {
-                                    "[V:result] - "
-                                } else {
-                                    ""
-                                },
-                                expr
-                            ),
-                            Err(err) => eprintln!("{}", err),
-                        };
-                    }
-                };
+                // match expr.check_errors(param.verbose()) {
+                //     nb if nb > 0 => eprintln!(
+                //         "[err-Lexer:] - {} error(s) detected. {}.",
+                //         nb, "Expression computing aborted"
+                //     ),
+                //     _ => {
+                //         let result = if !param.bench() {
+                //             expr.compute(param.verbose())
+                //         } else {
+                //             let _timer = Timer::new("Computing");
+                //             expr.compute(param.verbose())
+                //         };
+                //         match result {
+                //             Ok(expr) => println!(
+                //                 "{}{}",
+                //                 if param.verbose() {
+                //                     "[V:result] - "
+                //                 } else {
+                //                     ""
+                //                 },
+                //                 expr
+                //             ),
+                //             Err(err) => eprintln!("{}", err),
+                //         };
+                //     }
+                // };
             }
             Err(err) => {
                 if *err.kind() == ErrorKind::IOStop {

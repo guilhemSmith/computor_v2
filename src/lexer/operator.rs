@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 17:45:46 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/13 14:09:41 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,7 +170,7 @@ impl Operator {
                             None => Ok(orand),
                         }
                     } else {
-                        Ok(Token::Expr(Expression::from_tokens(exp)))
+                        Ok(Token::Expr(Expression::new(exp)))
                     }
                 }
                 None => Ok(orand),
@@ -180,7 +180,7 @@ impl Operator {
             new_list.push_back(orand);
             new_list.push_back(Token::Orator(self.clone()));
             new_list.push_back(Token::Expr(exp));
-            Ok(Token::Expr(Expression::from_tokens(new_list)))
+            Ok(Token::Expr(Expression::new(new_list)))
         }
     }
 }
