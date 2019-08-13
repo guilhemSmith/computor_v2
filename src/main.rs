@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 15:37:34 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/13 16:09:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ fn computor(argc: usize, argv: Vec<String>) -> u32 {
     loop {
         match lex.read_input() {
             Ok(tokens) => {
+                println!("{}", lexer::token::tokens_to_string(&tokens));
                 // let expr = Expression::new(tokens);
                 // match expr.check_errors(param.verbose()) {
                 //     nb if nb > 0 => eprintln!(

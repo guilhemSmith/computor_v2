@@ -6,14 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 15:42:34 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/13 16:46:42 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod expression;
 mod operand;
 mod operator;
-mod token;
+pub mod token;
 
 pub use expression::Expression;
 pub use operand::Operand;
@@ -52,14 +52,17 @@ impl Lexer {
         match readline {
             Ok(line) => {
                 self.line.add_history_entry(line.as_str());
+                if self.verbose {
+                    println!("[V:Lexer] - input read: '{}'", line);
+                }
                 let cleared = self.clear_input(line);
                 let cloned = cleared.clone();
                 let mut iter = cloned.char_indices();
                 if !self.bench {
-                    self.tokenize(cleared, &mut iter, 0)
+                    self.tokenize(cleared, &mut iter, 0, false)
                 } else {
                     let _timer = Timer::new("Lexing");
-                    self.tokenize(cleared, &mut iter, 0)
+                    self.tokenize(cleared, &mut iter, 0, false)
                 }
             }
             Err(ReadlineError::Interrupted) => Err(ComputorError::io_stop()),
@@ -73,47 +76,45 @@ impl Lexer {
         input: String,
         chars: &mut CharIndices,
         start: usize,
+        stop_with_closing: bool,
     ) -> Result<LinkedList<Token>, ComputorError> {
-        if self.verbose {
-            println!("[V:Lexer] - input read: '{}'", input.trim());
-        }
-        let stop_with_closing = input.starts_with('(');
         let mut toks: LinkedList<Token> = LinkedList::new();
         let mut ind: i64 = -1;
 
-        if stop_with_closing {
-            chars.next();
+        if self.verbose {
+            println!("[V:Lexer] - tokenize: '{}'", input);
         }
         loop {
             match chars.next() {
                 Some((i, ch))
                     if ch == '+' || ch == '-' || ch == '*' || ch == '/' =>
                 {
-                    push_orand(&mut toks, &mut ind, i, &input, start);
+                    push_orand(&mut toks, &mut ind, i - start, &input, start);
                     let orator = Operator::new(ch)?;
                     toks.push_back(Token::Orator(orator));
                 }
                 Some((i, ch)) if ch == '(' => {
-                    push_orand(&mut toks, &mut ind, i, &input, start);
+                    push_orand(&mut toks, &mut ind, i - start, &input, start);
+                    let sub_str = String::from(&input[i - start + 1 - start..]);
                     let sub_tok =
-                        self.tokenize(String::from(&input[i..]), chars, i)?;
+                        self.tokenize(sub_str, chars, i - start + 1, true)?;
                     toks.push_back(Token::Expr(Expression::new(sub_tok)));
                 }
                 Some((i, ch)) if ch == ')' && stop_with_closing => {
-                    push_orand(&mut toks, &mut ind, i, &input, start);
+                    push_orand(&mut toks, &mut ind, i - start, &input, start);
                     break;
                 }
                 Some((i, eq)) if eq == '=' => {
-                    push_orand(&mut toks, &mut ind, i, &input, start);
+                    push_orand(&mut toks, &mut ind, i - start, &input, start);
                     toks.push_back(Token::Equal);
                 }
                 Some((i, res)) if res == '?' => {
-                    push_orand(&mut toks, &mut ind, i, &input, start);
+                    push_orand(&mut toks, &mut ind, i - start, &input, start);
                     toks.push_back(Token::Resolve);
                 }
                 Some((i, _)) => {
                     if ind < 0 {
-                        ind = i as i64;
+                        ind = (i - start) as i64;
                     }
                 }
                 None => {
