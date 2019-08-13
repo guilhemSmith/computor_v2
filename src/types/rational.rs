@@ -90,7 +90,7 @@ impl cmp::PartialEq for Rational {
         self.positiv == rhs.positiv
             && self.numerator == rhs.numerator
             && self.denominator == rhs.denominator
-            // && self.numerator / self.denominator == rhs.numerator / rhs.denominator
+        // && self.numerator / self.denominator == rhs.numerator / rhs.denominator
     }
 }
 

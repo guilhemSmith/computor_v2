@@ -48,8 +48,7 @@ impl fmt::Display for Imaginary {
                         if self.irreal > Rational::zero() {
                             format!(
                                 "+ {}",
-                                if self.irreal != Rational::new(1.0)
-                                {
+                                if self.irreal != Rational::new(1.0) {
                                     format!("{}", self.irreal)
                                 } else {
                                     String::new()
@@ -73,9 +72,7 @@ impl fmt::Display for Imaginary {
                 "{}",
                 match self.irreal {
                     zero if zero == Rational::zero() => String::from("0"),
-                    one if one == Rational::new(1.0) => {
-                        String::from("i")
-                    }
+                    one if one == Rational::new(1.0) => String::from("i"),
                     other => format!("{}i", other),
                 }
             )
@@ -168,10 +165,7 @@ mod operator {
         let complex_2 = Imaginary::new(-42.0, 50.0);
 
         assert_eq!(real_1 - zero, real_1);
-        assert_eq!(
-            real_1 - real_2,
-            Imaginary::new(42.0 + 13.00001456, 0.0)
-        );
+        assert_eq!(real_1 - real_2, Imaginary::new(42.0 + 13.00001456, 0.0));
         assert_eq!(irreal_1 - zero, irreal_1);
         assert_eq!(complex_1 - zero, complex_1);
         assert_eq!(irreal_2 - real_1, complex_2);

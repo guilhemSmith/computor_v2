@@ -12,7 +12,7 @@
 
 use super::{Expression, Operand, Operator};
 use crate::error::ComputorError;
-use std::{fmt, collections::LinkedList};
+use std::{collections::LinkedList, fmt};
 
 #[derive(Clone)]
 pub enum Token {
@@ -21,7 +21,7 @@ pub enum Token {
     Orand(Operand),
     Orator(Operator),
     Invalid(ComputorError),
-    Resolve
+    Resolve,
 }
 
 impl fmt::Display for Token {

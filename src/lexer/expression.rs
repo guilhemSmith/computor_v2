@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 14:09:26 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/13 14:41:56 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::{Operator, Token, token::tokens_to_string};
+use super::{token::tokens_to_string, Token};
 use crate::error::ComputorError;
 use std::{collections::LinkedList, fmt};
 
@@ -28,10 +28,6 @@ impl fmt::Display for Expression {
 impl Expression {
     pub fn new(tokens: LinkedList<Token>) -> Self {
         Expression { tokens: tokens }
-    }
-
-    fn push_back(&mut self, tok: Token) {
-        self.tokens.push_back(tok);
     }
 
     pub fn len(&self) -> usize {
