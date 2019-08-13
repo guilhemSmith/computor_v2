@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 15:34:16 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/13 15:42:34 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,14 @@ impl Lexer {
                 Some((i, ch)) if ch == ')' && stop_with_closing => {
                     push_orand(&mut toks, &mut ind, i, &input, start);
                     break;
+                }
+                Some((i, eq)) if eq == '=' => {
+                    push_orand(&mut toks, &mut ind, i, &input, start);
+                    toks.push_back(Token::Equal);
+                }
+                Some((i, res)) if res == '?' => {
+                    push_orand(&mut toks, &mut ind, i, &input, start);
+                    toks.push_back(Token::Resolve);
                 }
                 Some((i, _)) => {
                     if ind < 0 {
