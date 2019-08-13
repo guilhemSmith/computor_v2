@@ -6,19 +6,23 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 16:46:42 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/13 17:21:58 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod expression;
+mod function;
 mod operand;
 mod operator;
 pub mod token;
+mod variable;
 
 pub use expression::Expression;
+pub use function::Function;
 pub use operand::Operand;
 pub use operator::Operator;
 pub use token::Token;
+pub use variable::Variable;
 
 extern crate rustyline;
 use rustyline::error::ReadlineError;

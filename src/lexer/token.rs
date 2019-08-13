@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 13:43:00 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/13 17:22:58 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::{Expression, Operand, Operator};
+use super::{Expression, Function, Operand, Operator, Variable};
 use crate::error::ComputorError;
 use std::{collections::LinkedList, fmt};
 
@@ -18,10 +18,12 @@ use std::{collections::LinkedList, fmt};
 pub enum Token {
     Equal,
     Expr(Expression),
+    Fun(Function),
     Orand(Operand),
     Orator(Operator),
     Invalid(ComputorError),
     Resolve,
+    Var(Variable),
 }
 
 impl fmt::Display for Token {
@@ -33,6 +35,8 @@ impl fmt::Display for Token {
             Token::Invalid(err) => write!(f, "{{{}}}", err.kind()),
             Token::Equal => write!(f, "="),
             Token::Resolve => write!(f, "?"),
+            Token::Var(var) => write!(f, "{}", var),
+            Token::Fun(fun) => write!(f, "{}", fun),
         }
     }
 }
