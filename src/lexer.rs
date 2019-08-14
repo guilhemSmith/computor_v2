@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 17:21:58 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/14 16:25:10 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ extern crate rustyline;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-use crate::error::{ComputorError, ErrorPosition};
+use crate::error::ComputorError;
 use crate::Timer;
 
 use std::collections::LinkedList;
@@ -40,6 +40,8 @@ pub struct Lexer {
     verbose: bool,
     bench: bool,
     line: Editor<()>,
+    last_ch: Option<(usize, char)>,
+    depth: i32,
 }
 
 impl Lexer {
@@ -48,6 +50,8 @@ impl Lexer {
             verbose: verbose,
             bench: bench,
             line: Editor::new(),
+            last_ch: None,
+            depth: 0,
         }
     }
 
@@ -60,13 +64,20 @@ impl Lexer {
                     println!("[V:Lexer] - input read: '{}'", line);
                 }
                 let cleared = self.clear_input(line);
-                let cloned = cleared.clone();
-                let mut iter = cloned.char_indices();
+                let mut iter = cleared.char_indices();
+                let tokens;
+                self.depth = 0;
+                self.last_ch = None;
                 if !self.bench {
-                    self.tokenize(cleared, &mut iter, 0, false)
+                    tokens = self.tokenize(&mut iter);
                 } else {
                     let _timer = Timer::new("Lexing");
-                    self.tokenize(cleared, &mut iter, 0, false)
+                    tokens = self.tokenize(&mut iter);
+                }
+                if self.depth == 0 && iter.next() == None {
+                    Ok(tokens)
+                } else {
+                    Err(ComputorError::invalid_expr())
                 }
             }
             Err(ReadlineError::Interrupted) => Err(ComputorError::io_stop()),
@@ -75,59 +86,130 @@ impl Lexer {
         }
     }
 
-    fn tokenize(
-        &self,
-        input: String,
-        chars: &mut CharIndices,
-        start: usize,
-        stop_with_closing: bool,
-    ) -> Result<LinkedList<Token>, ComputorError> {
-        let mut toks: LinkedList<Token> = LinkedList::new();
-        let mut ind: i64 = -1;
-
-        if self.verbose {
-            println!("[V:Lexer] - tokenize: '{}'", input);
-        }
+    fn tokenize(&mut self, chars: &mut CharIndices) -> LinkedList<Token> {
+        let mut tokens: LinkedList<Token> = LinkedList::new();
         loop {
-            match chars.next() {
-                Some((i, ch))
-                    if ch == '+' || ch == '-' || ch == '*' || ch == '/' =>
-                {
-                    push_orand(&mut toks, &mut ind, i - start, &input, start);
-                    let orator = Operator::new(ch)?;
-                    toks.push_back(Token::Orator(orator));
+            match if self.last_ch != None {
+                self.last_ch
+            } else {
+                chars.next()
+            } {
+                Some((i, ch)) if ch.is_digit(10) => {
+                    self.last_ch = Some((i, ch));
+                    tokens.push_back(self.read_val(chars));
                 }
-                Some((i, ch)) if ch == '(' => {
-                    push_orand(&mut toks, &mut ind, i - start, &input, start);
-                    let sub_str = String::from(&input[i - start + 1 - start..]);
-                    let sub_tok =
-                        self.tokenize(sub_str, chars, i - start + 1, true)?;
-                    toks.push_back(Token::Expr(Expression::new(sub_tok)));
+                Some((i, ch)) if ch.is_alphabetic() => {
+                    self.last_ch = Some((i, ch));
+                    tokens.push_back(self.read_id(chars));
                 }
-                Some((i, ch)) if ch == ')' && stop_with_closing => {
-                    push_orand(&mut toks, &mut ind, i - start, &input, start);
+                Some((_, ch)) if ch == '=' => tokens.push_back(Token::Equal),
+                Some((_, ch)) if ch == '?' => tokens.push_back(Token::Resolve),
+                Some((_, ch)) if ch == '(' => {
+                    self.depth += 1;
+                    tokens.push_back(Token::Expr(Expression::new(
+                        self.tokenize(chars),
+                    )));
+                    self.last_ch = None;
+                }
+                Some((_, ch)) if ch == ')' => {
+                    self.depth -= 1;
                     break;
                 }
-                Some((i, eq)) if eq == '=' => {
-                    push_orand(&mut toks, &mut ind, i - start, &input, start);
-                    toks.push_back(Token::Equal);
+                Some((_, ch)) => {
+                    tokens.push_back(match Operator::new(ch) {
+                        Ok(orator) => Token::Orator(orator),
+                        Err(err) => Token::Invalid(err),
+                    });
+                    self.last_ch = None;
+                },
+                None => break,
+            }
+        }
+        return tokens;
+    }
+
+    fn read_val(&mut self, chars: &mut CharIndices) -> Token {
+        let mut raw = String::new();
+        let is_real: bool;
+
+        raw.push(self.last_ch.unwrap().1);
+        loop {
+            match chars.next() {
+                Some((_, ch)) if ch == '.' || ch.is_digit(10) => raw.push(ch),
+                Some((_, ch)) if ch == 'i' => {
+                    is_real = false;
+                    self.last_ch = chars.next();
+                    break;
                 }
-                Some((i, res)) if res == '?' => {
-                    push_orand(&mut toks, &mut ind, i - start, &input, start);
-                    toks.push_back(Token::Resolve);
-                }
-                Some((i, _)) => {
-                    if ind < 0 {
-                        ind = (i - start) as i64;
-                    }
+                Some((i, ch)) => {
+                    is_real = true;
+                    self.last_ch = Some((i, ch));
+                    break;
                 }
                 None => {
-                    push_orand(&mut toks, &mut ind, input.len(), &input, start);
+                    is_real = true;
+                    self.last_ch = None;
                     break;
                 }
             }
         }
-        return Ok(toks);
+        match Operand::new(raw, is_real) {
+            Ok(orand) => Token::Orand(orand),
+            Err(err) => Token::Invalid(err),
+        }
+    }
+
+    fn read_id(&mut self, chars: &mut CharIndices) -> Token {
+        let mut raw = String::new();
+
+        raw.push(self.last_ch.unwrap().1);
+        loop {
+            match chars.next() {
+                Some((i, ch))
+                    if ch == '+'
+                        || ch == '-'
+                        || ch == '*'
+                        || ch == '/'
+                        || ch == '='
+                        || ch == '?' =>
+                {
+                    self.last_ch = Some((i, ch));
+                    break;
+                }
+                Some((_, ch)) if ch == '(' => {
+                    let mut param = String::new();
+                    loop {
+                        match chars.next() {
+                            Some((_, ch)) if ch == ')' => {
+                                self.last_ch = chars.next();
+                                return match Function::new(raw, param) {
+                                    Ok(fun) => Token::Fun(fun),
+                                    Err(err) => Token::Invalid(err),
+                                };
+                            }
+                            Some((_, ch)) => param.push(ch),
+                            None => {
+                                self.last_ch = None;
+                                raw.push('(');
+                                raw.push_str(&param);
+                                return Token::Invalid(
+                                    ComputorError::invalid_token(raw),
+                                );
+                            }
+                        }
+                    }
+                }
+                Some((_, ch)) => raw.push(ch),
+                None => {
+                    self.last_ch = None;
+                    break;
+                }
+            }
+        }
+        match Variable::new(raw) {
+            Ok(var) => Token::Var(var),
+            Err(err) => Token::Invalid(err),
+        }
     }
 
     fn clear_input(&self, raw_input: String) -> String {
@@ -145,47 +227,5 @@ impl Lexer {
                 }
             };
         }
-    }
-}
-
-fn read_operand(raw_operand: &str, pos: usize) -> Token {
-    let is_real = match raw_operand.chars().rev().next() {
-        Some(c) => c != 'i',
-        None => true,
-    };
-
-    match Operand::new(
-        if is_real {
-            raw_operand
-        } else {
-            let len = raw_operand.len();
-            if len > 1 {
-                &raw_operand[..raw_operand.len() - 1]
-            } else {
-                "1"
-            }
-        },
-        is_real,
-    ) {
-        Ok(orand) => Token::Orand(orand),
-        Err(mut err) => {
-            err.set_pos(ErrorPosition::Char(pos));
-            Token::Invalid(err)
-        }
-    }
-}
-
-fn push_orand(
-    toks: &mut LinkedList<Token>,
-    start: &mut i64,
-    stop: usize,
-    chain: &String,
-    pos: usize,
-) {
-    let i = *start;
-    if i >= 0 {
-        let u = i as usize;
-        toks.push_back(read_operand(&chain[u..stop], u + pos));
-        *start = -1;
     }
 }

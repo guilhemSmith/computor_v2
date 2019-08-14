@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 10:26:41 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/14 13:11:56 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,11 @@ impl fmt::Display for Operand {
 }
 
 impl Operand {
-    pub fn new(raw_str: &str, is_real: bool) -> Result<Operand, ComputorError> {
-        let fl_value = match raw_str.parse::<f64>() {
+    pub fn new(raw: String, is_real: bool) -> Result<Operand, ComputorError> {
+        let fl_value = match raw.parse::<f64>() {
             Ok(val) => val,
             Err(_err) => {
-                return Err(ComputorError::invalid_operand(raw_str, is_real));
+                return Err(ComputorError::invalid_operand(raw, is_real));
             }
         };
 

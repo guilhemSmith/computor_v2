@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 18:54:55 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/14 15:01:14 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ pub enum ErrorKind {
     InvalidExpr,
     InvalidOperand,
     InvalidOperator,
+    InvalidToken,
     IO,
     IOStop,
 }
@@ -35,6 +36,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::InvalidOperator => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
+            ErrorKind::InvalidToken => write!(f, "parsing"),
         }
     }
 }
@@ -111,7 +113,7 @@ impl ComputorError {
         }
     }
 
-    pub fn invalid_operand(raw_str: &str, is_real: bool) -> Self {
+    pub fn invalid_operand(raw_str: String, is_real: bool) -> Self {
         ComputorError {
             kind: ErrorKind::InvalidOperand,
             position: ErrorPosition::Global,
@@ -127,6 +129,14 @@ impl ComputorError {
             kind: ErrorKind::InvalidOperator,
             position: ErrorPosition::Global,
             info: format!("Invalid operator symbol caught : {}", symbol),
+        }
+    }
+
+    pub fn invalid_token(token: String) -> Self {
+        ComputorError {
+            kind: ErrorKind::InvalidToken,
+            position: ErrorPosition::Global,
+            info: format!("Invalid token parsed : {}", token),
         }
     }
 
