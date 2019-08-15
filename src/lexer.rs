@@ -6,22 +6,22 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/14 16:25:10 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 10:57:30 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod expression;
 mod function;
-mod operand;
 mod operator;
 pub mod token;
+mod value;
 mod variable;
 
 pub use expression::Expression;
 pub use function::Function;
-pub use operand::Operand;
 pub use operator::Operator;
 pub use token::Token;
+pub use value::Value;
 pub use variable::Variable;
 
 extern crate rustyline;
@@ -32,7 +32,7 @@ use crate::error::ComputorError;
 use crate::Timer;
 
 use std::collections::LinkedList;
-use std::str::CharIndices;
+use std::str::Chars;
 
 const PROMPT: &str = "> ";
 
@@ -40,7 +40,7 @@ pub struct Lexer {
     verbose: bool,
     bench: bool,
     line: Editor<()>,
-    last_ch: Option<(usize, char)>,
+    last_ch: Option<char>,
     depth: i32,
 }
 
@@ -64,15 +64,15 @@ impl Lexer {
                     println!("[V:Lexer] - input read: '{}'", line);
                 }
                 let cleared = self.clear_input(line);
-                let mut iter = cleared.char_indices();
+                let mut iter = cleared.chars();
                 let tokens;
                 self.depth = 0;
                 self.last_ch = None;
                 if !self.bench {
-                    tokens = self.tokenize(&mut iter);
+                    tokens = self.tokenize(&mut iter, false);
                 } else {
                     let _timer = Timer::new("Lexing");
-                    tokens = self.tokenize(&mut iter);
+                    tokens = self.tokenize(&mut iter, false);
                 }
                 if self.depth == 0 && iter.next() == None {
                     Ok(tokens)
@@ -86,129 +86,122 @@ impl Lexer {
         }
     }
 
-    fn tokenize(&mut self, chars: &mut CharIndices) -> LinkedList<Token> {
+    fn tokenize(&mut self, chars: &mut Chars, fun: bool) -> LinkedList<Token> {
         let mut tokens: LinkedList<Token> = LinkedList::new();
+        let mut cur = chars.next();
         loop {
-            match if self.last_ch != None {
-                self.last_ch
-            } else {
-                chars.next()
-            } {
-                Some((i, ch)) if ch.is_digit(10) => {
-                    self.last_ch = Some((i, ch));
-                    tokens.push_back(self.read_val(chars));
+            match cur {
+                Some(ch) if ch.is_alphanumeric() => {
+                    self.last_ch = Some(ch);
+                    tokens.push_back(self.read_operand(chars, fun));
                 }
-                Some((i, ch)) if ch.is_alphabetic() => {
-                    self.last_ch = Some((i, ch));
-                    tokens.push_back(self.read_id(chars));
-                }
-                Some((_, ch)) if ch == '=' => tokens.push_back(Token::Equal),
-                Some((_, ch)) if ch == '?' => tokens.push_back(Token::Resolve),
-                Some((_, ch)) if ch == '(' => {
+                Some(ch) if ch == '=' => tokens.push_back(Token::Equal),
+                Some(ch) if ch == '?' => tokens.push_back(Token::Resolve),
+                Some(ch) if ch == '(' => {
                     self.depth += 1;
-                    tokens.push_back(Token::Expr(Expression::new(
-                        self.tokenize(chars),
-                    )));
-                    self.last_ch = None;
+                    let expr = Expression::new(self.tokenize(chars, false));
+                    if expr.len() > 0 {
+                        tokens.push_back(Token::Expr(expr));
+                    }
                 }
-                Some((_, ch)) if ch == ')' => {
+                Some(ch) if ch == ')' => {
                     self.depth -= 1;
                     break;
                 }
-                Some((_, ch)) => {
+                Some(ch) => {
                     tokens.push_back(match Operator::new(ch) {
                         Ok(orator) => Token::Orator(orator),
                         Err(err) => Token::Invalid(err),
                     });
-                    self.last_ch = None;
-                },
+                }
                 None => break,
+            }
+            if self.last_ch == None {
+                cur = chars.next();
+            } else {
+                cur = self.last_ch;
+                self.last_ch = None;
             }
         }
         return tokens;
     }
 
-    fn read_val(&mut self, chars: &mut CharIndices) -> Token {
-        let mut raw = String::new();
-        let is_real: bool;
+    fn read_operand(&mut self, chars: &mut Chars, fun: bool) -> Token {
+        if self.last_ch.unwrap().is_digit(10) {
+            self.read_val(chars, fun)
+        } else {
+            self.read_id(chars, fun)
+        }
+    }
 
-        raw.push(self.last_ch.unwrap().1);
+    fn read_val(&mut self, chars: &mut Chars, fun: bool) -> Token {
+        let mut raw = String::new();
+
+        raw.push(self.last_ch.unwrap());
         loop {
             match chars.next() {
-                Some((_, ch)) if ch == '.' || ch.is_digit(10) => raw.push(ch),
-                Some((_, ch)) if ch == 'i' => {
-                    is_real = false;
-                    self.last_ch = chars.next();
-                    break;
-                }
-                Some((i, ch)) => {
-                    is_real = true;
-                    self.last_ch = Some((i, ch));
+                Some(ch) if ch == '.' || ch.is_alphanumeric() => raw.push(ch),
+                Some(ch) => {
+                    if fun && ch == ',' {
+                        self.last_ch = chars.next()
+                    } else {
+                        self.last_ch = Some(ch);
+                    }
                     break;
                 }
                 None => {
-                    is_real = true;
                     self.last_ch = None;
                     break;
                 }
             }
         }
-        match Operand::new(raw, is_real) {
-            Ok(orand) => Token::Orand(orand),
+        match Value::new(raw) {
+            Ok(val) => Token::Val(val),
             Err(err) => Token::Invalid(err),
         }
     }
 
-    fn read_id(&mut self, chars: &mut CharIndices) -> Token {
+    fn read_id(&mut self, chars: &mut Chars, fun: bool) -> Token {
         let mut raw = String::new();
 
-        raw.push(self.last_ch.unwrap().1);
+        raw.push(self.last_ch.unwrap());
         loop {
             match chars.next() {
-                Some((i, ch))
-                    if ch == '+'
-                        || ch == '-'
-                        || ch == '*'
-                        || ch == '/'
-                        || ch == '='
-                        || ch == '?' =>
-                {
-                    self.last_ch = Some((i, ch));
+                Some(ch) if ch == '.' || ch.is_alphanumeric() => raw.push(ch),
+                Some(ch) if ch == '(' => {
+                    self.depth += 1;
+                    let param_lst = self.tokenize(chars, true);
+                    let mut param_vec: Vec<Token> = Vec::new();
+                    for param in param_lst {
+                        param_vec.push(param)
+                    }
+                    let foo = Function::new(raw, param_vec);
+                    return Token::Fun(foo);
+                }
+                Some(ch) => {
+                    if fun && ch == ',' {
+                        self.last_ch = chars.next();
+                    } else {
+                        self.last_ch = Some(ch);
+                    }
                     break;
                 }
-                Some((_, ch)) if ch == '(' => {
-                    let mut param = String::new();
-                    loop {
-                        match chars.next() {
-                            Some((_, ch)) if ch == ')' => {
-                                self.last_ch = chars.next();
-                                return match Function::new(raw, param) {
-                                    Ok(fun) => Token::Fun(fun),
-                                    Err(err) => Token::Invalid(err),
-                                };
-                            }
-                            Some((_, ch)) => param.push(ch),
-                            None => {
-                                self.last_ch = None;
-                                raw.push('(');
-                                raw.push_str(&param);
-                                return Token::Invalid(
-                                    ComputorError::invalid_token(raw),
-                                );
-                            }
-                        }
-                    }
-                }
-                Some((_, ch)) => raw.push(ch),
                 None => {
                     self.last_ch = None;
                     break;
                 }
             }
         }
-        match Variable::new(raw) {
-            Ok(var) => Token::Var(var),
-            Err(err) => Token::Invalid(err),
+        if !(raw.len() == 1 && raw.starts_with('i')) {
+            match Variable::new(raw) {
+                Ok(var) => Token::Var(var),
+                Err(err) => Token::Invalid(err),
+            }
+        } else {
+            match Value::new(raw) {
+                Ok(val) => Token::Val(val),
+                Err(err) => Token::Invalid(err),
+            }
         }
     }
 

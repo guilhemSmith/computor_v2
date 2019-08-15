@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/08/12 14:42:37 by gsmith           ###   ########.fr        #
+#    Updated: 2019/08/15 10:08:54 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ SRC			= $(addprefix src/, \
 				lexer.rs \
 				$(addprefix lexer/, \
 					expression.rs \
-					operand.rs \
+					value.rs \
 					operator.rs \
 					token.rs) \
 				timer.rs \

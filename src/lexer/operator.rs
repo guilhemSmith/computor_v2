@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 14:09:41 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 10:15:08 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::{Expression, Operand, Token};
+use super::{Expression, Token, Value};
 use crate::error::ComputorError;
 use std::{collections::LinkedList as LList, fmt};
 
@@ -67,13 +67,13 @@ impl Operator {
     ) -> Result<(LList<Token>), ComputorError> {
         let mut result: LList<Token> = LList::new();
         match (val_a, val_b) {
-            (Token::Orand(op_a), Token::Orand(op_b)) => {
-                result.push_back(Operand::add_orand(op_a, op_b))
+            (Token::Val(op_a), Token::Val(op_b)) => {
+                result.push_back(Value::add_val(op_a, op_b))
             }
-            (Token::Orand(op_a), Token::Expr(ep_b)) => {
+            (Token::Val(op_a), Token::Expr(ep_b)) => {
                 result.push_back(self.with_expr(op_a, ep_b, true, verbose)?)
             }
-            (Token::Expr(ep_a), Token::Orand(op_b)) => {
+            (Token::Expr(ep_a), Token::Val(op_b)) => {
                 result.push_back(self.with_expr(op_b, ep_a, false, verbose)?)
             }
             _ => return Err(ComputorError::bad_use_op('+')),
@@ -89,13 +89,13 @@ impl Operator {
     ) -> Result<(LList<Token>), ComputorError> {
         let mut result: LList<Token> = LList::new();
         match (val_a, val_b) {
-            (Token::Orand(op_a), Token::Orand(op_b)) => {
-                result.push_back(Operand::sub_orand(op_a, op_b))
+            (Token::Val(op_a), Token::Val(op_b)) => {
+                result.push_back(Value::sub_val(op_a, op_b))
             }
-            (Token::Orand(op_a), Token::Expr(ep_b)) => {
+            (Token::Val(op_a), Token::Expr(ep_b)) => {
                 result.push_back(self.with_expr(op_a, ep_b, true, verbose)?)
             }
-            (Token::Expr(ep_a), Token::Orand(op_b)) => {
+            (Token::Expr(ep_a), Token::Val(op_b)) => {
                 result.push_back(self.with_expr(op_b, ep_a, false, verbose)?)
             }
             _ => return Err(ComputorError::bad_use_op('-')),
@@ -111,13 +111,13 @@ impl Operator {
     ) -> Result<(LList<Token>), ComputorError> {
         let mut result: LList<Token> = LList::new();
         match (val_a, val_b) {
-            (Token::Orand(op_a), Token::Orand(op_b)) => {
-                result.push_back(Operand::mul_orand(op_a, op_b))
+            (Token::Val(op_a), Token::Val(op_b)) => {
+                result.push_back(Value::mul_val(op_a, op_b))
             }
-            (Token::Orand(op_a), Token::Expr(ep_b)) => {
+            (Token::Val(op_a), Token::Expr(ep_b)) => {
                 result.push_back(self.with_expr(op_a, ep_b, true, verbose)?)
             }
-            (Token::Expr(ep_a), Token::Orand(op_b)) => {
+            (Token::Expr(ep_a), Token::Val(op_b)) => {
                 result.push_back(self.with_expr(op_b, ep_a, false, verbose)?)
             }
             _ => return Err(ComputorError::bad_use_op('*')),
@@ -133,13 +133,13 @@ impl Operator {
     ) -> Result<(LList<Token>), ComputorError> {
         let mut result: LList<Token> = LList::new();
         match (val_a, val_b) {
-            (Token::Orand(op_a), Token::Orand(op_b)) => {
-                result.push_back(Operand::div_orand(op_a, op_b)?)
+            (Token::Val(op_a), Token::Val(op_b)) => {
+                result.push_back(Value::div_val(op_a, op_b)?)
             }
-            // (Token::Orand(op_a), Token::Expr(ep_b)) => {
+            // (Token::Val(op_a), Token::Expr(ep_b)) => {
             //     result.push_back(self.with_expr(op_a, ep_b, true, verbose)?)
             // }
-            // (Token::Expr(ep_a), Token::Orand(op_b)) => {
+            // (Token::Expr(ep_a), Token::Val(op_b)) => {
             //     result.push_back(self.with_expr(op_b, ep_a, false, verbose)?)
             // }
             _ => return Err(ComputorError::bad_use_op('/')),
@@ -149,35 +149,35 @@ impl Operator {
 
     fn with_expr(
         &self,
-        op_tok: &Operand,
+        op_tok: &Value,
         exp_tok: &Expression,
         exp_right: bool,
         verbose: bool,
     ) -> Result<Token, ComputorError> {
         let exp = exp_tok.compute(verbose)?;
-        let orand = Token::Orand(op_tok.clone());
+        let val = Token::Val(op_tok.clone());
         if exp.len() == 1 {
             match exp.front() {
                 Some(exp_tok) => {
                     let exp = if exp_right {
-                        self.exec(&orand, exp_tok, verbose)?
+                        self.exec(&val, exp_tok, verbose)?
                     } else {
-                        self.exec(exp_tok, &orand, verbose)?
+                        self.exec(exp_tok, &val, verbose)?
                     };
                     if exp.len() == 1 {
                         match exp.front() {
                             Some(tok) => Ok(tok.clone()),
-                            None => Ok(orand),
+                            None => Ok(val),
                         }
                     } else {
                         Ok(Token::Expr(Expression::new(exp)))
                     }
                 }
-                None => Ok(orand),
+                None => Ok(val),
             }
         } else {
             let mut new_list: LList<Token> = LList::new();
-            new_list.push_back(orand);
+            new_list.push_back(val);
             new_list.push_back(Token::Orator(self.clone()));
             new_list.push_back(Token::Expr(exp));
             Ok(Token::Expr(Expression::new(new_list)))

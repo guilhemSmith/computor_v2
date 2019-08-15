@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   operand.rs                                         :+:      :+:    :+:   */
+/*   value.rs                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/14 13:11:56 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 11:00:07 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,60 +16,62 @@ use crate::types::Imaginary;
 use std::fmt;
 
 #[derive(Clone)]
-pub struct Operand {
+pub struct Value {
     value: Imaginary,
 }
 
-impl fmt::Display for Operand {
+impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.value)
     }
 }
 
-impl Operand {
-    pub fn new(raw: String, is_real: bool) -> Result<Operand, ComputorError> {
-        let fl_value = match raw.parse::<f64>() {
-            Ok(val) => val,
-            Err(_err) => {
-                return Err(ComputorError::invalid_operand(raw, is_real));
+impl Value {
+    pub fn new(raw: String) -> Result<Value, ComputorError> {
+        if raw.ends_with('i') {
+            if raw.len() > 1 {
+                match raw[..raw.len() - 1].parse::<f64>() {
+                    Ok(val) => Ok(Value {
+                        value: Imaginary::new(0.0, val),
+                    }),
+                    Err(_err) => Err(ComputorError::invalid_value(raw)),
+                }
+            } else {
+                Ok(Value {
+                    value: Imaginary::new(0.0, 1.0),
+                })
             }
-        };
-
-        if is_real {
-            Ok(Operand {
-                value: Imaginary::new(fl_value, 0.0),
-            })
         } else {
-            Ok(Operand {
-                value: Imaginary::new(0.0, fl_value),
-            })
+            match raw.parse::<f64>() {
+                Ok(val) => Ok(Value {
+                    value: Imaginary::new(val, 0.0),
+                }),
+                Err(_err) => Err(ComputorError::invalid_value(raw)),
+            }
         }
     }
 
-    pub fn add_orand(lhs: &Operand, rhs: &Operand) -> Token {
-        Token::Orand(Operand {
+    pub fn add_val(lhs: &Value, rhs: &Value) -> Token {
+        Token::Val(Value {
             value: lhs.value + rhs.value,
         })
     }
 
-    pub fn sub_orand(lhs: &Operand, rhs: &Operand) -> Token {
-        Token::Orand(Operand {
+    pub fn sub_val(lhs: &Value, rhs: &Value) -> Token {
+        Token::Val(Value {
             value: lhs.value - rhs.value,
         })
     }
 
-    pub fn mul_orand(lhs: &Operand, rhs: &Operand) -> Token {
-        Token::Orand(Operand {
+    pub fn mul_val(lhs: &Value, rhs: &Value) -> Token {
+        Token::Val(Value {
             value: lhs.value * rhs.value,
         })
     }
 
-    pub fn div_orand(
-        lhs: &Operand,
-        rhs: &Operand,
-    ) -> Result<(Token), ComputorError> {
+    pub fn div_val(lhs: &Value, rhs: &Value) -> Result<(Token), ComputorError> {
         if rhs.value != Imaginary::zero() {
-            Ok(Token::Orand(Operand {
+            Ok(Token::Val(Value {
                 value: lhs.value / rhs.value,
             }))
         } else {

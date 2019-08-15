@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/14 15:01:14 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 10:11:06 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ pub enum ErrorKind {
     DivByZero,
     IncompleteExpr,
     InvalidExpr,
-    InvalidOperand,
+    InvalidValue,
     InvalidOperator,
     InvalidToken,
     IO,
@@ -32,7 +32,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::DivByZero => write!(f, "math"),
             ErrorKind::IncompleteExpr => write!(f, "incomplete"),
             ErrorKind::InvalidExpr => write!(f, "syntax"),
-            ErrorKind::InvalidOperand => write!(f, "syntax"),
+            ErrorKind::InvalidValue => write!(f, "syntax"),
             ErrorKind::InvalidOperator => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
@@ -113,14 +113,13 @@ impl ComputorError {
         }
     }
 
-    pub fn invalid_operand(raw_str: String, is_real: bool) -> Self {
+    pub fn invalid_value(raw_str: String) -> Self {
         ComputorError {
-            kind: ErrorKind::InvalidOperand,
+            kind: ErrorKind::InvalidValue,
             position: ErrorPosition::Global,
             info: format!(
-                "Operand can't be interpreted as a numeric value : {}{}",
-                raw_str,
-                if is_real { "" } else { "i" }
+                "Value can't be interpreted as a numeric value : {}",
+                raw_str
             ),
         }
     }

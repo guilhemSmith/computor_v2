@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 17:22:58 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 10:12:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::{Expression, Function, Operand, Operator, Variable};
+use super::{Expression, Function, Operator, Value, Variable};
 use crate::error::ComputorError;
 use std::{collections::LinkedList, fmt};
 
@@ -19,7 +19,7 @@ pub enum Token {
     Equal,
     Expr(Expression),
     Fun(Function),
-    Orand(Operand),
+    Val(Value),
     Orator(Operator),
     Invalid(ComputorError),
     Resolve,
@@ -30,7 +30,7 @@ impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Token::Expr(exp) => write!(f, "({})", exp),
-            Token::Orand(orand) => write!(f, "{}", orand),
+            Token::Val(val) => write!(f, "{}", val),
             Token::Orator(orator) => write!(f, "{}", orator),
             Token::Invalid(err) => write!(f, "{{{}}}", err.kind()),
             Token::Equal => write!(f, "="),
