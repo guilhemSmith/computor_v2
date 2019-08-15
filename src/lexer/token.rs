@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 17:37:05 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 18:01:03 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,11 @@ pub use variable::Variable;
 use std::fmt;
 use std::rc::Rc;
 
-pub trait Token: fmt::Display + fmt::Debug {}
+pub trait Token: fmt::Display + fmt::Debug {
+    fn is_equal(&self) -> bool {
+        false
+    }
+}
 
 pub fn debug_token(tokens: &Vec<Rc<Token>>, sep: &str) -> String {
     let mut debug = String::new();

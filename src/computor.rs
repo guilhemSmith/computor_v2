@@ -6,11 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 17:03:34 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 18:02:20 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use crate::lexer::{token::debug_token, Token};
+use crate::lexer::{
+    token::{debug_token, display_token},
+    Token,
+};
 use crate::Memory;
 use std::rc::Rc;
 
@@ -35,6 +38,13 @@ impl Computor {
                 "[v:Computor] - Token received: {}",
                 debug_token(&tokens, "")
             )
+        }
+        let iter = tokens.split(|token| token.is_equal());
+        for vec in iter {
+            for tok in vec {
+                println!("tok: {}", tok);
+            }
+            println!("new side");
         }
     }
 }

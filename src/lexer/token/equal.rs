@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 17:33:02 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 17:35:03 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 18:01:13 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,4 +27,8 @@ impl fmt::Debug for Equal {
     }
 }
 
-impl Token for Equal {}
+impl Token for Equal {
+    fn is_equal(&self) -> bool {
+        true
+    }
+}
