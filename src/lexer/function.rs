@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 09:40:13 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 11:06:29 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,10 @@ pub struct Function {
 
 impl Function {
     pub fn new(id: String, vars: Vec<Token>) -> Self {
-        let mut new = Function {
+        Function {
             id: id,
             param: vars,
-        };
-        return new;
+        }
     }
 }
 

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 10:11:06 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 11:06:01 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ use std::{error::Error, fmt};
 pub enum ErrorKind {
     BadUseOperator,
     DivByZero,
-    IncompleteExpr,
     InvalidExpr,
     InvalidValue,
     InvalidOperator,
@@ -30,7 +29,6 @@ impl fmt::Display for ErrorKind {
         match self {
             ErrorKind::BadUseOperator => write!(f, "bad use"),
             ErrorKind::DivByZero => write!(f, "math"),
-            ErrorKind::IncompleteExpr => write!(f, "incomplete"),
             ErrorKind::InvalidExpr => write!(f, "syntax"),
             ErrorKind::InvalidValue => write!(f, "syntax"),
             ErrorKind::InvalidOperator => write!(f, "syntax"),
@@ -42,33 +40,12 @@ impl fmt::Display for ErrorKind {
 }
 
 #[derive(Debug, Clone)]
-pub enum ErrorPosition {
-    Char(usize),
-    Global,
-}
-
-impl fmt::Display for ErrorPosition {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            ErrorPosition::Char(pos) => write!(f, "-char:{}", pos),
-            ErrorPosition::Global => write!(f, ""),
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
 pub struct ComputorError {
     kind: ErrorKind,
-    position: ErrorPosition,
     info: String,
 }
 
 impl ComputorError {
-    pub fn set_pos(&mut self, pos: ErrorPosition) -> &Self {
-        self.position = pos;
-        return self;
-    }
-
     pub fn kind(&self) -> &ErrorKind {
         &self.kind
     }
@@ -76,7 +53,6 @@ impl ComputorError {
     pub fn bad_use_op(op: char) -> Self {
         ComputorError {
             kind: ErrorKind::BadUseOperator,
-            position: ErrorPosition::Global,
             info: format!(
                 "Operator: '{}', {}, and {}",
                 op,
@@ -89,7 +65,6 @@ impl ComputorError {
     pub fn div_by_zero(left_op: String, right_op: String, op: char) -> Self {
         ComputorError {
             kind: ErrorKind::DivByZero,
-            position: ErrorPosition::Global,
             info: format!(
                 "Division by zero is not allowed : {} {} {}",
                 left_op, op, right_op
@@ -97,26 +72,16 @@ impl ComputorError {
         }
     }
 
-    pub fn incomplete_expr(expr: &str) -> Self {
-        ComputorError {
-            kind: ErrorKind::IncompleteExpr,
-            position: ErrorPosition::Global,
-            info: format!("Incomplete expression can't be parsed : '{}'", expr),
-        }
-    }
-
     pub fn invalid_expr() -> Self {
         ComputorError {
             kind: ErrorKind::InvalidExpr,
-            position: ErrorPosition::Global,
-            info: format!("An expression contains incoherent tokens."),
+            info: format!("This expression can't be read correctly."),
         }
     }
 
     pub fn invalid_value(raw_str: String) -> Self {
         ComputorError {
             kind: ErrorKind::InvalidValue,
-            position: ErrorPosition::Global,
             info: format!(
                 "Value can't be interpreted as a numeric value : {}",
                 raw_str
@@ -126,7 +91,6 @@ impl ComputorError {
     pub fn invalid_operator(symbol: char) -> Self {
         ComputorError {
             kind: ErrorKind::InvalidOperator,
-            position: ErrorPosition::Global,
             info: format!("Invalid operator symbol caught : {}", symbol),
         }
     }
@@ -134,7 +98,6 @@ impl ComputorError {
     pub fn invalid_token(token: String) -> Self {
         ComputorError {
             kind: ErrorKind::InvalidToken,
-            position: ErrorPosition::Global,
             info: format!("Invalid token parsed : {}", token),
         }
     }
@@ -142,7 +105,6 @@ impl ComputorError {
     pub fn io(cut: &str) -> Self {
         ComputorError {
             kind: ErrorKind::IO,
-            position: ErrorPosition::Global,
             info: format!("{}", cut),
         }
     }
@@ -150,7 +112,6 @@ impl ComputorError {
     pub fn io_stop() -> Self {
         ComputorError {
             kind: ErrorKind::IOStop,
-            position: ErrorPosition::Global,
             info: String::from("Input interrupted."),
         }
     }
@@ -162,11 +123,7 @@ impl fmt::Display for ComputorError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.kind {
             ErrorKind::IOStop => write!(f, "{}", self.info),
-            _ => write!(
-                f,
-                "[err:{}{}] -> {}",
-                self.kind, self.position, self.info
-            ),
+            _ => write!(f, "[err:{}] -> {}", self.kind, self.info),
         }
     }
 }
