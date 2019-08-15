@@ -6,23 +6,18 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 12:08:30 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 12:56:32 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-mod expression;
-mod function;
-mod operator;
 pub mod token;
-mod value;
-mod variable;
 
-pub use expression::Expression;
-pub use function::Function;
-pub use operator::Operator;
-pub use token::Token;
-pub use value::Value;
-pub use variable::Variable;
+use token::Expression;
+use token::Function;
+pub use token::OldToken as Token;
+use token::Operator;
+use token::Value;
+use token::Variable;
 
 extern crate rustyline;
 use rustyline::error::ReadlineError;

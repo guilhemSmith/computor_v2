@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 17:45:03 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 12:57:28 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Variable;
-use crate::lexer::Expression;
+use crate::lexer::token::Expression;
 use std::{fmt, vec::Vec};
 
 pub struct Function {

@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 11:00:07 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 13:00:12 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::Token;
+use super::OldToken as Token;
 use crate::error::ComputorError;
 use crate::types::Imaginary;
 use std::fmt;

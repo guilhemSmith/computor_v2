@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 11:55:05 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 12:59:52 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::Token;
+use super::OldToken as Token;
 use std::fmt;
 
 #[derive(Clone)]

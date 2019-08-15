@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 10:15:08 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 13:00:04 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::{Expression, Token, Value};
+use super::{Expression, OldToken as Token, Value};
 use crate::error::ComputorError;
 use std::{collections::LinkedList as LList, fmt};
 

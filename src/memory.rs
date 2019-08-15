@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 17:38:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 12:56:50 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ mod variable;
 pub use function::Function;
 pub use variable::Variable;
 
-use crate::lexer::Expression;
+use crate::lexer::token::Expression;
 use crate::types::Imaginary;
 use std::{collections::HashMap, fmt};
 
