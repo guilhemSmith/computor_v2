@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/08/15 13:03:44 by gsmith           ###   ########.fr        #
+#    Updated: 2019/08/15 17:17:15 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ DEBUG_BIN	= target/debug/$(NAME)
 RELEASE_BIN	= target/release/$(NAME)
 SRC			= $(addprefix src/, \
 				arg_parse.rs \
-				error.rs \
+				computor_error.rs \
 				main.rs \
 				memory.rs \
 				$(addprefix memory/, \
@@ -30,7 +30,8 @@ SRC			= $(addprefix src/, \
 					token/value.rs \
 					token/variable.rs \
 					token/function.rs \
-					token/operator.rs) \
+					token/operator.rs \
+					token/lexer_error.rs) \
 				timer.rs \
 				types.rs \
 				$(addprefix types/, \

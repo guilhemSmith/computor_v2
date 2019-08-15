@@ -6,15 +6,15 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 12:56:32 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 17:22:12 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 pub mod token;
+pub use token::Token;
 
 use token::Expression;
 use token::Function;
-pub use token::OldToken as Token;
 use token::Operator;
 use token::Value;
 use token::Variable;
@@ -23,10 +23,10 @@ extern crate rustyline;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-use crate::error::ComputorError;
+use crate::computor_error::ComputorError;
 use crate::Timer;
 
-use std::collections::LinkedList;
+use std::rc::Rc;
 use std::str::Chars;
 
 const PROMPT: &str = "> ";
@@ -50,7 +50,7 @@ impl Lexer {
         }
     }
 
-    pub fn read_input(&mut self) -> Result<LinkedList<Token>, ComputorError> {
+    pub fn read_input(&mut self) -> Result<Vec<Rc<Token>>, ComputorError> {
         let readline = self.line.readline(PROMPT);
         match readline {
             Ok(line) => {
@@ -69,7 +69,7 @@ impl Lexer {
                     if self.depth == 0 && iter.next() == None {
                         return Ok(tokens);
                     } else {
-                        return Err(ComputorError::invalid_expr());
+                        return Err(ComputorError::invalid_input());
                     }
                 };
                 if !bench {
@@ -85,34 +85,32 @@ impl Lexer {
         }
     }
 
-    fn tokenize(&mut self, chars: &mut Chars, fun: bool) -> LinkedList<Token> {
-        let mut tokens: LinkedList<Token> = LinkedList::new();
+    fn tokenize(&mut self, chars: &mut Chars, fun: bool) -> Vec<Rc<Token>> {
+        let mut tokens: Vec<Rc<Token>> = Vec::new();
         let mut cur = chars.next();
         loop {
             match cur {
                 Some(ch) if ch.is_alphanumeric() => {
                     self.last_ch = Some(ch);
-                    tokens.push_back(self.read_operand(chars, fun));
+                    tokens.push(self.read_operand(chars, fun));
                 }
-                Some(ch) if ch == '=' => tokens.push_back(Token::Equal),
-                Some(ch) if ch == '?' => tokens.push_back(Token::Resolve),
+                // Some(ch) if ch == '=' => tokens.push(Token::Equal),
+                // Some(ch) if ch == '?' => tokens.push(Token::Resolve),
                 Some(ch) if ch == '(' => {
                     self.depth += 1;
                     let expr = Expression::new(self.tokenize(chars, false));
-                    if expr.len() > 0 {
-                        tokens.push_back(Token::Expr(expr));
+                    if expr.count() > 0 {
+                        tokens.push(Rc::new(expr));
                     }
                 }
                 Some(ch) if ch == ')' => {
                     self.depth -= 1;
                     break;
                 }
-                Some(ch) => {
-                    tokens.push_back(match Operator::new(ch) {
-                        Ok(orator) => Token::Orator(orator),
-                        Err(err) => Token::Invalid(err),
-                    });
-                }
+                Some(ch) => match Operator::new(ch) {
+                    Ok(val) => tokens.push(Rc::new(val)),
+                    Err(err) => tokens.push(Rc::new(err)),
+                },
                 None => break,
             }
             if self.last_ch == None {
@@ -125,7 +123,7 @@ impl Lexer {
         return tokens;
     }
 
-    fn read_operand(&mut self, chars: &mut Chars, fun: bool) -> Token {
+    fn read_operand(&mut self, chars: &mut Chars, fun: bool) -> Rc<Token> {
         if self.last_ch.unwrap().is_digit(10) {
             self.read_val(chars, fun)
         } else {
@@ -133,7 +131,7 @@ impl Lexer {
         }
     }
 
-    fn read_val(&mut self, chars: &mut Chars, fun: bool) -> Token {
+    fn read_val(&mut self, chars: &mut Chars, fun: bool) -> Rc<Token> {
         let mut raw = String::new();
 
         raw.push(self.last_ch.unwrap());
@@ -155,12 +153,12 @@ impl Lexer {
             }
         }
         match Value::new(raw) {
-            Ok(val) => Token::Val(val),
-            Err(err) => Token::Invalid(err),
+            Ok(val) => Rc::new(val),
+            Err(err) => Rc::new(err),
         }
     }
 
-    fn read_id(&mut self, chars: &mut Chars, fun: bool) -> Token {
+    fn read_id(&mut self, chars: &mut Chars, fun: bool) -> Rc<Token> {
         let mut raw = String::new();
 
         raw.push(self.last_ch.unwrap());
@@ -170,12 +168,14 @@ impl Lexer {
                 Some(ch) if ch == '(' => {
                     self.depth += 1;
                     let param_lst = self.tokenize(chars, true);
-                    let mut param_vec: Vec<Token> = Vec::new();
+                    let mut param_vec: Vec<Rc<Token>> = Vec::new();
                     for param in param_lst {
                         param_vec.push(param)
                     }
-                    let foo = Function::new(raw, param_vec);
-                    return Token::Fun(foo);
+                    match Function::new(raw, param_vec) {
+                        Ok(val) => return Rc::new(val),
+                        Err(err) => return Rc::new(err),
+                    };
                 }
                 Some(ch) => {
                     if fun && ch == ',' {
@@ -193,13 +193,13 @@ impl Lexer {
         }
         if !(raw.len() == 1 && raw.starts_with('i')) {
             match Variable::new(raw) {
-                Ok(var) => Token::Var(var),
-                Err(err) => Token::Invalid(err),
+                Ok(var) => Rc::new(var),
+                Err(err) => Rc::new(err),
             }
         } else {
             match Value::new(raw) {
-                Ok(val) => Token::Val(val),
-                Err(err) => Token::Invalid(err),
+                Ok(val) => Rc::new(val),
+                Err(err) => Rc::new(err),
             }
         }
     }

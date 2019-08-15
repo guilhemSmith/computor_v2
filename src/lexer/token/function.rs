@@ -6,54 +6,51 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 12:59:52 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 17:12:40 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::OldToken as Token;
+use super::{LexerError, Token};
 use std::fmt;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Function {
     id: String,
-    param: Vec<Token>,
+    param: Vec<Rc<Token>>,
 }
 
 impl Function {
-    pub fn new(id: String, vars: Vec<Token>) -> Self {
-        Function {
+    pub fn new(id: String, vars: Vec<Rc<Token>>) -> Result<Self, LexerError> {
+        let mut chars = id.chars();
+
+        if !chars.next().unwrap().is_alphabetic() {
+            return Err(LexerError::InvalidFun(id, vars));
+        }
+        for ch in chars {
+            if !ch.is_alphanumeric() {
+                return Err(LexerError::InvalidFun(id, vars));
+            }
+        }
+        Ok(Function {
             id: id,
             param: vars,
-        }
+        })
     }
 }
 
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut param = String::new();
-        let mut iter = self.param.iter();
-
-        loop {
-            match iter.next() {
-                Some(var) => param = format!("{}, {}", param, var),
-                None => break,
-            }
-        }
-        write!(f, "{}({})", self.id, param.trim_start_matches(", "))
+        let param = super::display_token(&self.param, ", ");
+        write!(f, "{}({})", self.id, param)
     }
 }
 
 impl fmt::Debug for Function {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut param = String::new();
-        let mut iter = self.param.iter();
-
-        loop {
-            match iter.next() {
-                Some(tok) => param = format!("{}, {:?}", param, tok),
-                None => break,
-            }
-        }
-        write!(f, "{}({})", self.id, param.trim_start_matches(", "))
+        let param = super::debug_token(&self.param, ", ");
+        write!(f, "[fun:{}({})]", self.id, param)
     }
 }
+
+impl Token for Function {}

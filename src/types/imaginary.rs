@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 12:54:02 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 17:16:32 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,6 @@ impl Imaginary {
         Imaginary {
             real: Rational::new(real),
             irreal: Rational::new(irreal),
-        }
-    }
-
-    pub fn zero() -> Self {
-        Imaginary {
-            real: Rational::zero(),
-            irreal: Rational::zero(),
         }
     }
 }
@@ -137,7 +130,7 @@ mod operator {
 
     #[test]
     fn add_imaginary() {
-        let zero = Imaginary::zero();
+        let zero = Imaginary::new(0.0, 0.0);
         let real_1 = Imaginary::new(42.0, 0.0);
         let real_2 = Imaginary::new(-13.00001456, 0.0);
         let irreal_1 = Imaginary::new(0.0, 81.0987);
@@ -156,7 +149,7 @@ mod operator {
 
     #[test]
     fn sub_imaginary() {
-        let zero = Imaginary::zero();
+        let zero = Imaginary::new(0.0, 0.0);
         let real_1 = Imaginary::new(42.0, 0.0);
         let real_2 = Imaginary::new(-13.00001456, 0.0);
         let irreal_1 = Imaginary::new(0.0, 81.0987);
@@ -173,7 +166,7 @@ mod operator {
 
     #[test]
     fn mul_imaginary() {
-        let zero = Imaginary::zero();
+        let zero = Imaginary::new(0.0, 0.0);
         let complex_1 = Imaginary::new(42.0, 50.0);
         let complex_2 = Imaginary::new(2.0, 3.0);
         let complex_3 = Imaginary::new(3.0, 2.0);
@@ -186,7 +179,7 @@ mod operator {
 
     #[test]
     fn div_imaginary() {
-        let zero = Imaginary::zero();
+        let zero = Imaginary::new(0.0, 0.0);
         let complex_2 = Imaginary::new(2.0, 3.0);
         let complex_3 = Imaginary::new(3.0, 2.0);
         let complex_4 = Imaginary::new(12.0, 5.0) / Imaginary::new(13.0, 0.0);
@@ -194,19 +187,4 @@ mod operator {
         assert_eq!(zero / complex_2, zero);
         assert_eq!(complex_2 / complex_3, complex_4);
     }
-
-    // #[test]
-    // fn cmp_0() {}
-
-    // #[test]
-    // fn cmp_1() {}
-
-    // #[test]
-    // fn cmp_2() {}
-
-    // #[test]
-    // fn cmp_3() {}
-
-    // #[test]
-    // fn cmp_4() {}
 }

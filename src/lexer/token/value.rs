@@ -6,12 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 13:00:12 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 16:46:21 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::OldToken as Token;
-use crate::error::ComputorError;
+use super::{LexerError, Token};
 use crate::types::Imaginary;
 use std::fmt;
 
@@ -26,15 +25,21 @@ impl fmt::Display for Value {
     }
 }
 
+impl fmt::Debug for Value {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[val:{}]", self)
+    }
+}
+
 impl Value {
-    pub fn new(raw: String) -> Result<Value, ComputorError> {
+    pub fn new(raw: String) -> Result<Value, LexerError> {
         if raw.ends_with('i') {
             if raw.len() > 1 {
                 match raw[..raw.len() - 1].parse::<f64>() {
                     Ok(val) => Ok(Value {
                         value: Imaginary::new(0.0, val),
                     }),
-                    Err(_err) => Err(ComputorError::invalid_value(raw)),
+                    Err(_err) => Err(LexerError::InvalidVal(raw)),
                 }
             } else {
                 Ok(Value {
@@ -46,40 +51,42 @@ impl Value {
                 Ok(val) => Ok(Value {
                     value: Imaginary::new(val, 0.0),
                 }),
-                Err(_err) => Err(ComputorError::invalid_value(raw)),
+                Err(_err) => Err(LexerError::InvalidVal(raw)),
             }
         }
     }
 
-    pub fn add_val(lhs: &Value, rhs: &Value) -> Token {
-        Token::Val(Value {
-            value: lhs.value + rhs.value,
-        })
-    }
+    // pub fn add_val(lhs: &Value, rhs: &Value) -> Token {
+    //     Token::Val(Value {
+    //         value: lhs.value + rhs.value,
+    //     })
+    // }
 
-    pub fn sub_val(lhs: &Value, rhs: &Value) -> Token {
-        Token::Val(Value {
-            value: lhs.value - rhs.value,
-        })
-    }
+    // pub fn sub_val(lhs: &Value, rhs: &Value) -> Token {
+    //     Token::Val(Value {
+    //         value: lhs.value - rhs.value,
+    //     })
+    // }
 
-    pub fn mul_val(lhs: &Value, rhs: &Value) -> Token {
-        Token::Val(Value {
-            value: lhs.value * rhs.value,
-        })
-    }
+    // pub fn mul_val(lhs: &Value, rhs: &Value) -> Token {
+    //     Token::Val(Value {
+    //         value: lhs.value * rhs.value,
+    //     })
+    // }
 
-    pub fn div_val(lhs: &Value, rhs: &Value) -> Result<(Token), ComputorError> {
-        if rhs.value != Imaginary::zero() {
-            Ok(Token::Val(Value {
-                value: lhs.value / rhs.value,
-            }))
-        } else {
-            Err(ComputorError::div_by_zero(
-                format!("{}", lhs.value),
-                format!("{}", rhs.value),
-                '/',
-            ))
-        }
-    }
+    // pub fn div_val(lhs: &Value, rhs: &Value) -> Result<(Token), ComputorError> {
+    //     if rhs.value != Imaginary::zero() {
+    //         Ok(Token::Val(Value {
+    //             value: lhs.value / rhs.value,
+    //         }))
+    //     } else {
+    //         Err(ComputorError::div_by_zero(
+    //             format!("{}", lhs.value),
+    //             format!("{}", rhs.value),
+    //             '/',
+    //         ))
+    //     }
+    // }
 }
+
+impl Token for Value {}

@@ -6,13 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 12:56:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 17:03:34 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use crate::lexer::{token, Token};
+use crate::lexer::{token::debug_token, Token};
 use crate::Memory;
-use std::collections::LinkedList;
+use std::rc::Rc;
 
 pub struct Computor {
     verbose: bool,
@@ -29,11 +29,11 @@ impl Computor {
         }
     }
 
-    pub fn read_tokens(&mut self, tokens: LinkedList<Token>) {
+    pub fn read_tokens(&mut self, tokens: Vec<Rc<Token>>) {
         if self.verbose {
             println!(
                 "[v:Computor] - Token received: {}",
-                token::tokens_to_debug(&tokens)
+                debug_token(&tokens, "")
             )
         }
     }

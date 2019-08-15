@@ -6,13 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 12:10:44 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 17:17:35 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod arg_parse;
 mod computor;
-mod error;
+mod computor_error;
 mod lexer;
 mod memory;
 mod timer;
@@ -20,7 +20,7 @@ mod types;
 
 use crate::arg_parse::Param;
 use crate::computor::Computor;
-use crate::error::ErrorKind;
+use crate::computor_error::ErrorKind;
 use crate::lexer::Lexer;
 use crate::memory::Memory;
 use crate::timer::Timer;

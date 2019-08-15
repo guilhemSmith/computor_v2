@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   error.rs                                           :+:      :+:    :+:   */
+/*   computor_error.rs                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 11:06:01 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 17:22:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,7 @@ use std::{error::Error, fmt};
 pub enum ErrorKind {
     BadUseOperator,
     DivByZero,
-    InvalidExpr,
-    InvalidValue,
-    InvalidOperator,
-    InvalidToken,
+    InvalidInput,
     IO,
     IOStop,
 }
@@ -29,12 +26,9 @@ impl fmt::Display for ErrorKind {
         match self {
             ErrorKind::BadUseOperator => write!(f, "bad use"),
             ErrorKind::DivByZero => write!(f, "math"),
-            ErrorKind::InvalidExpr => write!(f, "syntax"),
-            ErrorKind::InvalidValue => write!(f, "syntax"),
-            ErrorKind::InvalidOperator => write!(f, "syntax"),
+            ErrorKind::InvalidInput => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
-            ErrorKind::InvalidToken => write!(f, "parsing"),
         }
     }
 }
@@ -72,33 +66,14 @@ impl ComputorError {
         }
     }
 
-    pub fn invalid_expr() -> Self {
+    pub fn invalid_input() -> Self {
         ComputorError {
-            kind: ErrorKind::InvalidExpr,
-            info: format!("This expression can't be read correctly."),
-        }
-    }
-
-    pub fn invalid_value(raw_str: String) -> Self {
-        ComputorError {
-            kind: ErrorKind::InvalidValue,
+            kind: ErrorKind::InvalidInput,
             info: format!(
-                "Value can't be interpreted as a numeric value : {}",
-                raw_str
+                "{} {}",
+                "This input can't be read correctly.",
+                "Might be du to an orphan parenthesis."
             ),
-        }
-    }
-    pub fn invalid_operator(symbol: char) -> Self {
-        ComputorError {
-            kind: ErrorKind::InvalidOperator,
-            info: format!("Invalid operator symbol caught : {}", symbol),
-        }
-    }
-
-    pub fn invalid_token(token: String) -> Self {
-        ComputorError {
-            kind: ErrorKind::InvalidToken,
-            info: format!("Invalid token parsed : {}", token),
         }
     }
 
