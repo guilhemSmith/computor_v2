@@ -6,21 +6,25 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 17:06:45 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 17:37:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+mod equal;
 mod expression;
 mod function;
 mod lexer_error;
 mod operator;
+mod resolve;
 mod value;
 mod variable;
 
+pub use equal::Equal;
 pub use expression::Expression;
 pub use function::Function;
 pub use lexer_error::LexerError;
 pub use operator::Operator;
+pub use resolve::Resolve;
 pub use value::Value;
 pub use variable::Variable;
 
