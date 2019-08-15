@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 16:05:42 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/08 16:52:19 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 11:59:21 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ impl<'a> Timer<'a> {
     pub fn top(&self) {
         let duration = self.start.elapsed();
         println!(
-            "[T:{}] - time elapsed: {}us ({}ms).",
+            "[b:{}] - time elapsed: {}us ({}ms).",
             self.title,
             duration.as_micros(),
             duration.as_millis()

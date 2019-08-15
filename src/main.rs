@@ -6,11 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 17:08:35 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 12:10:44 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod arg_parse;
+mod computor;
 mod error;
 mod lexer;
 mod memory;
@@ -18,29 +19,23 @@ mod timer;
 mod types;
 
 use crate::arg_parse::Param;
+use crate::computor::Computor;
 use crate::error::ErrorKind;
 use crate::lexer::Lexer;
 use crate::memory::Memory;
 use crate::timer::Timer;
 use std::{env, process};
 
-use crate::lexer::Expression;
-
 fn main() {
-    let argv: Vec<String> = env::args().collect();
-
     println!("Computor start.");
-    match computor(argv.len(), argv) {
-        err if err > 0 => {
-            println!("Computor stop.");
-            process::exit(1)
-        }
-        _ => println!("Computor stop."),
-    }
+    let exit_code = main_wrapped();
+    println!("Computor stop.");
+    process::exit(exit_code);
 }
 
-fn computor(argc: usize, argv: Vec<String>) -> u32 {
-    let param = match Param::new(argc, argv) {
+fn main_wrapped() -> i32 {
+    let argv: Vec<String> = env::args().collect();
+    let param = match Param::new(argv.len(), argv) {
         Some(p) => p,
         None => return 1,
     };
@@ -48,39 +43,17 @@ fn computor(argc: usize, argv: Vec<String>) -> u32 {
         return 0;
     }
     let mut lex = Lexer::new(param.verbose(), param.bench());
-    let mut mem = Memory::new();
+    let mut computor = Computor::new(param.verbose(), param.bench());
 
     loop {
         match lex.read_input() {
             Ok(tokens) => {
-                println!("{}", lexer::token::tokens_to_string(&tokens));
-                // let expr = Expression::new(tokens);
-                // match expr.check_errors(param.verbose()) {
-                //     nb if nb > 0 => eprintln!(
-                //         "[err-Lexer:] - {} error(s) detected. {}.",
-                //         nb, "Expression computing aborted"
-                //     ),
-                //     _ => {
-                //         let result = if !param.bench() {
-                //             expr.compute(param.verbose())
-                //         } else {
-                //             let _timer = Timer::new("Computing");
-                //             expr.compute(param.verbose())
-                //         };
-                //         match result {
-                //             Ok(expr) => println!(
-                //                 "{}{}",
-                //                 if param.verbose() {
-                //                     "[V:result] - "
-                //                 } else {
-                //                     ""
-                //                 },
-                //                 expr
-                //             ),
-                //             Err(err) => eprintln!("{}", err),
-                //         };
-                //     }
-                // };
+                if !param.bench() {
+                    computor.read_tokens(tokens);
+                } else {
+                    let _timer = Timer::new("Computor");
+                    computor.read_tokens(tokens);
+                }
             }
             Err(err) => {
                 if *err.kind() == ErrorKind::IOStop {

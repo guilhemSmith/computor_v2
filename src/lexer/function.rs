@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 11:06:29 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 11:55:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,21 @@ impl fmt::Display for Function {
         loop {
             match iter.next() {
                 Some(var) => param = format!("{}, {}", param, var),
+                None => break,
+            }
+        }
+        write!(f, "{}({})", self.id, param.trim_start_matches(", "))
+    }
+}
+
+impl fmt::Debug for Function {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut param = String::new();
+        let mut iter = self.param.iter();
+
+        loop {
+            match iter.next() {
+                Some(tok) => param = format!("{}, {:?}", param, tok),
                 None => break,
             }
         }

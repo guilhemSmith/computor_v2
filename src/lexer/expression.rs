@@ -6,11 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 14:41:56 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 11:57:15 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::{token::tokens_to_string, Token};
+use super::{token, Token};
 use crate::error::ComputorError;
 use std::{collections::LinkedList, fmt};
 
@@ -21,7 +21,13 @@ pub struct Expression {
 
 impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", tokens_to_string(&self.tokens))
+        write!(f, "{}", token::tokens_to_string(&self.tokens))
+    }
+}
+
+impl fmt::Debug for Expression {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", token::tokens_to_debug(&self.tokens))
     }
 }
 
@@ -69,14 +75,14 @@ impl Expression {
         if verbose {
             println!(
                 "[V:computor] - sub expressions computed: {}",
-                tokens_to_string(&result)
+                token::tokens_to_string(&result)
             );
         }
         result = compute_all(result, true, verbose)?;
         if verbose {
             println!(
                 "[V:computor] - prior operations computed: {}",
-                tokens_to_string(&result)
+                token::tokens_to_string(&result)
             );
         }
         if result.len() > 1 {
@@ -84,7 +90,7 @@ impl Expression {
             if verbose {
                 println!(
                     "[V:computor] - remaining operations computed: {}",
-                    tokens_to_string(&result)
+                    token::tokens_to_string(&result)
                 );
             }
         }

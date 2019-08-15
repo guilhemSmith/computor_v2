@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 10:57:30 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/15 12:08:30 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,23 +61,27 @@ impl Lexer {
             Ok(line) => {
                 self.line.add_history_entry(line.as_str());
                 if self.verbose {
-                    println!("[V:Lexer] - input read: '{}'", line);
+                    println!("[v:Lexer] - input read: '{}'", line);
                 }
-                let cleared = self.clear_input(line);
-                let mut iter = cleared.chars();
-                let tokens;
-                self.depth = 0;
-                self.last_ch = None;
-                if !self.bench {
+                let bench = self.bench;
+                let lexe_input = || {
+                    let cleared = self.clear_input(line);
+                    let mut iter = cleared.chars();
+                    let tokens;
+                    self.depth = 0;
+                    self.last_ch = None;
                     tokens = self.tokenize(&mut iter, false);
+                    if self.depth == 0 && iter.next() == None {
+                        return Ok(tokens);
+                    } else {
+                        return Err(ComputorError::invalid_expr());
+                    }
+                };
+                if !bench {
+                    lexe_input()
                 } else {
-                    let _timer = Timer::new("Lexing");
-                    tokens = self.tokenize(&mut iter, false);
-                }
-                if self.depth == 0 && iter.next() == None {
-                    Ok(tokens)
-                } else {
-                    Err(ComputorError::invalid_expr())
+                    let _timer = Timer::new("Lexer");
+                    lexe_input()
                 }
             }
             Err(ReadlineError::Interrupted) => Err(ComputorError::io_stop()),
@@ -214,7 +218,7 @@ impl Lexer {
                 Some(word) => cleared.push_str(word),
                 None => {
                     if self.verbose {
-                        println!("[V:Lexer] - input cleared: '{}'", cleared);
+                        println!("[v:Lexer] - input cleared: '{}'", cleared);
                     }
                     return cleared;
                 }
