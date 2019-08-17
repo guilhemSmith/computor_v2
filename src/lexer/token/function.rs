@@ -6,11 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 17:12:40 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 15:48:57 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
+use std::any::Any;
 use std::fmt;
 use std::rc::Rc;
 
@@ -53,4 +54,8 @@ impl fmt::Debug for Function {
     }
 }
 
-impl Token for Function {}
+impl Token for Function {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}

@@ -6,11 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:16:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 16:52:48 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 15:02:03 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
+use std::any::Any;
 use std::fmt;
 
 #[derive(Clone)]
@@ -46,4 +47,8 @@ impl fmt::Debug for Variable {
     }
 }
 
-impl Token for Variable {}
+impl Token for Variable {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}

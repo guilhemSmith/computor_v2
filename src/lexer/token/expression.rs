@@ -6,11 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 17:11:32 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 15:48:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Token;
+use std::any::Any;
 use std::fmt;
 use std::rc::Rc;
 
@@ -31,7 +32,11 @@ impl fmt::Debug for Expression {
     }
 }
 
-impl Token for Expression {}
+impl Token for Expression {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
 
 impl Expression {
     pub fn new(tokens: Vec<Rc<Token>>) -> Self {

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 13:08:02 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 15:49:49 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,12 @@ pub use resolve::Resolve;
 pub use value::Value;
 pub use variable::Variable;
 
+use std::any::Any;
 use std::fmt;
 use std::rc::Rc;
 
 pub trait Token: fmt::Display + fmt::Debug {
-    fn as_operator(&self) -> Option<&Operator> {
-        None
-    }
+    fn as_any(&self) -> &dyn Any;
 }
 
 pub fn debug_token(tokens: &Vec<Rc<Token>>, sep: &str) -> String {

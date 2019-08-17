@@ -6,12 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 16:46:21 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 15:01:56 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
 use crate::types::Imaginary;
+use std::any::Any;
 use std::fmt;
 
 #[derive(Clone)]
@@ -89,4 +90,8 @@ impl Value {
     // }
 }
 
-impl Token for Value {}
+impl Token for Value {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}

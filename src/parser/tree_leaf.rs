@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 11:48:54 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 15:50:48 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,10 @@ pub struct TreeLeaf {
 }
 
 impl TreeLeaf {
-    pub fn new(token: Rc<Token>) -> Self {
-        TreeLeaf { token: token }
+    pub fn new(token: &Rc<Token>) -> Self {
+        TreeLeaf {
+            token: token.clone(),
+        }
     }
 }
 
