@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 17:07:05 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 10:52:20 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ impl Operator {
             '-' => {}
             '*' => {}
             '/' => {}
+            '=' => {}
             _ => return Err(LexerError::InvalidOp(symbol)),
         };
         Ok(Operator {

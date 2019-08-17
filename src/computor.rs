@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 18:02:20 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 10:54:36 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,13 +38,6 @@ impl Computor {
                 "[v:Computor] - Token received: {}",
                 debug_token(&tokens, "")
             )
-        }
-        let iter = tokens.split(|token| token.is_equal());
-        for vec in iter {
-            for tok in vec {
-                println!("tok: {}", tok);
-            }
-            println!("new side");
         }
     }
 }

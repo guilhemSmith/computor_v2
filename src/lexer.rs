@@ -6,14 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 17:39:45 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 10:54:10 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 pub mod token;
 pub use token::Token;
 
-use token::Equal;
 use token::Expression;
 use token::Function;
 use token::Operator;
@@ -96,7 +95,6 @@ impl Lexer {
                     self.last_ch = Some(ch);
                     tokens.push(self.read_operand(chars, fun));
                 }
-                Some(ch) if ch == '=' => tokens.push(Rc::new(Equal)),
                 Some(ch) if ch == '?' => tokens.push(Rc::new(Resolve)),
                 Some(ch) if ch == '(' => {
                     self.depth += 1;
