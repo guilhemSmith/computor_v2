@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 11:53:29 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 12:56:01 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ pub use tree_branch::TreeBranch;
 pub use tree_leaf::TreeLeaf;
 
 use crate::arg_parse::Param;
-use crate::lexer::Token;
+use crate::lexer::{token::Operator, Token};
 
 use std::rc::Rc;
 
@@ -41,7 +41,10 @@ impl Parser {
         mut tokens: Vec<Rc<Token>>,
     ) -> Option<Rc<TokenTree>> {
         match tokens.pop() {
-            Some(token) => Some(Rc::new(TreeLeaf::new(token))),
+            Some(token) => match token.as_operator() {
+                Some(op) => Some(Rc::new(TreeBranch::new(Rc::new(op)))),
+                None => Some(Rc::new(TreeLeaf::new(token))),
+            },
             None => None,
         }
     }

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 10:52:20 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 12:57:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,11 @@ impl fmt::Debug for Operator {
     }
 }
 
-impl Token for Operator {}
+impl Token for Operator {
+    fn as_operator(&self) -> Option<Operator> {
+        Some(self.clone())
+    }
+}
 
 impl Operator {
     pub fn new(symbol: char) -> Result<Self, LexerError> {

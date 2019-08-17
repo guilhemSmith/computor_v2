@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 10:53:39 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 12:55:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ use std::fmt;
 use std::rc::Rc;
 
 pub trait Token: fmt::Display + fmt::Debug {
-    fn is_equal(&self) -> bool {
-        false
+    fn as_operator(&self) -> Option<Operator> {
+        None
     }
 }
 
