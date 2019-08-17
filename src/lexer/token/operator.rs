@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 15:49:16 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 17:49:31 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ use std::fmt;
 #[derive(Clone)]
 pub struct Operator {
     symbol: char,
+    priority: i32,
     // op: fn(
     //     &Self,
     //     &Token,
@@ -45,18 +46,22 @@ impl Token for Operator {
 
 impl Operator {
     pub fn new(symbol: char) -> Result<Self, LexerError> {
+        let priority: i32;
         match symbol {
-            '+' => {}
-            '-' => {}
-            '*' => {}
-            '/' => {}
-            '=' => {}
+            '+' | '-' => priority = 0,
+            '*' | '/' => priority = 1,
+            '=' => priority = 2,
             _ => return Err(LexerError::InvalidOp(symbol)),
         };
         Ok(Operator {
             symbol: symbol,
+            priority: priority,
             // op: op,
         })
+    }
+
+    pub fn is_prior(&self, other: &Self) -> bool {
+        self.priority >= other.priority
     }
 }
 
