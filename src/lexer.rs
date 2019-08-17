@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 10:54:10 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 11:24:08 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ extern crate rustyline;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
+use crate::arg_parse::Param;
 use crate::computor_error::ComputorError;
 use crate::Timer;
 
@@ -41,10 +42,10 @@ pub struct Lexer {
 }
 
 impl Lexer {
-    pub fn new(verbose: bool, bench: bool) -> Self {
+    pub fn new(param: &Param) -> Self {
         Lexer {
-            verbose: verbose,
-            bench: bench,
+            verbose: param.verbose(),
+            bench: param.bench(),
             line: Editor::new(),
             last_ch: None,
             depth: 0,

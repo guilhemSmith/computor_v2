@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/08/17 10:53:07 by gsmith           ###   ########.fr        #
+#    Updated: 2019/08/17 11:17:54 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,11 @@ SRC			= $(addprefix src/, \
 					token/resolve.rs \
 					token/value.rs \
 					token/variable.rs) \
+				parser.rs \
+				$(addprefix parser/, \
+					token_tree.rs \
+					tree_branch.rs \
+					tree_leaf.rs)\
 				timer.rs \
 				types.rs \
 				$(addprefix types/, \

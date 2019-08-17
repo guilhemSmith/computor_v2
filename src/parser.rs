@@ -1,39 +1,48 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   computor.rs                                        :+:      :+:    :+:   */
+/*   parser.rs                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 11:44:05 by gsmith           ###   ########.fr       */
+/*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
+/*   Updated: 2019/08/17 11:53:29 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+mod token_tree;
+mod tree_branch;
+mod tree_leaf;
+
+pub use token_tree::TokenTree;
+pub use tree_branch::TreeBranch;
+pub use tree_leaf::TreeLeaf;
+
 use crate::arg_parse::Param;
 use crate::lexer::Token;
-use crate::parser::TokenTree;
-use crate::Memory;
+
 use std::rc::Rc;
 
-pub struct Computor {
+pub struct Parser {
     verbose: bool,
     bench: bool,
-    memory: Memory,
 }
 
-impl Computor {
+impl Parser {
     pub fn new(param: &Param) -> Self {
-        Computor {
+        Parser {
             verbose: param.verbose(),
             bench: param.bench(),
-            memory: Memory::new(),
         }
     }
 
-    pub fn read_tokens(&mut self, tree: Rc<TokenTree>) {
-        if self.verbose {
-            println!("[v:Computor] - Token received: {}", tree.token())
+    pub fn parse_tokens(
+        &self,
+        mut tokens: Vec<Rc<Token>>,
+    ) -> Option<Rc<TokenTree>> {
+        match tokens.pop() {
+            Some(token) => Some(Rc::new(TreeLeaf::new(token))),
+            None => None,
         }
     }
 }
