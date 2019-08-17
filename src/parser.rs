@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 12:56:01 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 13:07:47 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ impl Parser {
     ) -> Option<Rc<TokenTree>> {
         match tokens.pop() {
             Some(token) => match token.as_operator() {
-                Some(op) => Some(Rc::new(TreeBranch::new(Rc::new(op)))),
+                Some(op) => Some(Rc::new(TreeBranch::new(op, token))),
                 None => Some(Rc::new(TreeLeaf::new(token))),
             },
             None => None,

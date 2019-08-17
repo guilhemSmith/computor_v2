@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 12:55:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 13:08:02 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ use std::fmt;
 use std::rc::Rc;
 
 pub trait Token: fmt::Display + fmt::Debug {
-    fn as_operator(&self) -> Option<Operator> {
+    fn as_operator(&self) -> Option<&Operator> {
         None
     }
 }

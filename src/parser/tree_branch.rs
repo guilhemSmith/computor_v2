@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 12:56:22 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/17 13:13:07 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,25 +15,33 @@ use crate::lexer::{token::Operator, Token};
 
 use std::rc::Rc;
 
-pub struct TreeBranch {
-    operator: Rc<Operator>,
+pub struct TreeBranch<'op, 'bl, 'br> {
+    operator: &'op Operator,
     as_token: Rc<Token>,
-    branch_left: Option<Rc<TokenTree>>,
-    branch_right: Option<Rc<TokenTree>>,
+    branch_left: Option<&'bl TokenTree>,
+    branch_right: Option<&'br TokenTree>,
 }
 
-impl TreeBranch {
-    pub fn new(operator: Rc<Operator>) -> Self {
+impl<'op, 'bl, 'br> TreeBranch<'op, 'bl, 'br> {
+    pub fn new(operator: &'op Operator, token: Rc<Token>) -> Self {
         TreeBranch {
-            operator: operator.clone(),
-            as_token: operator,
+            operator: operator,
+            as_token: token,
             branch_left: None,
             branch_right: None,
         }
     }
+
+    pub fn set_branch_left(&mut self, child: &'bl TokenTree) {
+        self.branch_left = Some(child);
+    }
+
+    pub fn set_branch_right(&mut self, child: &'br TokenTree) {
+        self.branch_right = Some(child);
+    }
 }
 
-impl TokenTree for TreeBranch {
+impl<'op, 'bl, 'br> TokenTree for TreeBranch<'op, 'bl, 'br> {
     fn token(&self) -> &Rc<Token> {
         &self.as_token
     }
