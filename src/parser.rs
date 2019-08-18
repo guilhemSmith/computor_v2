@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 17:51:21 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/18 19:02:11 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ use crate::lexer::token::{Expression, Operator};
 
 use crate::arg_parse::Param;
 use crate::lexer::Token;
+use crate::timer::Timer;
 
 use std::rc::Rc;
 
@@ -40,8 +41,20 @@ impl Parser {
 
     pub fn parse_tokens(
         &self,
-        mut tokens: Vec<Rc<Token>>,
+        tokens: Vec<Rc<Token>>,
     ) -> Option<Box<TokenTree>> {
+        if self.verbose {
+            println!("[v:parser] - token stack received : {:?}", tokens);
+        }
+        if !self.bench {
+            self.parse(tokens)
+        } else {
+            let _timer = Timer::new("Parser");
+            self.parse(tokens)
+        }
+    }
+
+    fn parse(&self, mut tokens: Vec<Rc<Token>>) -> Option<Box<TokenTree>> {
         let mut tree: Box<TokenTree>;
 
         match tokens.pop() {

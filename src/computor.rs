@@ -6,18 +6,19 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 11:30:19 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/18 19:28:25 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use crate::arg_parse::Param;
 use crate::parser::TokenTree;
+use crate::timer::Timer;
 use crate::Memory;
 
 pub struct Computor {
     verbose: bool,
     bench: bool,
-    memory: Memory,
+    _memory: Memory,
 }
 
 impl Computor {
@@ -25,13 +26,21 @@ impl Computor {
         Computor {
             verbose: param.verbose(),
             bench: param.bench(),
-            memory: Memory::new(),
+            _memory: Memory::new(),
         }
     }
 
     pub fn read_tokens(&mut self, tree: Box<TokenTree>) {
         if self.verbose {
-            println!("[v:Computor] - Token received: {}", tree)
+            println!("[v:Computor] - tree received: {}", tree)
+        }
+        if !self.bench {
+            self.compute(tree);
+        } else {
+            let _timer = Timer::new("Computor");
+            self.compute(tree);
         }
     }
+
+    fn compute(&self, _tree: Box<TokenTree>) {}
 }

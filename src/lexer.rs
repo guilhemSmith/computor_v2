@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 11:24:08 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/18 19:27:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,30 +60,30 @@ impl Lexer {
                 if self.verbose {
                     println!("[v:Lexer] - input read: '{}'", line);
                 }
-                let bench = self.bench;
-                let lexe_input = || {
-                    let cleared = self.clear_input(line);
-                    let mut iter = cleared.chars();
-                    let tokens;
-                    self.depth = 0;
-                    self.last_ch = None;
-                    tokens = self.tokenize(&mut iter, false);
-                    if self.depth == 0 && iter.next() == None {
-                        return Ok(tokens);
-                    } else {
-                        return Err(ComputorError::invalid_input());
-                    }
-                };
-                if !bench {
-                    lexe_input()
+                if !self.bench {
+                    self.lexe(line)
                 } else {
                     let _timer = Timer::new("Lexer");
-                    lexe_input()
+                    self.lexe(line)
                 }
             }
             Err(ReadlineError::Interrupted) => Err(ComputorError::io_stop()),
             Err(ReadlineError::Eof) => Err(ComputorError::io_stop()),
             Err(err) => Err(ComputorError::io(&format!("{:?}", err))),
+        }
+    }
+
+    fn lexe(&mut self, l: String) -> Result<Vec<Rc<Token>>, ComputorError> {
+        let cleared = self.clear_input(l);
+        let mut iter = cleared.chars();
+        let tokens;
+        self.depth = 0;
+        self.last_ch = None;
+        tokens = self.tokenize(&mut iter, false);
+        if self.depth == 0 && iter.next() == None {
+            return Ok(tokens);
+        } else {
+            return Err(ComputorError::invalid_input());
         }
     }
 
