@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 15:48:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/18 17:27:29 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ impl fmt::Debug for Expression {
 }
 
 impl Token for Expression {
-    fn as_any(&self) -> &dyn Any {
+    fn as_any(&mut self) -> &mut dyn Any {
         self
     }
 }
@@ -45,6 +45,12 @@ impl Expression {
 
     pub fn count(&self) -> usize {
         self.tokens.len()
+    }
+
+    pub fn consume_tokens(&mut self) -> Vec<Rc<Token>> {
+        let mut extractor: Vec<Rc<Token>> = Vec::new();
+        std::mem::swap(&mut self.tokens, &mut extractor);
+        return extractor;
     }
 }
 

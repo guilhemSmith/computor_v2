@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 16:42:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/18 17:48:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,8 @@ impl TokenTree for TreeLeaf {
     fn iter(&self, foo: fn(&Rc<Token>)) {
         foo(self.token());
     }
+
+    fn set_prior_as_exp(&mut self) {}
 }
 
 impl fmt::Display for TreeLeaf {

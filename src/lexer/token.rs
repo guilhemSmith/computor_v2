@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 15:49:49 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/18 17:27:15 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ use std::fmt;
 use std::rc::Rc;
 
 pub trait Token: fmt::Display + fmt::Debug {
-    fn as_any(&self) -> &dyn Any;
+    fn as_any(&mut self) -> &mut dyn Any;
 }
 
 pub fn debug_token(tokens: &Vec<Rc<Token>>, sep: &str) -> String {

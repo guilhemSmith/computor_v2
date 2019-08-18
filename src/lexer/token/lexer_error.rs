@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 15:47:12 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 15:49:21 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/18 17:27:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ impl fmt::Display for LexerError {
 }
 
 impl Token for LexerError {
-    fn as_any(&self) -> &dyn Any {
+    fn as_any(&mut self) -> &mut dyn Any {
         self
     }
 }

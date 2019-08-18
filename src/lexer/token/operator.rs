@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 14:52:44 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/18 17:46:19 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ impl fmt::Debug for Operator {
 }
 
 impl Token for Operator {
-    fn as_any(&self) -> &dyn Any {
+    fn as_any(&mut self) -> &mut dyn Any {
         self
     }
 }
@@ -62,6 +62,10 @@ impl Operator {
 
     pub fn is_prior(&self, other: &Self) -> bool {
         self.priority > other.priority
+    }
+
+    pub fn set_prior_as_exp(&mut self) {
+        self.priority = 3;
     }
 }
 
