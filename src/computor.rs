@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 19:28:25 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/18 19:44:30 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,13 @@ impl Computor {
 
     pub fn read_tokens(&mut self, tree: Box<TokenTree>) {
         if self.verbose {
-            println!("[v:Computor] - tree received: {}", tree)
+            println!("[v:Computor] - tree received: {:?}", tree)
         }
         if !self.bench {
             self.compute(tree);
         } else {
-            let _timer = Timer::new("Computor");
+            let display = format!("Computor({})", tree);
+            let _timer = Timer::new(&display[..]);
             self.compute(tree);
         }
     }

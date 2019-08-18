@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/08/17 11:17:54 by gsmith           ###   ########.fr        #
+#    Updated: 2019/08/18 19:38:01 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ DEBUG_BIN	= target/debug/$(NAME)
 RELEASE_BIN	= target/release/$(NAME)
 SRC			= $(addprefix src/, \
 				arg_parse.rs \
+				computor.rs \
 				computor_error.rs \
 				main.rs \
 				memory.rs \
