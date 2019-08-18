@@ -6,14 +6,15 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/17 18:46:06 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/18 16:42:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::{TokenTree, TreeBranch};
+use super::TokenTree;
 use crate::lexer::Token;
 
 use std::any::Any;
+use std::fmt;
 use std::rc::Rc;
 
 #[derive(Clone)]
@@ -22,7 +23,7 @@ pub struct TreeLeaf {
 }
 
 impl TreeLeaf {
-    pub fn new(token: &Rc<Token>) -> Self {
+    pub fn new(token: Rc<Token>) -> Self {
         TreeLeaf {
             token: token.clone(),
         }
@@ -30,7 +31,7 @@ impl TreeLeaf {
 }
 
 impl TokenTree for TreeLeaf {
-    fn as_any(&self) -> &dyn Any {
+    fn as_any(&mut self) -> &mut dyn Any {
         self
     }
 
@@ -38,15 +39,13 @@ impl TokenTree for TreeLeaf {
         &self.token
     }
 
-    fn set_branch_left(&mut self, _leaf: Box<TokenTree>) {
-        panic!("Can't set a branch to a leaf.");
-    }
-
-    fn set_branch_right(&mut self, _leaf: Box<TokenTree>) {
-        panic!("Can't set a branch to a leaf.");
-    }
-
     fn iter(&self, foo: fn(&Rc<Token>)) {
         foo(self.token());
+    }
+}
+
+impl fmt::Display for TreeLeaf {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{{L:{:?}}}", self.token)
     }
 }
