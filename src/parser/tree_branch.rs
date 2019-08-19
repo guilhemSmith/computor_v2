@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 19:38:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 09:35:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,6 +143,19 @@ impl TokenTree for TreeBranch {
             Some(tree) => tree.iter(foo),
             None => {}
         }
+    }
+
+    fn count(&self, foo: fn(&Rc<Token>) -> i32) -> i32 {
+        let mut sum = match &self.branch_left {
+            Some(tree) => tree.count(foo),
+            None => 0,
+        };
+        sum += foo(self.token());
+        sum += match &self.branch_right {
+            Some(tree) => tree.count(foo),
+            None => 0,
+        };
+        return sum;
     }
 
     fn set_prior_as_exp(&mut self) {
