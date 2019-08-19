@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:29:18 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 12:06:39 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,16 @@ pub trait Token: fmt::Display + fmt::Debug {
 
 pub fn count_error(token: &Rc<Token>) -> i32 {
     match token.as_any().downcast_ref::<LexerError>() {
-        None => 0,
+        None => match token.as_any().downcast_ref::<Function>() {
+            None => 0,
+            Some(fun) => {
+                let mut sub_count = 1;
+                for token in fun.param() {
+                    sub_count += count_error(token);
+                }
+                sub_count
+            }
+        },
         Some(err) => {
             eprintln!("[err:Token] -> {}", err);
             1

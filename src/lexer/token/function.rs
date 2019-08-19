@@ -6,12 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:28:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 12:06:31 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
 use crate::computor::ComputorResult;
+use crate::computor_error::ComputorError;
 use crate::memory::Memory;
 // use crate::types::Imaginary;
 use std::any::Any;
@@ -41,6 +42,10 @@ impl Function {
             param: vars,
         })
     }
+
+    pub fn param(&self) -> &Vec<Rc<Token>> {
+        &self.param
+    }
 }
 
 impl fmt::Display for Function {
@@ -66,14 +71,29 @@ impl Token for Function {
         self
     }
 
-    fn get_result(&self, _mem: &Memory) -> ComputorResult {
-        // match mem.get_fun(self.id) {
-        //     Some(fun) => match fun.get() {
-        //         Some(val) => return ComputorResult::Value(val),
-        //         None => {}
-        //     },
-        //     None => {}
-        // };
+    fn get_result(&self, mem: &Memory) -> ComputorResult {
+        let param_known: bool;
+        let mut iter_param = self.param.iter();
+
+        match iter_param.next() {
+            None => return ComputorResult::Err(ComputorError::invalid_fun()),
+            Some(token) => match token.get_result(mem) {
+                ComputorResult::Resolve => {
+                    return ComputorResult::Err(ComputorError::invalid_fun())
+                }
+                ComputorResult::Value(_val) => {}
+                ComputorResult::Unknown(_id, _coef, _pow) => {}
+                ComputorResult::SolveVar(_id, _coefs) => {
+                    return ComputorResult::Err(ComputorError::invalid_fun())
+                }
+                ComputorResult::AssignFun(_id, _param, _exec) => {
+                    return ComputorResult::Err(ComputorError::invalid_fun())
+                }
+                ComputorResult::Err(error) => {
+                    return ComputorResult::Err(error)
+                }
+            },
+        };
         ComputorResult::Resolve
     }
 }
