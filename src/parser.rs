@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:29:49 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 15:52:12 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ pub use token_tree::TokenTree;
 pub use tree_branch::TreeBranch;
 pub use tree_leaf::TreeLeaf;
 
-use crate::lexer::token::{display_token, Expression, Operator};
+use crate::lexer::token::{self, Expression, Operator};
 
 use crate::arg_parse::Param;
 use crate::lexer::Token;
@@ -44,12 +44,15 @@ impl Parser {
         tokens: Vec<Rc<Token>>,
     ) -> Option<Box<TokenTree>> {
         if self.verbose {
-            println!("[v:Parser] - token stack received : {:?}", tokens);
+            println!(
+                "[v:Parser] - token stack received : {}",
+                token::debug_token(&tokens)
+            );
         }
         if !self.bench {
             self.parse(tokens)
         } else {
-            let display = format!("Parser({})", display_token(&tokens, ""));
+            let display = format!("Parser({})", token::display_token(&tokens));
             let _timer = Timer::new(&display[..]);
             self.parse(tokens)
         }

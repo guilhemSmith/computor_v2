@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:28:26 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 14:49:30 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,13 +24,13 @@ pub struct Expression {
 
 impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({})", super::display_token(&self.tokens, " "))
+        write!(f, "({})", super::display_token(&self.tokens))
     }
 }
 
 impl fmt::Debug for Expression {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "[exp:({})]", super::debug_token(&self.tokens, ""))
+        write!(f, "[exp:({})]", super::debug_token(&self.tokens))
     }
 }
 
@@ -44,7 +44,7 @@ impl Token for Expression {
     }
 
     fn get_result(&self, _mem: &Memory) -> ComputorResult {
-        panic!("Expression left behind: {}", self);
+        panic!("Expression left behind by Parser: {}", self);
     }
 }
 

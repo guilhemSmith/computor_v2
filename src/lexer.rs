@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 19:51:18 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 16:00:45 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@ pub mod token;
 pub use token::Token;
 
 use token::Expression;
-use token::Function;
+use token::FunctionToken;
 use token::Operator;
 use token::Resolve;
 use token::Value;
@@ -108,6 +108,10 @@ impl Lexer {
                     self.depth -= 1;
                     break;
                 }
+                Some(ch) if fun && ch == ',' => {
+                    self.last_ch = Some(',');
+                    return tokens;
+                }
                 Some(ch) => match Operator::new(ch) {
                     Ok(val) => tokens.push(Rc::new(val)),
                     Err(err) => tokens.push(Rc::new(err)),
@@ -126,13 +130,13 @@ impl Lexer {
 
     fn read_operand(&mut self, chars: &mut Chars, fun: bool) -> Rc<Token> {
         if self.last_ch.unwrap().is_digit(10) {
-            self.read_val(chars, fun)
+            self.read_val(chars)
         } else {
             self.read_id(chars, fun)
         }
     }
 
-    fn read_val(&mut self, chars: &mut Chars, fun: bool) -> Rc<Token> {
+    fn read_val(&mut self, chars: &mut Chars) -> Rc<Token> {
         let mut raw = String::new();
 
         raw.push(self.last_ch.unwrap());
@@ -141,11 +145,7 @@ impl Lexer {
                 Some(ch) if ch == '.' || ch == 'i' => raw.push(ch),
                 Some(ch) if ch.is_digit(10) => raw.push(ch),
                 Some(ch) => {
-                    if fun && ch == ',' {
-                        self.last_ch = chars.next()
-                    } else {
-                        self.last_ch = Some(ch);
-                    }
+                    self.last_ch = Some(ch);
                     break;
                 }
                 None => {
@@ -169,22 +169,18 @@ impl Lexer {
                 Some(ch) if ch.is_alphanumeric() => raw.push(ch),
                 Some(ch) if ch == '(' => {
                     self.depth += 1;
-                    let param_lst = self.tokenize(chars, true);
-                    let mut param_vec: Vec<Rc<Token>> = Vec::new();
-                    for param in param_lst {
-                        param_vec.push(param)
+                    let mut param_lst: Vec<Vec<Rc<Token>>> = Vec::new();
+                    param_lst.push(self.tokenize(chars, true));
+                    while self.last_ch == Some(',') {
+                        param_lst.push(self.tokenize(chars, true));
                     }
-                    match Function::new(raw, param_vec) {
+                    match FunctionToken::new(raw, param_lst) {
                         Ok(val) => return Rc::new(val),
                         Err(err) => return Rc::new(err),
                     };
                 }
                 Some(ch) => {
-                    if fun && ch == ',' {
-                        self.last_ch = chars.next();
-                    } else {
-                        self.last_ch = Some(ch);
-                    }
+                    self.last_ch = Some(ch);
                     break;
                 }
                 None => {

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 15:47:12 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:28:42 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 14:52:26 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ pub enum LexerError {
     InvalidOp(char),
     InvalidVal(String),
     InvalidVar(String),
-    InvalidFun(String, Vec<Rc<Token>>),
+    InvalidFun(String, Vec<Vec<Rc<Token>>>),
 }
 
 impl Error for LexerError {}
@@ -32,9 +32,7 @@ impl fmt::Debug for LexerError {
             LexerError::InvalidOp(ch) => write!(f, "!{{{}}}", ch),
             LexerError::InvalidVal(word) => write!(f, "!{{{}}}", word),
             LexerError::InvalidVar(word) => write!(f, "!{{{}}}", word),
-            LexerError::InvalidFun(fun, v) => {
-                write!(f, "!{{{}{}}}", fun, super::debug_token(v, ""))
-            }
+            LexerError::InvalidFun(fun, v) => write!(f, "!{{{}}}", fun),
         }
     }
 }
@@ -65,6 +63,6 @@ impl Token for LexerError {
     }
 
     fn get_result(&self, _mem: &Memory) -> ComputorResult {
-        panic!("Error left behind: {}", self);
+        panic!("Error left behind by Parser: {}", self);
     }
 }

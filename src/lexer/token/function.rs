@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 12:06:31 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 15:48:35 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,22 @@ use super::{LexerError, Token};
 use crate::computor::ComputorResult;
 use crate::computor_error::ComputorError;
 use crate::memory::Memory;
+use crate::parser::TokenTree;
 // use crate::types::Imaginary;
 use std::any::Any;
 use std::fmt;
 use std::rc::Rc;
 
-#[derive(Clone)]
-pub struct Function {
+pub struct FunctionToken {
     id: String,
-    param: Vec<Rc<Token>>,
+    param: Vec<Vec<Rc<Token>>>,
 }
 
-impl Function {
-    pub fn new(id: String, vars: Vec<Rc<Token>>) -> Result<Self, LexerError> {
+impl FunctionToken {
+    pub fn new(
+        id: String,
+        vars: Vec<Vec<Rc<Token>>>,
+    ) -> Result<Self, LexerError> {
         let mut chars = id.chars();
 
         if !chars.next().unwrap().is_alphabetic() {
@@ -37,32 +40,38 @@ impl Function {
                 return Err(LexerError::InvalidFun(id, vars));
             }
         }
-        Ok(Function {
+        Ok(FunctionToken {
             id: id,
             param: vars,
         })
     }
 
-    pub fn param(&self) -> &Vec<Rc<Token>> {
-        &self.param
+    pub fn consume_param(self) -> Vec<Vec<Rc<Token>>> {
+        self.param
     }
 }
 
-impl fmt::Display for Function {
+impl fmt::Display for FunctionToken {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let param = super::display_token(&self.param, ", ");
-        write!(f, "{}({})", self.id, param)
+        let mut param = String::new();
+        for p in &self.param {
+            param = format!("{}, {}", param, super::display_token(&p));
+        }
+        write!(f, "{}({})", self.id, param.trim_start_matches(", "))
     }
 }
 
-impl fmt::Debug for Function {
+impl fmt::Debug for FunctionToken {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let param = super::debug_token(&self.param, ", ");
-        write!(f, "[fun:{}({})]", self.id, param)
+        let mut param = String::new();
+        for p in &self.param {
+            param = format!("{},{}", param, super::debug_token(&p));
+        }
+        write!(f, "[fun:{}({})]", self.id, param.trim_start_matches(","))
     }
 }
 
-impl Token for Function {
+impl Token for FunctionToken {
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -72,28 +81,48 @@ impl Token for Function {
     }
 
     fn get_result(&self, mem: &Memory) -> ComputorResult {
-        let param_known: bool;
-        let mut iter_param = self.param.iter();
+        panic!("Function left behind by Parser: {}", self);
+        // let mut iter_param = self.param.iter();
 
-        match iter_param.next() {
-            None => return ComputorResult::Err(ComputorError::invalid_fun()),
-            Some(token) => match token.get_result(mem) {
-                ComputorResult::Resolve => {
-                    return ComputorResult::Err(ComputorError::invalid_fun())
-                }
-                ComputorResult::Value(_val) => {}
-                ComputorResult::Unknown(_id, _coef, _pow) => {}
-                ComputorResult::SolveVar(_id, _coefs) => {
-                    return ComputorResult::Err(ComputorError::invalid_fun())
-                }
-                ComputorResult::AssignFun(_id, _param, _exec) => {
-                    return ComputorResult::Err(ComputorError::invalid_fun())
-                }
-                ComputorResult::Err(error) => {
-                    return ComputorResult::Err(error)
-                }
-            },
-        };
-        ComputorResult::Resolve
+        // match iter_param.next() {
+        //     None => return ComputorResult::Err(ComputorError::invalid_fun()),
+        //     Some(token) => match token.get_result(mem) {
+        //         ComputorResult::Resolve => {
+        //             return ComputorResult::Err(ComputorError::invalid_fun())
+        //         }
+        //         ComputorResult::Value(_val) => {}
+        //         ComputorResult::Unknown(_id, _coef, _pow) => {}
+        //         ComputorResult::SolveVar(_id, _coefs) => {
+        //             return ComputorResult::Err(ComputorError::invalid_fun())
+        //         }
+        //         ComputorResult::AssignFun(_id, _param, _exec) => {
+        //             return ComputorResult::Err(ComputorError::invalid_fun())
+        //         }
+        //         ComputorResult::Err(error) => {
+        //             return ComputorResult::Err(error)
+        //         }
+        //     },
+        // };
+    }
+}
+
+pub struct FunctionTree {
+    id: String,
+    param: Vec<Rc<TokenTree>>,
+}
+
+impl FunctionTree {
+    pub fn new(
+        id: String,
+        vars: Vec<Rc<TokenTree>>,
+    ) -> Result<Self, LexerError> {
+        Ok(FunctionTree {
+            id: id,
+            param: vars,
+        })
+    }
+
+    pub fn param(&self) -> &Vec<Rc<TokenTree>> {
+        &self.param
     }
 }
