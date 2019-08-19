@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 17:35:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:18:10 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 11:28:48 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,11 @@ impl fmt::Debug for Resolve {
 }
 
 impl Token for Resolve {
-    fn as_any(&mut self) -> &mut dyn Any {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
 

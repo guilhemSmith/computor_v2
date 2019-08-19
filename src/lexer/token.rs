@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 10:39:16 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 11:29:18 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,19 @@ use std::fmt;
 use std::rc::Rc;
 
 pub trait Token: fmt::Display + fmt::Debug {
-    fn as_any(&mut self) -> &mut dyn Any;
+    fn as_any(&self) -> &dyn Any;
+    fn as_any_mut(&mut self) -> &mut dyn Any;
     fn get_result(&self, mem: &Memory) -> ComputorResult;
+}
+
+pub fn count_error(token: &Rc<Token>) -> i32 {
+    match token.as_any().downcast_ref::<LexerError>() {
+        None => 0,
+        Some(err) => {
+            eprintln!("[err:Token] -> {}", err);
+            1
+        }
+    }
 }
 
 pub fn debug_token(tokens: &Vec<Rc<Token>>, sep: &str) -> String {

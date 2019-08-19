@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 09:35:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 11:29:06 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ impl TreeBranch {
 
     pub fn operator(&mut self) -> &mut Operator {
         let extractor = Rc::get_mut(&mut self.token).unwrap();
-        return extractor.as_any().downcast_mut::<Operator>().unwrap();
+        return extractor.as_any_mut().downcast_mut::<Operator>().unwrap();
     }
 
     pub fn default_to_left(leaf: &mut Box<TokenTree>, next: Box<TokenTree>) {

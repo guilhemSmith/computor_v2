@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 10:34:22 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 11:36:12 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ mod result;
 pub use result::ComputorResult;
 
 use crate::arg_parse::Param;
+use crate::lexer::token;
 use crate::parser::TokenTree;
 use crate::timer::Timer;
 use crate::Memory;
@@ -46,5 +47,13 @@ impl Computor {
         }
     }
 
-    fn compute(&self, _tree: Box<TokenTree>) {}
+    fn compute(&self, tree: Box<TokenTree>) {
+        match &tree.count(token::count_error) {
+            0 => {}
+            n => {
+                eprintln!("[err:Computor] - {} invalid tokens. Abort.", n);
+                return;
+            }
+        }
+    }
 }

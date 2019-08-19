@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 19:45:03 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 11:29:49 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,8 +83,8 @@ impl Parser {
 
     fn token_to_node(&self, mut token: Rc<Token>) -> Option<Box<TokenTree>> {
         let op = Rc::get_mut(&mut token).unwrap();
-        match op.as_any().downcast_mut::<Operator>() {
-            None => match op.as_any().downcast_mut::<Expression>() {
+        match op.as_any_mut().downcast_mut::<Operator>() {
+            None => match op.as_any_mut().downcast_mut::<Expression>() {
                 None => Some(Box::new(TreeLeaf::new(token))),
                 Some(exp) => {
                     let mut exp_token = self.parse_tokens(exp.consume_tokens());
