@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 12:01:08 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 18:01:47 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ use std::{error::Error, fmt};
 pub enum ErrorKind {
     BadUseOperator,
     DivByZero,
-    InvalidFun,
     InvalidInput,
     IO,
     IOStop,
@@ -27,7 +26,6 @@ impl fmt::Display for ErrorKind {
         match self {
             ErrorKind::BadUseOperator => write!(f, "bad use"),
             ErrorKind::DivByZero => write!(f, "math"),
-            ErrorKind::InvalidFun => write!(f, "syntax"),
             ErrorKind::InvalidInput => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
@@ -65,13 +63,6 @@ impl ComputorError {
                 "Division by zero is not allowed : {} {} {}",
                 left_op, op, right_op
             ),
-        }
-    }
-
-    pub fn invalid_fun() -> Self {
-        ComputorError {
-            kind: ErrorKind::InvalidFun,
-            info: String::from("bad function."),
         }
     }
 

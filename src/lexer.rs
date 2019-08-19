@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 16:00:45 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 18:01:12 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ use crate::arg_parse::Param;
 use crate::computor_error::ComputorError;
 use crate::Timer;
 
-use std::rc::Rc;
 use std::str::Chars;
 
 const PROMPT: &str = "> ";
@@ -52,7 +51,7 @@ impl Lexer {
         }
     }
 
-    pub fn read_input(&mut self) -> Result<Vec<Rc<Token>>, ComputorError> {
+    pub fn read_input(&mut self) -> Result<Vec<Box<Token>>, ComputorError> {
         let readline = self.line.readline(PROMPT);
         match readline {
             Ok(line) => {
@@ -73,7 +72,7 @@ impl Lexer {
         }
     }
 
-    fn lexe(&mut self, l: String) -> Result<Vec<Rc<Token>>, ComputorError> {
+    fn lexe(&mut self, l: String) -> Result<Vec<Box<Token>>, ComputorError> {
         let cleared = self.clear_input(l);
         let mut iter = cleared.chars();
         let tokens;
@@ -87,24 +86,27 @@ impl Lexer {
         }
     }
 
-    fn tokenize(&mut self, chars: &mut Chars, fun: bool) -> Vec<Rc<Token>> {
-        let mut tokens: Vec<Rc<Token>> = Vec::new();
+    fn tokenize(&mut self, chars: &mut Chars, fun: bool) -> Vec<Box<Token>> {
+        let mut tokens: Vec<Box<Token>> = Vec::new();
         let mut cur = chars.next();
         loop {
             match cur {
                 Some(ch) if ch.is_alphanumeric() => {
                     self.last_ch = Some(ch);
-                    tokens.push(self.read_operand(chars, fun));
+                    tokens.push(self.read_operand(chars));
                 }
-                Some(ch) if ch == '?' => tokens.push(Rc::new(Resolve)),
+                Some(ch) if ch == '?' => tokens.push(Box::new(Resolve)),
                 Some(ch) if ch == '(' => {
                     self.depth += 1;
                     let expr = Expression::new(self.tokenize(chars, false));
                     if expr.count() > 0 {
-                        tokens.push(Rc::new(expr));
+                        tokens.push(Box::new(expr));
                     }
                 }
                 Some(ch) if ch == ')' => {
+                    if fun {
+                        self.last_ch = None;
+                    }
                     self.depth -= 1;
                     break;
                 }
@@ -113,8 +115,8 @@ impl Lexer {
                     return tokens;
                 }
                 Some(ch) => match Operator::new(ch) {
-                    Ok(val) => tokens.push(Rc::new(val)),
-                    Err(err) => tokens.push(Rc::new(err)),
+                    Ok(val) => tokens.push(Box::new(val)),
+                    Err(err) => tokens.push(Box::new(err)),
                 },
                 None => break,
             }
@@ -128,15 +130,15 @@ impl Lexer {
         return tokens;
     }
 
-    fn read_operand(&mut self, chars: &mut Chars, fun: bool) -> Rc<Token> {
+    fn read_operand(&mut self, chars: &mut Chars) -> Box<Token> {
         if self.last_ch.unwrap().is_digit(10) {
             self.read_val(chars)
         } else {
-            self.read_id(chars, fun)
+            self.read_id(chars)
         }
     }
 
-    fn read_val(&mut self, chars: &mut Chars) -> Rc<Token> {
+    fn read_val(&mut self, chars: &mut Chars) -> Box<Token> {
         let mut raw = String::new();
 
         raw.push(self.last_ch.unwrap());
@@ -155,12 +157,12 @@ impl Lexer {
             }
         }
         match Value::new(raw) {
-            Ok(val) => Rc::new(val),
-            Err(err) => Rc::new(err),
+            Ok(val) => Box::new(val),
+            Err(err) => Box::new(err),
         }
     }
 
-    fn read_id(&mut self, chars: &mut Chars, fun: bool) -> Rc<Token> {
+    fn read_id(&mut self, chars: &mut Chars) -> Box<Token> {
         let mut raw = String::new();
 
         raw.push(self.last_ch.unwrap());
@@ -169,14 +171,14 @@ impl Lexer {
                 Some(ch) if ch.is_alphanumeric() => raw.push(ch),
                 Some(ch) if ch == '(' => {
                     self.depth += 1;
-                    let mut param_lst: Vec<Vec<Rc<Token>>> = Vec::new();
+                    let mut param_lst: Vec<Vec<Box<Token>>> = Vec::new();
                     param_lst.push(self.tokenize(chars, true));
                     while self.last_ch == Some(',') {
                         param_lst.push(self.tokenize(chars, true));
                     }
                     match FunctionToken::new(raw, param_lst) {
-                        Ok(val) => return Rc::new(val),
-                        Err(err) => return Rc::new(err),
+                        Ok(val) => return Box::new(val),
+                        Err(err) => return Box::new(err),
                     };
                 }
                 Some(ch) => {
@@ -191,13 +193,13 @@ impl Lexer {
         }
         if !(raw.len() == 1 && raw.starts_with('i')) {
             match Variable::new(raw) {
-                Ok(var) => Rc::new(var),
-                Err(err) => Rc::new(err),
+                Ok(var) => Box::new(var),
+                Err(err) => Box::new(err),
             }
         } else {
             match Value::new(raw) {
-                Ok(val) => Rc::new(val),
-                Err(err) => Rc::new(err),
+                Ok(val) => Box::new(val),
+                Err(err) => Box::new(err),
             }
         }
     }

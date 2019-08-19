@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 14:49:30 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 17:10:20 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,9 @@ use crate::computor::ComputorResult;
 use crate::memory::Memory;
 use std::any::Any;
 use std::fmt;
-use std::rc::Rc;
 
-#[derive(Clone)]
 pub struct Expression {
-    tokens: Vec<Rc<Token>>,
+    tokens: Vec<Box<Token>>,
 }
 
 impl fmt::Display for Expression {
@@ -49,7 +47,7 @@ impl Token for Expression {
 }
 
 impl Expression {
-    pub fn new(tokens: Vec<Rc<Token>>) -> Self {
+    pub fn new(tokens: Vec<Box<Token>>) -> Self {
         Expression { tokens: tokens }
     }
 
@@ -57,8 +55,8 @@ impl Expression {
         self.tokens.len()
     }
 
-    pub fn consume_tokens(&mut self) -> Vec<Rc<Token>> {
-        let mut extractor: Vec<Rc<Token>> = Vec::new();
+    pub fn consume_tokens(&mut self) -> Vec<Box<Token>> {
+        let mut extractor: Vec<Box<Token>> = Vec::new();
         std::mem::swap(&mut self.tokens, &mut extractor);
         return extractor;
     }

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 15:52:12 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 17:17:42 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,13 @@ pub use token_tree::TokenTree;
 pub use tree_branch::TreeBranch;
 pub use tree_leaf::TreeLeaf;
 
-use crate::lexer::token::{self, Expression, Operator};
+use crate::lexer::token::{
+    self, Expression, FunctionToken, FunctionTree, LexerError, Operator,
+};
 
 use crate::arg_parse::Param;
 use crate::lexer::Token;
 use crate::timer::Timer;
-
-use std::rc::Rc;
 
 pub struct Parser {
     verbose: bool,
@@ -41,7 +41,7 @@ impl Parser {
 
     pub fn parse_tokens(
         &self,
-        tokens: Vec<Rc<Token>>,
+        tokens: Vec<Box<Token>>,
     ) -> Option<Box<TokenTree>> {
         if self.verbose {
             println!(
@@ -58,7 +58,7 @@ impl Parser {
         }
     }
 
-    fn parse(&self, mut tokens: Vec<Rc<Token>>) -> Option<Box<TokenTree>> {
+    fn parse(&self, mut tokens: Vec<Box<Token>>) -> Option<Box<TokenTree>> {
         let mut tree: Box<TokenTree>;
 
         match tokens.pop() {
@@ -84,21 +84,43 @@ impl Parser {
         }
     }
 
-    fn token_to_node(&self, mut token: Rc<Token>) -> Option<Box<TokenTree>> {
-        let op = Rc::get_mut(&mut token).unwrap();
+    fn token_to_node(&self, mut token: Box<Token>) -> Option<Box<TokenTree>> {
+        let op = &mut token;
         match op.as_any_mut().downcast_mut::<Operator>() {
             None => match op.as_any_mut().downcast_mut::<Expression>() {
-                None => Some(Box::new(TreeLeaf::new(token))),
-                Some(exp) => {
-                    let mut exp_token = self.parse_tokens(exp.consume_tokens());
-                    match &mut exp_token {
-                        None => {}
-                        Some(tokens) => tokens.set_prior_as_exp(),
-                    };
-                    exp_token
-                }
+                None => match op.as_any_mut().downcast_mut::<FunctionToken>() {
+                    None => Some(Box::new(TreeLeaf::new(token))),
+                    Some(fun) => self.fun_to_node(fun),
+                },
+                Some(exp) => self.expr_to_node(exp),
             },
             Some(_) => Some(Box::new(TreeBranch::new(token))),
         }
+    }
+
+    fn expr_to_node(&self, exp: &mut Expression) -> Option<Box<TokenTree>> {
+        let mut exp_token = self.parse_tokens(exp.consume_tokens());
+        match &mut exp_token {
+            None => {}
+            Some(tokens) => tokens.set_prior_as_exp(),
+        };
+        exp_token
+    }
+
+    fn fun_to_node(&self, fun: &mut FunctionToken) -> Option<Box<TokenTree>> {
+        let id = fun.id().clone();
+        let mut param_tree: Vec<Box<TokenTree>> = Vec::new();
+        for param in fun.consume_param() {
+            let arg = self.parse_tokens(param);
+            match arg {
+                None => {
+                    let error = LexerError::InvalidPar(String::from(""));
+                    param_tree.push(Box::new(TreeLeaf::new(Box::new(error))));
+                }
+                Some(boxed_tree) => param_tree.push(boxed_tree),
+            }
+        }
+        let token: Box<Token> = Box::new(FunctionTree::new(id, param_tree));
+        return Some(Box::new(TreeLeaf::new(token)));
     }
 }

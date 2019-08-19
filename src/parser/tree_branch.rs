@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:29:06 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 17:17:06 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,15 @@ use crate::lexer::{token::Operator, Token};
 
 use std::any::Any;
 use std::fmt;
-use std::rc::Rc;
 
 pub struct TreeBranch {
-    token: Rc<Token>,
+    token: Box<Token>,
     branch_left: Option<Box<TokenTree>>,
     branch_right: Option<Box<TokenTree>>,
 }
 
 impl TreeBranch {
-    pub fn new(token: Rc<Token>) -> Self {
+    pub fn new(token: Box<Token>) -> Self {
         TreeBranch {
             token: token,
             branch_left: None,
@@ -33,13 +32,13 @@ impl TreeBranch {
     }
 
     pub fn operator(&mut self) -> &mut Operator {
-        let extractor = Rc::get_mut(&mut self.token).unwrap();
+        let extractor = &mut self.token;
         return extractor.as_any_mut().downcast_mut::<Operator>().unwrap();
     }
 
     pub fn default_to_left(leaf: &mut Box<TokenTree>, next: Box<TokenTree>) {
         let op = Operator::new('*').unwrap();
-        let mut new_tree = TreeBranch::new(Rc::new(op));
+        let mut new_tree = TreeBranch::new(Box::new(op));
         new_tree.insert_left(next);
         let mut box_tree: Box<TokenTree> = Box::new(new_tree);
         std::mem::swap(leaf, &mut box_tree);
@@ -50,7 +49,7 @@ impl TreeBranch {
 
     fn default_to_right(leaf: &mut Box<TokenTree>, next: Box<TokenTree>) {
         let op = Operator::new('*').unwrap();
-        let mut new_tree = TreeBranch::new(Rc::new(op));
+        let mut new_tree = TreeBranch::new(Box::new(op));
         new_tree.insert_right(next);
         let mut box_tree: Box<TokenTree> = Box::new(new_tree);
         std::mem::swap(leaf, &mut box_tree);
@@ -129,11 +128,11 @@ impl TokenTree for TreeBranch {
         self
     }
 
-    fn token(&self) -> &Rc<Token> {
+    fn token(&self) -> &Box<Token> {
         &self.token
     }
 
-    fn iter(&self, foo: fn(&Rc<Token>)) {
+    fn iter(&self, foo: fn(&Box<Token>)) {
         match &self.branch_left {
             Some(tree) => tree.iter(foo),
             None => {}
@@ -145,7 +144,7 @@ impl TokenTree for TreeBranch {
         }
     }
 
-    fn count(&self, foo: fn(&Rc<Token>) -> i32) -> i32 {
+    fn count(&self, foo: fn(&Box<Token>) -> i32) -> i32 {
         let mut sum = match &self.branch_left {
             Some(tree) => tree.count(foo),
             None => 0,

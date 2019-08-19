@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 15:47:12 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 14:52:26 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 17:13:15 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,14 @@ use super::Token;
 use crate::computor::ComputorResult;
 use crate::memory::Memory;
 use std::any::Any;
-use std::rc::Rc;
 use std::{error::Error, fmt};
 
 pub enum LexerError {
     InvalidOp(char),
     InvalidVal(String),
     InvalidVar(String),
-    InvalidFun(String, Vec<Vec<Rc<Token>>>),
+    InvalidPar(String),
+    InvalidFun(String, Vec<Vec<Box<Token>>>),
 }
 
 impl Error for LexerError {}
@@ -32,7 +32,8 @@ impl fmt::Debug for LexerError {
             LexerError::InvalidOp(ch) => write!(f, "!{{{}}}", ch),
             LexerError::InvalidVal(word) => write!(f, "!{{{}}}", word),
             LexerError::InvalidVar(word) => write!(f, "!{{{}}}", word),
-            LexerError::InvalidFun(fun, v) => write!(f, "!{{{}}}", fun),
+            LexerError::InvalidPar(word) => write!(f, "!{{{}}}", word),
+            LexerError::InvalidFun(fun, _) => write!(f, "!{{{}}}", fun),
         }
     }
 }
@@ -47,6 +48,7 @@ impl fmt::Display for LexerError {
             }
             LexerError::InvalidVal(word) => (word.clone(), "value"),
             LexerError::InvalidVar(word) => (word.clone(), "variable name"),
+            LexerError::InvalidPar(w) => (w.clone(), "function parameter"),
             LexerError::InvalidFun(word, _) => (word.clone(), "function name"),
         };
         write!(f, "'{}' isn't a valid {}.", info.0, info.1)

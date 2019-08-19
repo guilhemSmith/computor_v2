@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 09:33:47 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 17:12:45 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,14 @@ use crate::lexer::Token;
 
 use std::any::Any;
 use std::fmt;
-use std::rc::Rc;
 
-#[derive(Clone)]
 pub struct TreeLeaf {
-    token: Rc<Token>,
+    token: Box<Token>,
 }
 
 impl TreeLeaf {
-    pub fn new(token: Rc<Token>) -> Self {
-        TreeLeaf {
-            token: token.clone(),
-        }
+    pub fn new(token: Box<Token>) -> Self {
+        TreeLeaf { token: token }
     }
 }
 
@@ -35,15 +31,15 @@ impl TokenTree for TreeLeaf {
         self
     }
 
-    fn token(&self) -> &Rc<Token> {
+    fn token(&self) -> &Box<Token> {
         &self.token
     }
 
-    fn iter(&self, foo: fn(&Rc<Token>)) {
+    fn iter(&self, foo: fn(&Box<Token>)) {
         foo(self.token());
     }
 
-    fn count(&self, foo: fn(&Rc<Token>) -> i32) -> i32 {
+    fn count(&self, foo: fn(&Box<Token>) -> i32) -> i32 {
         foo(&self.token)
     }
 
