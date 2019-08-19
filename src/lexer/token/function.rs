@@ -6,11 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 17:27:37 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 11:19:08 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
+use crate::computor::ComputorResult;
+use crate::memory::Memory;
+// use crate::types::Imaginary;
 use std::any::Any;
 use std::fmt;
 use std::rc::Rc;
@@ -57,5 +60,16 @@ impl fmt::Debug for Function {
 impl Token for Function {
     fn as_any(&mut self) -> &mut dyn Any {
         self
+    }
+
+    fn get_result(&self, _mem: &Memory) -> ComputorResult {
+        // match mem.get_fun(self.id) {
+        //     Some(fun) => match fun.get() {
+        //         Some(val) => return ComputorResult::Value(val),
+        //         None => {}
+        //     },
+        //     None => {}
+        // };
+        ComputorResult::Resolve
     }
 }

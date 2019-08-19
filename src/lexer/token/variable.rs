@@ -6,11 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:16:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 17:28:18 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 11:17:56 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
+use crate::computor::ComputorResult;
+use crate::memory::Memory;
+use crate::types::Imaginary;
 use std::any::Any;
 use std::fmt;
 
@@ -50,5 +53,20 @@ impl fmt::Debug for Variable {
 impl Token for Variable {
     fn as_any(&mut self) -> &mut dyn Any {
         self
+    }
+
+    fn get_result(&self, mem: &Memory) -> ComputorResult {
+        match mem.get_var(&self.id) {
+            Some(var) => match var.get() {
+                Some(val) => return ComputorResult::Value(val),
+                None => {}
+            },
+            None => {}
+        };
+        ComputorResult::Unknown(
+            self.id.clone(),
+            Imaginary::new(1.0, 0.0),
+            Imaginary::new(1.0, 0.0),
+        )
     }
 }

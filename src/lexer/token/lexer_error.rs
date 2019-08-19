@@ -6,11 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 15:47:12 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 17:27:46 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 11:18:48 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Token;
+use crate::computor::ComputorResult;
+use crate::memory::Memory;
 use std::any::Any;
 use std::rc::Rc;
 use std::{error::Error, fmt};
@@ -56,5 +58,9 @@ impl fmt::Display for LexerError {
 impl Token for LexerError {
     fn as_any(&mut self) -> &mut dyn Any {
         self
+    }
+
+    fn get_result(&self, _mem: &Memory) -> ComputorResult {
+        panic!("Error left behind: {}", self);
     }
 }

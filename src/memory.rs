@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 12:56:50 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 11:17:40 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ mod variable;
 pub use function::Function;
 pub use variable::Variable;
 
-use crate::lexer::token::Expression;
+use crate::parser::TokenTree;
 use crate::types::Imaginary;
 use std::{collections::HashMap, fmt};
 
@@ -44,11 +44,16 @@ impl Memory {
         };
     }
 
-    pub fn get_var(&self, name: String) -> Option<&Variable> {
-        self.var.get(&name)
+    pub fn get_var(&self, name: &String) -> Option<&Variable> {
+        self.var.get(name)
     }
 
-    pub fn set_fun(&mut self, name: String, var: Vec<String>, exp: Expression) {
+    pub fn set_fun(
+        &mut self,
+        name: String,
+        var: Vec<String>,
+        exp: Box<TokenTree>,
+    ) {
         let mut var_vec: Vec<Variable> = Vec::new();
         let mut name_iter = var.iter();
 
@@ -66,6 +71,10 @@ impl Memory {
                 self.fun.insert(name, fun);
             }
         };
+    }
+
+    pub fn get_fun(&self, name: String) -> Option<&Function> {
+        self.fun.get(&name)
     }
 
     fn var_to_string(&self) -> String {

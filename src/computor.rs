@@ -6,9 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 19:44:30 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 10:34:22 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+mod result;
+pub use result::ComputorResult;
 
 use crate::arg_parse::Param;
 use crate::parser::TokenTree;

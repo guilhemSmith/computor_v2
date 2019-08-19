@@ -6,18 +6,18 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 12:57:28 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 10:26:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Variable;
-use crate::lexer::token::Expression;
+use crate::parser::TokenTree;
 use std::{fmt, vec::Vec};
 
 pub struct Function {
     name: String,
     var: Vec<Variable>,
-    expr: Option<Expression>,
+    expr: Option<Box<TokenTree>>,
 }
 
 impl Function {
@@ -29,7 +29,7 @@ impl Function {
         }
     }
 
-    pub fn set(&mut self, mut vars: Vec<Variable>, expr: Expression) {
+    pub fn set(&mut self, mut vars: Vec<Variable>, expr: Box<TokenTree>) {
         vars.reverse();
         loop {
             match vars.pop() {
@@ -71,7 +71,7 @@ impl Function {
 
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.expr.clone() {
+        match &self.expr {
             Some(expr) => {
                 write!(f, "{}({}): {}", self.name, self.var_to_string(), expr)
             }

@@ -6,11 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 17:35:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 17:28:04 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/19 11:18:10 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Token;
+use crate::computor::ComputorResult;
+use crate::memory::Memory;
 use std::any::Any;
 use std::fmt;
 
@@ -31,5 +33,9 @@ impl fmt::Debug for Resolve {
 impl Token for Resolve {
     fn as_any(&mut self) -> &mut dyn Any {
         self
+    }
+
+    fn get_result(&self, _mem: &Memory) -> ComputorResult {
+        ComputorResult::Resolve
     }
 }
