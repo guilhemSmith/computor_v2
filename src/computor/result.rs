@@ -11,8 +11,8 @@
 /* ************************************************************************** */
 
 use crate::computor_error::ComputorError;
-use crate::parser::TokenTree;
 use crate::memory::Variable;
+use crate::parser::TokenTree;
 use crate::types::Imaginary;
 
 pub enum ComputorResult {

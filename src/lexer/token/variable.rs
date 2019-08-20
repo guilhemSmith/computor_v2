@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:16:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 13:41:21 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 13:51:23 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ impl Token for Variable {
             None => {}
         };
         ComputorResult::Var(
-            self.id.clone(),
+            self.id.to_lowercase(),
             Imaginary::new(1.0, 0.0),
             Imaginary::new(1.0, 0.0),
         )

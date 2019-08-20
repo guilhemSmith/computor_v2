@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 13:36:09 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 13:51:08 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ impl Memory {
         match self.var.get_mut(&name) {
             Some(var) => var.set(val),
             None => {
-                let mut var = Variable::new(name.clone());
+                let mut var = Variable::new(name.to_lowercase());
                 var.set(val);
                 self.var.insert(name, var);
             }

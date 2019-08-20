@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 18:01:12 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 13:50:21 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,8 +144,13 @@ impl Lexer {
         raw.push(self.last_ch.unwrap());
         loop {
             match chars.next() {
-                Some(ch) if ch == '.' || ch == 'i' => raw.push(ch),
+                Some(ch) if ch == '.' => raw.push(ch),
                 Some(ch) if ch.is_digit(10) => raw.push(ch),
+                Some(ch) if ch == 'i' => {
+                    raw.push(ch);
+                    self.last_ch = chars.next();
+                    break;
+                }
                 Some(ch) => {
                     self.last_ch = Some(ch);
                     break;
@@ -168,7 +173,7 @@ impl Lexer {
         raw.push(self.last_ch.unwrap());
         loop {
             match chars.next() {
-                Some(ch) if ch.is_alphanumeric() => raw.push(ch),
+                Some(ch) if ch.is_alphabetic() => raw.push(ch),
                 Some(ch) if ch == '(' => {
                     self.depth += 1;
                     let mut param_lst: Vec<Vec<Box<Token>>> = Vec::new();

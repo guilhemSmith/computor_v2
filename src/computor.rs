@@ -19,7 +19,7 @@ use crate::lexer::token;
 use crate::parser::TokenTree;
 use crate::timer::Timer;
 use crate::types::Imaginary;
-use crate::{Memory, memory::Variable};
+use crate::{memory::Variable, Memory};
 
 pub struct Computor {
     verbose: bool,
