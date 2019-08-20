@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:28:46 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 10:29:21 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ impl Token for Operator {
     }
 
     fn get_result(&self, _mem: &Memory) -> ComputorResult {
-        ComputorResult::Resolve
+        panic!("Operator left behind by Parser: {:?}", self)
     }
 }
 
@@ -76,6 +76,15 @@ impl Operator {
 
     pub fn set_prior_as_exp(&mut self) {
         self.priority = 3;
+    }
+
+    pub fn exec(
+        &self,
+        _mem: &Memory,
+        _orand_l: ComputorResult,
+        _orand_r: ComputorResult,
+    ) -> ComputorResult {
+        ComputorResult::default()
     }
 }
 

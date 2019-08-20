@@ -6,12 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 09:35:29 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 10:23:08 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::TokenTree;
+use crate::computor::ComputorResult;
 use crate::lexer::{token::Operator, Token};
+use crate::memory::Memory;
 
 use std::any::Any;
 use std::fmt;
@@ -31,9 +33,14 @@ impl TreeBranch {
         }
     }
 
-    pub fn operator(&mut self) -> &mut Operator {
+    pub fn op_mut(&mut self) -> &mut Operator {
         let extractor = &mut self.token;
         return extractor.as_any_mut().downcast_mut::<Operator>().unwrap();
+    }
+
+    pub fn op_ref(&self) -> &Operator {
+        let extractor = &self.token;
+        return extractor.as_any().downcast_ref::<Operator>().unwrap();
     }
 
     pub fn default_to_left(leaf: &mut Box<TokenTree>, next: Box<TokenTree>) {
@@ -62,7 +69,7 @@ impl TreeBranch {
         match new.as_any().downcast_mut::<TreeBranch>() {
             None => self.rotate_left(new),
             Some(branch) => {
-                if self.operator().is_prior(branch.operator()) {
+                if self.op_mut().is_prior(branch.op_mut()) {
                     std::mem::swap(self, branch);
                     self.insert_right(new);
                 } else {
@@ -76,7 +83,7 @@ impl TreeBranch {
         match new.as_any().downcast_mut::<TreeBranch>() {
             None => self.rotate_right(new),
             Some(branch) => {
-                if self.operator().is_prior(branch.operator()) {
+                if self.op_mut().is_prior(branch.op_mut()) {
                     std::mem::swap(self, branch);
                     self.insert_left(new);
                 } else {
@@ -158,7 +165,19 @@ impl TokenTree for TreeBranch {
     }
 
     fn set_prior_as_exp(&mut self) {
-        self.operator().set_prior_as_exp();
+        self.op_mut().set_prior_as_exp();
+    }
+
+    fn compute(&self, mem: &Memory) -> ComputorResult {
+        let orand_left = match &self.branch_left {
+            None => ComputorResult::None,
+            Some(tree) => tree.compute(mem),
+        };
+        let orand_right = match &self.branch_right {
+            None => ComputorResult::None,
+            Some(tree) => tree.compute(mem),
+        };
+        self.op_ref().exec(mem, orand_left, orand_right)
     }
 }
 

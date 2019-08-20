@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 15:47:12 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 17:13:15 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 10:19:09 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,6 @@ impl Token for LexerError {
     }
 
     fn get_result(&self, _mem: &Memory) -> ComputorResult {
-        panic!("Error left behind by Parser: {}", self);
+        panic!("Error left behind by Parser: {:?}", self);
     }
 }

@@ -6,12 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 09:37:53 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 09:57:50 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::TokenTree;
+use crate::computor::ComputorResult;
 use crate::lexer::Token;
+use crate::memory::Memory;
 
 use std::any::Any;
 use std::fmt;
@@ -44,6 +46,10 @@ impl TokenTree for TreeLeaf {
     }
 
     fn set_prior_as_exp(&mut self) {}
+
+    fn compute(&self, mem: &Memory) -> ComputorResult {
+        self.token.get_result(mem)
+    }
 }
 
 impl fmt::Display for TreeLeaf {

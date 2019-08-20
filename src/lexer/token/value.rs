@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:28:52 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 10:02:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,38 +58,6 @@ impl Value {
             }
         }
     }
-
-    // pub fn add_val(lhs: &Value, rhs: &Value) -> Token {
-    //     Token::Val(Value {
-    //         value: lhs.value + rhs.value,
-    //     })
-    // }
-
-    // pub fn sub_val(lhs: &Value, rhs: &Value) -> Token {
-    //     Token::Val(Value {
-    //         value: lhs.value - rhs.value,
-    //     })
-    // }
-
-    // pub fn mul_val(lhs: &Value, rhs: &Value) -> Token {
-    //     Token::Val(Value {
-    //         value: lhs.value * rhs.value,
-    //     })
-    // }
-
-    // pub fn div_val(lhs: &Value, rhs: &Value) -> Result<(Token), ComputorError> {
-    //     if rhs.value != Imaginary::zero() {
-    //         Ok(Token::Val(Value {
-    //             value: lhs.value / rhs.value,
-    //         }))
-    //     } else {
-    //         Err(ComputorError::div_by_zero(
-    //             format!("{}", lhs.value),
-    //             format!("{}", rhs.value),
-    //             '/',
-    //         ))
-    //     }
-    // }
 }
 
 impl Token for Value {
