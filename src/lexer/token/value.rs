@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 10:02:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 13:31:07 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,6 @@ impl Token for Value {
     }
 
     fn get_result(&self, _mem: &Memory) -> ComputorResult {
-        ComputorResult::Value(self.value)
+        ComputorResult::Val(self.value)
     }
 }

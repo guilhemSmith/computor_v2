@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 17:35:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:28:48 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 13:31:01 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,6 @@ impl Token for Resolve {
     }
 
     fn get_result(&self, _mem: &Memory) -> ComputorResult {
-        ComputorResult::Resolve
+        ComputorResult::Res
     }
 }

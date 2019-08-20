@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 10:20:15 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 13:10:37 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,27 +98,6 @@ impl Token for FunctionTree {
 
     fn get_result(&self, _mem: &Memory) -> ComputorResult {
         ComputorResult::default()
-        // let mut iter_param = self.param.iter();
-
-        // match iter_param.next() {
-        //     None => return ComputorResult::Err(ComputorError::invalid_fun()),
-        //     Some(token) => match token.get_result(mem) {
-        //         ComputorResult::Resolve => {
-        //             return ComputorResult::Err(ComputorError::invalid_fun())
-        //         }
-        //         ComputorResult::Value(_val) => {}
-        //         ComputorResult::Unknown(_id, _coef, _pow) => {}
-        //         ComputorResult::SolveVar(_id, _coefs) => {
-        //             return ComputorResult::Err(ComputorError::invalid_fun())
-        //         }
-        //         ComputorResult::AssignFun(_id, _param, _exec) => {
-        //             return ComputorResult::Err(ComputorError::invalid_fun())
-        //         }
-        //         ComputorResult::Err(error) => {
-        //             return ComputorResult::Err(error)
-        //         }
-        //     },
-        // };
     }
 }
 

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 12:56:24 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 13:40:59 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ use crate::lexer::token;
 use crate::parser::TokenTree;
 use crate::timer::Timer;
 use crate::types::Imaginary;
-use crate::Memory;
+use crate::{Memory, memory::Variable};
 
 pub struct Computor {
     verbose: bool,
@@ -52,10 +52,10 @@ impl Computor {
     fn compute(&mut self, tree: Box<TokenTree>) {
         match &tree.count(token::count_error) {
             0 => match tree.compute(&self.memory) {
-                ComputorResult::Value(val) => println!("{}", val),
-                ComputorResult::Unknown(id, _, _) => self.catch_unknown(id),
-                ComputorResult::SolveVar(id, coef) => self.solve(id, coef),
-                ComputorResult::SetFun(id, param, exp) => {
+                ComputorResult::Val(val) => println!("{}", val),
+                ComputorResult::Var(var, _, _) => self.catch_var(var),
+                ComputorResult::Equ(id, coefs) => self.solve(id, coefs),
+                ComputorResult::Fun(id, param, exp) => {
                     self.set_fun(id, param, exp)
                 }
                 ComputorResult::Err(error) => self.print_err(error),
@@ -65,7 +65,7 @@ impl Computor {
         }
     }
 
-    fn catch_unknown(&self, id: String) {
+    fn catch_var(&self, id: String) {
         eprintln!("Unknown variable: '{}'.", id);
     }
 

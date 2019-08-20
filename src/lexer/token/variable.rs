@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:16:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:28:55 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 13:41:21 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,12 @@ impl Token for Variable {
     fn get_result(&self, mem: &Memory) -> ComputorResult {
         match mem.get_var(&self.id) {
             Some(var) => match var.get() {
-                Some(val) => return ComputorResult::Value(val),
+                Some(val) => return ComputorResult::Val(val),
                 None => {}
             },
             None => {}
         };
-        ComputorResult::Unknown(
+        ComputorResult::Var(
             self.id.clone(),
             Imaginary::new(1.0, 0.0),
             Imaginary::new(1.0, 0.0),

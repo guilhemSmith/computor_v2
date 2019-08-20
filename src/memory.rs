@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 11:17:40 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 13:36:09 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,12 @@ impl Memory {
         }
     }
 
-    pub fn set_var(&mut self, name: String, val: Imaginary) {
+    pub fn set_var(&mut self, name: String, val: Option<Imaginary>) {
         match self.var.get_mut(&name) {
-            Some(var) => var.set(Some(val)),
+            Some(var) => var.set(val),
             None => {
                 let mut var = Variable::new(name.clone());
-                var.set(Some(val));
+                var.set(val);
                 self.var.insert(name, var);
             }
         };
