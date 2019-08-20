@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 17:17:06 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 09:35:29 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,11 +177,11 @@ impl fmt::Debug for TreeBranch {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match (&self.branch_left, &self.branch_right) {
             (Some(l), Some(r)) => {
-                write!(f, "[B {} :{:?}{:?}]", self.token, l, r)
+                write!(f, "{{{}:{:?} {:?}}}", self.token, l, r)
             }
-            (Some(left), None) => write!(f, "[B {} :{:?}]", self.token, left),
-            (None, Some(right)) => write!(f, "[B {} :{:?}]", self.token, right),
-            (None, None) => write!(f, "[B {}]", self.token),
+            (Some(left), None) => write!(f, "{{{}:{:?} _}}", self.token, left),
+            (None, Some(right)) => write!(f, "{{{}:_ {:?}]", self.token, right),
+            (None, None) => write!(f, "{{{}: _ _}}", self.token),
         }
     }
 }

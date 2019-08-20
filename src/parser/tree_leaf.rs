@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 17:12:45 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 09:37:53 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,6 @@ impl fmt::Display for TreeLeaf {
 
 impl fmt::Debug for TreeLeaf {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{{L:{:?}}}", self.token)
+        write!(f, "{{{:?}}}", self.token)
     }
 }
