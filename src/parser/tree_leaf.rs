@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 09:57:50 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 11:13:02 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,11 @@ impl TokenTree for TreeLeaf {
         foo(&self.token)
     }
 
-    fn set_prior_as_exp(&mut self) {}
+    fn is_full(&self) -> bool {
+        true
+    }
+
+    fn set_as_exp(&mut self) {}
 
     fn compute(&self, mem: &Memory) -> ComputorResult {
         self.token.get_result(mem)

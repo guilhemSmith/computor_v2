@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 10:23:08 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 11:14:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ pub struct TreeBranch {
     token: Box<Token>,
     branch_left: Option<Box<TokenTree>>,
     branch_right: Option<Box<TokenTree>>,
+    was_expr: bool,
 }
 
 impl TreeBranch {
@@ -30,7 +31,12 @@ impl TreeBranch {
             token: token,
             branch_left: None,
             branch_right: None,
+            was_expr: false,
         }
+    }
+
+    pub fn was_expr(&self) -> bool {
+        self.was_expr
     }
 
     pub fn op_mut(&mut self) -> &mut Operator {
@@ -164,8 +170,16 @@ impl TokenTree for TreeBranch {
         return sum;
     }
 
-    fn set_prior_as_exp(&mut self) {
+    fn is_full(&self) -> bool {
+        match (&self.branch_left, &self.branch_right) {
+            (Some(left), Some(right)) => left.is_full() && right.is_full(),
+            _ => false,
+        }
+    }
+
+    fn set_as_exp(&mut self) {
         self.op_mut().set_prior_as_exp();
+        self.was_expr = true;
     }
 
     fn compute(&self, mem: &Memory) -> ComputorResult {

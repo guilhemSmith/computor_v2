@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 17:17:42 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 11:26:23 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ impl Parser {
         let mut exp_token = self.parse_tokens(exp.consume_tokens());
         match &mut exp_token {
             None => {}
-            Some(tokens) => tokens.set_prior_as_exp(),
+            Some(tokens) => tokens.set_as_exp(),
         };
         exp_token
     }

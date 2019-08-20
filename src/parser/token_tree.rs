@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:13:01 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 10:05:55 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 11:15:50 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,8 @@ pub trait TokenTree: fmt::Display + fmt::Debug {
     fn token(&self) -> &Box<Token>;
     fn iter(&self, foo: fn(&Box<Token>));
     fn count(&self, foo: fn(&Box<Token>) -> i32) -> i32;
-    fn set_prior_as_exp(&mut self);
+    fn is_full(&self) -> bool;
+    fn set_as_exp(&mut self);
     fn compute(&self, mem: &Memory) -> ComputorResult;
 }
 
@@ -32,13 +33,14 @@ pub fn insert_in_tree(b_tree: &mut Box<TokenTree>, mut b_new: Box<TokenTree>) {
     let new = b_new.as_any().downcast_mut::<TreeBranch>();
 
     match (tree, new) {
-        (Some(root), _) => root.insert_left(b_new),
-        (None, Some(_)) => {
+        (Some(ref mut root), _) if !root.was_expr() => root.insert_left(b_new),
+        (Some(_), _) => TreeBranch::default_to_left(b_tree, b_new),
+        (None, Some(ref branch)) if !branch.was_expr() => {
             std::mem::swap(b_tree, &mut b_new);
             let any = b_tree.as_any();
             let nw_root = any.downcast_mut::<TreeBranch>().unwrap();
             nw_root.insert_right(b_new);
         }
-        (None, None) => TreeBranch::default_to_left(b_tree, b_new),
+        _ => TreeBranch::default_to_left(b_tree, b_new),
     }
 }
