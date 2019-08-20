@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/19 10:10:40 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 10:04:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 11:43:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ pub enum ComputorResult {
     Value(Imaginary),
     Unknown(String, Imaginary, Imaginary),
     SolveVar(String, Vec<Imaginary>),
-    AssignFun(String, Vec<String>, Box<TokenTree>),
+    SetFun(String, Vec<String>, Box<TokenTree>),
     Err(ComputorError),
 }
 
