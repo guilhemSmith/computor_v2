@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 15:31:12 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 16:35:23 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ impl ComputorError {
         }
     }
 
-    pub fn fun_undefined(name: &String) -> Self {
+    pub fn fun_undef(name: &String) -> Self {
         ComputorError {
             kind: ErrorKind::FunUndefinded,
             info: format!("{} is not defined as a function.", name),

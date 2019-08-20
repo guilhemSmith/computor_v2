@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 15:31:13 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 16:48:57 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,9 +105,10 @@ impl FunctionTree {
                 None => break,
             }
         }
-        match mem.get_fun(self.id.to_lowercase()) {
-            Some(fun) => fun.compute(lst),
-            None => CResult::Err(CError::fun_undefined(&self.id)),
+        let fun_mem = mem.get_fun(&self.id);
+        match fun_mem {
+            Some(fun) => fun.compute(mem, lst),
+            None => CResult::Err(CError::fun_undef(&self.id)),
         }
     }
 

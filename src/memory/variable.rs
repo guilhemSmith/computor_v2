@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:28:27 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/12 15:33:33 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 16:12:07 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,6 @@ impl Variable {
 
     pub fn get(&self) -> Option<Imaginary> {
         self.value
-    }
-
-    pub fn name(&self) -> &String {
-        &self.name
     }
 }
 

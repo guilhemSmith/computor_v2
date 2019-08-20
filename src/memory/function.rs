@@ -6,19 +6,21 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 15:24:03 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 17:00:39 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::Variable;
-use crate::computor::ComputorResult;
+use super::Memory;
+
+use crate::computor::{ComputorError, ComputorResult};
 use crate::parser::TokenTree;
 use crate::types::Imaginary;
+
 use std::{fmt, vec::Vec};
 
 pub struct Function {
     name: String,
-    var: Vec<Variable>,
+    var: Vec<String>,
     expr: Option<Box<TokenTree>>,
 }
 
@@ -31,7 +33,7 @@ impl Function {
         }
     }
 
-    pub fn set(&mut self, mut vars: Vec<Variable>, expr: Box<TokenTree>) {
+    pub fn set(&mut self, mut vars: Vec<String>, expr: Box<TokenTree>) {
         vars.reverse();
         loop {
             match vars.pop() {
@@ -42,19 +44,19 @@ impl Function {
         self.expr = Some(expr);
     }
 
-    pub fn compute(&self, vals: Vec<Imaginary>) -> ComputorResult {
-        ComputorResult::default()
-    }
-
-    fn reset_var_val(&mut self) {
-        let mut var_iter = self.var.iter_mut();
-
-        loop {
-            match var_iter.next() {
-                Some(var) => var.set(None),
-                None => break,
-            };
+    pub fn compute(&self, mem: &Memory, arg: Vec<Imaginary>) -> ComputorResult {
+        let mut extended: Memory = mem.clone();
+        if arg.len() != self.var.len() {
+            return ComputorResult::Err(ComputorError::fun_arg_inv(&self.name));
         }
+        for i in 0..arg.len() {
+            extended.set_var(self.var[i], Some(arg[i]));
+        }
+        let res = match &self.expr {
+            Some(tree) => tree.compute(&extended),
+            None => ComputorResult::Err(ComputorError::fun_undef(&self.name)),
+        };
+        return res;
     }
 
     fn var_to_string(&self) -> String {
@@ -63,7 +65,7 @@ impl Function {
 
         loop {
             match var_iter.next() {
-                Some(var) => var_str = format!("{}, {}", var_str, var.name()),
+                Some(var) => var_str = format!("{}, {}", var_str, var),
                 None => break,
             }
         }
