@@ -6,13 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/18 19:25:15 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 14:39:23 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod arg_parse;
 mod computor;
-mod computor_error;
 mod lexer;
 mod memory;
 mod parser;
@@ -21,9 +20,8 @@ mod types;
 
 use crate::arg_parse::Param;
 use crate::computor::Computor;
-use crate::computor_error::ErrorKind;
+use crate::computor::ErrorKind;
 use crate::lexer::Lexer;
-use crate::memory::Memory;
 use crate::parser::Parser;
 use crate::timer::Timer;
 use std::{env, process};

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 13:50:21 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 14:39:09 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
 use crate::arg_parse::Param;
-use crate::computor_error::ComputorError;
+use crate::computor::ComputorError;
 use crate::Timer;
 
 use std::str::Chars;

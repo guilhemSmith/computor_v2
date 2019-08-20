@@ -6,17 +6,19 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 13:10:37 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 15:31:13 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
-use crate::computor::ComputorResult;
+use crate::computor::{ComputorError as CError, ComputorResult as CResult};
 use crate::memory::Memory;
 use crate::parser::TokenTree;
-// use crate::types::Imaginary;
+use crate::types::Imaginary;
+
 use std::any::Any;
 use std::fmt;
+use std::slice::Iter;
 
 pub struct FunctionToken {
     id: String,
@@ -64,7 +66,7 @@ impl Token for FunctionToken {
         self
     }
 
-    fn get_result(&self, _mem: &Memory) -> ComputorResult {
+    fn get_result(&self, _mem: &Memory) -> CResult {
         panic!("Function left behind by Parser: {:?}", self);
     }
 }
@@ -85,6 +87,55 @@ impl FunctionTree {
     pub fn param(&self) -> &Vec<Box<TokenTree>> {
         &self.param
     }
+
+    fn exec_fun(
+        &self,
+        mem: &Memory,
+        first: Imaginary,
+        mut iter: Iter<Box<TokenTree>>,
+    ) -> CResult {
+        let mut lst = vec![first];
+
+        loop {
+            match iter.next() {
+                Some(tree) => match tree.compute(mem) {
+                    CResult::Val(val) => lst.push(val),
+                    _ => return CResult::Err(CError::fun_arg_inv(&self.id)),
+                },
+                None => break,
+            }
+        }
+        match mem.get_fun(self.id.to_lowercase()) {
+            Some(fun) => fun.compute(lst),
+            None => CResult::Err(CError::fun_undefined(&self.id)),
+        }
+    }
+
+    fn setup_fun(
+        &self,
+        mem: &Memory,
+        first: String,
+        mut iter: Iter<Box<TokenTree>>,
+    ) -> CResult {
+        let mut lst = vec![first];
+
+        loop {
+            match iter.next() {
+                Some(tree) => match tree.compute(mem) {
+                    CResult::Var(name, coef, pow) => {
+                        if valid_var(coef, pow) {
+                            lst.push(name);
+                        } else {
+                            return CResult::Err(CError::fun_arg_inv(&self.id));
+                        }
+                    }
+                    _ => return CResult::Err(CError::fun_arg_inv(&self.id)),
+                },
+                None => break,
+            }
+        }
+        CResult::Fun(self.id.to_lowercase(), lst, None)
+    }
 }
 
 impl Token for FunctionTree {
@@ -96,8 +147,23 @@ impl Token for FunctionTree {
         self
     }
 
-    fn get_result(&self, _mem: &Memory) -> ComputorResult {
-        ComputorResult::default()
+    fn get_result(&self, mem: &Memory) -> CResult {
+        let mut iter_param = self.param.iter();
+
+        match iter_param.next() {
+            Some(param) => match param.compute(mem) {
+                CResult::Val(val) => self.exec_fun(mem, val, iter_param),
+                CResult::Var(name, coef, pow) => {
+                    if valid_var(coef, pow) {
+                        self.setup_fun(mem, name, iter_param)
+                    } else {
+                        CResult::Err(CError::fun_arg_inv(&self.id))
+                    }
+                }
+                _ => CResult::Err(CError::fun_arg_inv(&self.id)),
+            },
+            None => CResult::Err(CError::fun_arg_inv(&self.id)),
+        }
     }
 }
 
@@ -139,4 +205,8 @@ impl fmt::Debug for FunctionTree {
         }
         write!(f, "[fun:{}({})]", self.id, param.trim_start_matches(","))
     }
+}
+
+fn valid_var(coef: Imaginary, pow: Imaginary) -> bool {
+    coef == Imaginary::new(1.0, 0.0) && pow == Imaginary::new(1.0, 0.0)
 }

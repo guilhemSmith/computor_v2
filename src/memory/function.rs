@@ -6,12 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 10:26:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 15:24:03 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Variable;
+use crate::computor::ComputorResult;
 use crate::parser::TokenTree;
+use crate::types::Imaginary;
 use std::{fmt, vec::Vec};
 
 pub struct Function {
@@ -40,8 +42,8 @@ impl Function {
         self.expr = Some(expr);
     }
 
-    pub fn name(&self) -> &String {
-        &self.name
+    pub fn compute(&self, vals: Vec<Imaginary>) -> ComputorResult {
+        ComputorResult::default()
     }
 
     fn reset_var_val(&mut self) {

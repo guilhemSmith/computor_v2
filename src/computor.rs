@@ -6,20 +6,24 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 13:40:59 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 14:38:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+mod error;
 mod result;
+
+pub use error::{ComputorError, ErrorKind};
 pub use result::ComputorResult;
 
 use crate::arg_parse::Param;
-use crate::computor_error::ComputorError;
 use crate::lexer::token;
+use crate::memory::Memory;
 use crate::parser::TokenTree;
 use crate::timer::Timer;
 use crate::types::Imaginary;
-use crate::{memory::Variable, Memory};
+
+const LOG: &str = "[err:Computor] - ";
 
 pub struct Computor {
     verbose: bool,
@@ -61,21 +65,29 @@ impl Computor {
                 ComputorResult::Err(error) => self.print_err(error),
                 _ => {}
             },
-            n => eprintln!("[err:Computor] - {} invalid tokens. Abort.", n),
+            n => eprintln!("{}{} invalid tokens. Abort.", LOG, n),
         }
     }
 
     fn catch_var(&self, id: String) {
-        eprintln!("Unknown variable: '{}'.", id);
+        eprintln!("{}Unknown variable: '{}'.", LOG, id);
     }
 
     fn solve(&mut self, _id: String, _coefs: Vec<Imaginary>) {}
 
-    fn set_fun(&mut self, id: String, param: Vec<String>, exp: Box<TokenTree>) {
-        self.memory.set_fun(id, param, exp);
+    fn set_fun(
+        &mut self,
+        id: String,
+        param: Vec<String>,
+        exp: Option<Box<TokenTree>>,
+    ) {
+        match exp {
+            Some(fun) => self.memory.set_fun(id, param, fun),
+            None => eprintln!("{}'{}' need an expression to be set.", LOG, id),
+        }
     }
 
     fn print_err(&self, err: ComputorError) {
-        eprintln!("[err:Computor] - {}", err);
+        eprintln!("{}{}", LOG, err);
     }
 }

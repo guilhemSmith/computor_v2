@@ -6,12 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/19 10:10:40 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 13:40:21 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 14:39:39 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use crate::computor_error::ComputorError;
-use crate::memory::Variable;
+use super::ComputorError;
 use crate::parser::TokenTree;
 use crate::types::Imaginary;
 
@@ -21,7 +20,7 @@ pub enum ComputorResult {
     Val(Imaginary),
     Var(String, Imaginary, Imaginary),
     Equ(String, Vec<Imaginary>),
-    Fun(String, Vec<String>, Box<TokenTree>),
+    Fun(String, Vec<String>, Option<Box<TokenTree>>),
     Err(ComputorError),
 }
 

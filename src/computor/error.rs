@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   computor_error.rs                                  :+:      :+:    :+:   */
+/*   error.rs                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/19 18:01:47 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/20 15:31:12 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@ use std::{error::Error, fmt};
 #[derive(Debug, Clone, PartialEq)]
 pub enum ErrorKind {
     BadUseOperator,
+    FunUndefinded,
+    FunArgInv,
     DivByZero,
     InvalidInput,
     IO,
@@ -25,6 +27,8 @@ impl fmt::Display for ErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ErrorKind::BadUseOperator => write!(f, "bad use"),
+            ErrorKind::FunUndefinded => write!(f, "function"),
+            ErrorKind::FunArgInv => write!(f, "function"),
             ErrorKind::DivByZero => write!(f, "math"),
             ErrorKind::InvalidInput => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
@@ -53,6 +57,20 @@ impl ComputorError {
                 "must be preceded by a value",
                 "followed by a another value."
             ),
+        }
+    }
+
+    pub fn fun_undefined(name: &String) -> Self {
+        ComputorError {
+            kind: ErrorKind::FunUndefinded,
+            info: format!("{} is not defined as a function.", name),
+        }
+    }
+
+    pub fn fun_arg_inv(name: &String) -> Self {
+        ComputorError {
+            kind: ErrorKind::FunArgInv,
+            info: format!("{} did not received valid argument(s).", name),
         }
     }
 

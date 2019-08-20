@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/08/19 10:11:14 by gsmith           ###   ########.fr        #
+#    Updated: 2019/08/20 14:51:21 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,8 +19,8 @@ SRC			= $(addprefix src/, \
 				arg_parse.rs \
 				computor.rs \
 				$(addprefix computor/, \
+					error.rs \
 					result.rs) \
-				computor_error.rs \
 				main.rs \
 				memory.rs \
 				$(addprefix memory/, \
