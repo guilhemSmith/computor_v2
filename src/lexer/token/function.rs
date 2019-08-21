@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 11:41:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 12:31:15 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ impl Token for FunctionToken {
         _mem: &Memory,
         _ext: Option<&mut Extension>,
     ) -> CResult {
-        panic!("Function left behind by Parser: {:?}", self);
+        CResult::Err(CError::unparsed_token(self))
     }
 }
 

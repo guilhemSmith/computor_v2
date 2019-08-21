@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 11:41:45 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 12:34:28 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Token;
-use crate::computor::ComputorResult;
+use crate::computor::{ComputorError, ComputorResult};
 use crate::memory::{Extension, Memory};
 use std::any::Any;
 use std::fmt;
@@ -46,7 +46,7 @@ impl Token for Expression {
         _mem: &Memory,
         _ext: Option<&mut Extension>,
     ) -> ComputorResult {
-        panic!("Expression left behind by Parser: {:?}", self);
+        ComputorResult::Err(ComputorError::unparsed_token(self))
     }
 }
 

@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 15:47:12 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 11:41:25 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 12:31:30 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Token;
-use crate::computor::ComputorResult;
+use crate::computor::{ComputorError, ComputorResult};
 use crate::memory::{Extension, Memory};
 
 use std::any::Any;
@@ -70,6 +70,6 @@ impl Token for LexerError {
         _mem: &Memory,
         _ext: Option<&mut Extension>,
     ) -> ComputorResult {
-        panic!("Error left behind by Parser: {:?}", self);
+        ComputorResult::Err(ComputorError::unparsed_token(self))
     }
 }

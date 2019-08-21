@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 12:23:22 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 12:29:49 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
-use crate::computor::ComputorResult;
+use crate::computor::{ComputorError, ComputorResult};
 use crate::memory::{Extension, Memory};
 
 use std::any::Any;
@@ -50,7 +50,7 @@ impl Token for Operator {
         _mem: &Memory,
         _ext: Option<&mut Extension>,
     ) -> ComputorResult {
-        panic!("Operator left behind by Parser: {:?}", self)
+        ComputorResult::Err(ComputorError::unparsed_token(self))
     }
 }
 

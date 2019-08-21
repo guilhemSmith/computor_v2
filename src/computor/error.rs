@@ -6,10 +6,11 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 16:35:23 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 12:28:36 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+use crate::lexer::Token;
 use std::{error::Error, fmt};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -21,6 +22,7 @@ pub enum ErrorKind {
     InvalidInput,
     IO,
     IOStop,
+    UnparsedToken,
 }
 
 impl fmt::Display for ErrorKind {
@@ -33,6 +35,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::InvalidInput => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
+            ErrorKind::UnparsedToken => write!(f, "parser"),
         }
     }
 }
@@ -106,6 +109,13 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::IOStop,
             info: String::from("Input interrupted."),
+        }
+    }
+
+    pub fn unparsed_token(token: &Token) -> Self {
+        ComputorError {
+            kind: ErrorKind::UnparsedToken,
+            info: format!("Token left behind: {:?}.", token),
         }
     }
 }
