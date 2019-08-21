@@ -6,13 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:28:27 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 16:12:07 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 10:35:02 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use crate::types::Imaginary;
 use std::fmt;
 
+#[derive(Clone)]
 pub struct Variable {
     name: String,
     value: Option<Imaginary>,

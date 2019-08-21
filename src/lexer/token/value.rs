@@ -6,14 +6,15 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 16:48:26 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 10:48:35 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
 use crate::computor::ComputorResult;
-use crate::memory::Memory;
+use crate::memory::{Memory, Extension};
 use crate::types::Imaginary;
+
 use std::any::Any;
 use std::fmt;
 
@@ -69,7 +70,7 @@ impl Token for Value {
         self
     }
 
-    fn get_result(&self, _mem: &Memory) -> ComputorResult {
+    fn get_result(&self, _mem: &Memory, ext: Option<&mut Extension>) -> ComputorResult {
         ComputorResult::Val(self.value)
     }
 }

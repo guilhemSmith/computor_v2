@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 16:22:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 11:35:25 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ use crate::parser::TokenTree;
 use crate::timer::Timer;
 use crate::types::Imaginary;
 
-const LOG: &str = "[err:Computor] - ";
+const LOG: &str = "[err:Computor] -> ";
 
 pub struct Computor {
     verbose: bool,
@@ -42,7 +42,7 @@ impl Computor {
 
     pub fn read_tokens(&mut self, tree: Box<TokenTree>) {
         if self.verbose {
-            println!("[v:Computor] - tree received: {:?}", tree)
+            println!("[v:Computor] -> tree received: {:?}", tree)
         }
         if !self.bench {
             self.compute(tree);
@@ -55,7 +55,7 @@ impl Computor {
 
     fn compute(&mut self, tree: Box<TokenTree>) {
         match &tree.count(token::count_error) {
-            0 => match tree.compute(&mut self.memory) {
+            0 => match tree.compute(&mut self.memory, None) {
                 ComputorResult::Val(val) => println!("{}", val),
                 ComputorResult::Var(var, _, _) => self.catch_var(var),
                 ComputorResult::Equ(id, coefs) => self.solve(id, coefs),
@@ -88,6 +88,6 @@ impl Computor {
     }
 
     fn print_err(&self, err: ComputorError) {
-        eprintln!("{}{}", LOG, err);
+        eprintln!("{}", err);
     }
 }

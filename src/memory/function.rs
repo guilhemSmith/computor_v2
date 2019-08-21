@@ -6,16 +6,17 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 17:00:39 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 10:37:34 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::Memory;
+use super::{Memory, Extension};
 
 use crate::computor::{ComputorError, ComputorResult};
 use crate::parser::TokenTree;
 use crate::types::Imaginary;
 
+use std::collections::HashMap;
 use std::{fmt, vec::Vec};
 
 pub struct Function {
@@ -45,15 +46,15 @@ impl Function {
     }
 
     pub fn compute(&self, mem: &Memory, arg: Vec<Imaginary>) -> ComputorResult {
-        let mut extended: Memory = mem.clone();
         if arg.len() != self.var.len() {
             return ComputorResult::Err(ComputorError::fun_arg_inv(&self.name));
         }
-        for i in 0..arg.len() {
-            extended.set_var(self.var[i], Some(arg[i]));
-        }
+        let mut extended = Extension::new(); 
+        // for i in 0..arg.len() {
+        //     extended.set_var(self.var[i], Some(arg[i]));
+        // }
         let res = match &self.expr {
-            Some(tree) => tree.compute(&extended),
+            Some(tree) => tree.compute(mem, Some(&mut extended)),
             None => ComputorResult::Err(ComputorError::fun_undef(&self.name)),
         };
         return res;

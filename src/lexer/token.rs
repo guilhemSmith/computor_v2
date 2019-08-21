@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 16:47:23 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 10:44:06 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ pub use value::Value;
 pub use variable::Variable;
 
 use crate::computor::ComputorResult;
-use crate::memory::Memory;
+use crate::memory::{Memory, Extension};
 
 use std::any::Any;
 use std::fmt;
@@ -36,7 +36,7 @@ use std::fmt;
 pub trait Token: fmt::Display + fmt::Debug {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
-    fn get_result(&self, mem: &Memory) -> ComputorResult;
+    fn get_result(&self, mem: &Memory, ext: Option<&mut Extension>) -> ComputorResult;
 }
 
 pub fn count_error(token: &Box<Token>) -> i32 {

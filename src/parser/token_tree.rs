@@ -6,14 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:13:01 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 16:57:22 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 10:38:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::TreeBranch;
 use crate::computor::ComputorResult;
 use crate::lexer::Token;
-use crate::memory::Memory;
+use crate::memory::{Memory, Extension};
 
 use std::any::Any;
 use std::fmt;
@@ -25,7 +25,7 @@ pub trait TokenTree: fmt::Display + fmt::Debug {
     fn count(&self, foo: fn(&Box<Token>) -> i32) -> i32;
     fn is_full(&self) -> bool;
     fn set_as_exp(&mut self);
-    fn compute(&self, mem: &Memory) -> ComputorResult;
+    fn compute(&self, mem: &Memory, ext: Option<&mut Extension>) -> ComputorResult;
 }
 
 pub fn insert_in_tree(b_tree: &mut Box<TokenTree>, mut b_new: Box<TokenTree>) {

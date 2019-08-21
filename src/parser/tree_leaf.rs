@@ -6,14 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 16:47:14 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 10:39:24 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::TokenTree;
 use crate::computor::ComputorResult;
 use crate::lexer::Token;
-use crate::memory::Memory;
+use crate::memory::{Memory, Extension};
 
 use std::any::Any;
 use std::fmt;
@@ -51,8 +51,8 @@ impl TokenTree for TreeLeaf {
 
     fn set_as_exp(&mut self) {}
 
-    fn compute(&self, mem: &Memory) -> ComputorResult {
-        self.token.get_result(mem)
+    fn compute(&self, mem: &Memory, ext: Option<&mut Extension>) -> ComputorResult {
+        self.token.get_result(mem, ext)
     }
 }
 
