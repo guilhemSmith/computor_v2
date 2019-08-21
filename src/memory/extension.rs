@@ -6,11 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/21 10:31:53 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 10:37:18 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 12:00:25 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Variable;
+
+use crate::types::Imaginary;
 
 use std::collections::HashMap;
 
@@ -24,5 +26,17 @@ impl Extension {
         Extension {
             tmp_var: HashMap::new(),
         }
+    }
+
+    pub fn add(&mut self, name: &String, val: Imaginary) {
+        let lowercase = name.to_lowercase();
+        let mut new_tmp = Variable::new(name.clone());
+        new_tmp.set(Some(val));
+        self.tmp_var.insert(lowercase, new_tmp);
+    }
+
+    pub fn get(&self, name: &String) -> Option<&Variable> {
+        let lowercase = name.to_lowercase();
+        self.tmp_var.get(&lowercase)
     }
 }

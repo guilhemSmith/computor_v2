@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 11:42:06 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 12:00:09 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,9 @@ impl Function {
             return ComputorResult::Err(ComputorError::fun_arg_inv(&self.name));
         }
         let mut extended = Extension::new();
-        // for i in 0..arg.len() {
-        //     extended.set_var(self.var[i], Some(arg[i]));
-        // }
+        for i in 0..arg.len() {
+            extended.add(&self.var[i], arg[i]);
+        }
         let res = match &self.expr {
             Some(tree) => tree.compute(mem, Some(&mut extended)),
             None => ComputorResult::Err(ComputorError::fun_undef(&self.name)),
