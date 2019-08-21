@@ -28,7 +28,7 @@ pub use value::Value;
 pub use variable::Variable;
 
 use crate::computor::ComputorResult;
-use crate::memory::{Memory, Extension};
+use crate::memory::{Extension, Memory};
 
 use std::any::Any;
 use std::fmt;
@@ -36,7 +36,11 @@ use std::fmt;
 pub trait Token: fmt::Display + fmt::Debug {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
-    fn get_result(&self, mem: &Memory, ext: Option<&mut Extension>) -> ComputorResult;
+    fn get_result(
+        &self,
+        mem: &Memory,
+        ext: Option<&mut Extension>,
+    ) -> ComputorResult;
 }
 
 pub fn count_error(token: &Box<Token>) -> i32 {

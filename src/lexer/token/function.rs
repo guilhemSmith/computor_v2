@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 11:30:29 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 11:41:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ impl Token for FunctionToken {
     fn get_result(
         &self,
         _mem: &Memory,
-        ext: Option<&mut Extension>,
+        _ext: Option<&mut Extension>,
     ) -> CResult {
         panic!("Function left behind by Parser: {:?}", self);
     }

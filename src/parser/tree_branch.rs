@@ -13,7 +13,7 @@
 use super::TokenTree;
 use crate::computor::ComputorResult;
 use crate::lexer::{token::Operator, Token};
-use crate::memory::{Memory, Extension};
+use crate::memory::{Extension, Memory};
 
 use std::any::Any;
 use std::fmt;
@@ -182,25 +182,29 @@ impl TokenTree for TreeBranch {
         self.was_expr = true;
     }
 
-    fn compute(&self, mem: &Memory, mut ext: Option<&mut Extension>) -> ComputorResult {
+    fn compute(
+        &self,
+        mem: &Memory,
+        mut ext: Option<&mut Extension>,
+    ) -> ComputorResult {
         let orand_left = match &self.branch_left {
             None => ComputorResult::None,
-            Some(tree) =>  match &mut ext {
+            Some(tree) => match &mut ext {
                 Some(extend) => {
                     let mut ext_clone = extend.clone();
                     tree.compute(mem, Some(&mut ext_clone))
-                },
-                None => tree.compute(mem, None)
+                }
+                None => tree.compute(mem, None),
             },
         };
         let orand_right = match &self.branch_right {
             None => ComputorResult::None,
-            Some(tree) =>  match &mut ext {
+            Some(tree) => match &mut ext {
                 Some(extend) => {
                     let mut ext_clone = extend.clone();
                     tree.compute(mem, Some(&mut ext_clone))
-                },
-                None => tree.compute(mem, None)
+                }
+                None => tree.compute(mem, None),
             },
         };
         self.op_ref().exec(mem, orand_left, orand_right)

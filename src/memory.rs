@@ -46,7 +46,11 @@ impl Memory {
         };
     }
 
-    pub fn get_var(&self, name: &String, tmp_var: Option<&mut Extension>) -> Option<&Variable> {
+    pub fn get_var(
+        &self,
+        name: &String,
+        tmp_var: Option<&mut Extension>,
+    ) -> Option<&Variable> {
         self.var.get(name)
     }
 

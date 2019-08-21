@@ -13,7 +13,7 @@
 use super::TreeBranch;
 use crate::computor::ComputorResult;
 use crate::lexer::Token;
-use crate::memory::{Memory, Extension};
+use crate::memory::{Extension, Memory};
 
 use std::any::Any;
 use std::fmt;
@@ -25,7 +25,11 @@ pub trait TokenTree: fmt::Display + fmt::Debug {
     fn count(&self, foo: fn(&Box<Token>) -> i32) -> i32;
     fn is_full(&self) -> bool;
     fn set_as_exp(&mut self);
-    fn compute(&self, mem: &Memory, ext: Option<&mut Extension>) -> ComputorResult;
+    fn compute(
+        &self,
+        mem: &Memory,
+        ext: Option<&mut Extension>,
+    ) -> ComputorResult;
 }
 
 pub fn insert_in_tree(b_tree: &mut Box<TokenTree>, mut b_new: Box<TokenTree>) {

@@ -16,13 +16,13 @@ use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct Extension {
-	tmp_var: HashMap<String, Variable>,
+    tmp_var: HashMap<String, Variable>,
 }
 
 impl Extension {
-	pub fn new() -> Self {
-		Extension {
-			tmp_var: HashMap::new(),
-		}
-	}
+    pub fn new() -> Self {
+        Extension {
+            tmp_var: HashMap::new(),
+        }
+    }
 }

@@ -12,7 +12,7 @@
 
 use super::{LexerError, Token};
 use crate::computor::ComputorResult;
-use crate::memory::{Memory, Extension};
+use crate::memory::{Extension, Memory};
 use crate::types::Imaginary;
 use std::any::Any;
 use std::fmt;
@@ -59,7 +59,11 @@ impl Token for Variable {
         self
     }
 
-    fn get_result(&self, mem: &Memory, ext: Option<&mut Extension>) -> ComputorResult {
+    fn get_result(
+        &self,
+        mem: &Memory,
+        ext: Option<&mut Extension>,
+    ) -> ComputorResult {
         match mem.get_var(&self.id, ext) {
             Some(var) => match var.get() {
                 Some(val) => return ComputorResult::Val(val),

@@ -6,17 +6,16 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 10:37:34 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 11:42:06 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::{Memory, Extension};
+use super::{Extension, Memory};
 
 use crate::computor::{ComputorError, ComputorResult};
 use crate::parser::TokenTree;
 use crate::types::Imaginary;
 
-use std::collections::HashMap;
 use std::{fmt, vec::Vec};
 
 pub struct Function {
@@ -49,7 +48,7 @@ impl Function {
         if arg.len() != self.var.len() {
             return ComputorResult::Err(ComputorError::fun_arg_inv(&self.name));
         }
-        let mut extended = Extension::new(); 
+        let mut extended = Extension::new();
         // for i in 0..arg.len() {
         //     extended.set_var(self.var[i], Some(arg[i]));
         // }

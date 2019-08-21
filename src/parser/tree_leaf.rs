@@ -13,7 +13,7 @@
 use super::TokenTree;
 use crate::computor::ComputorResult;
 use crate::lexer::Token;
-use crate::memory::{Memory, Extension};
+use crate::memory::{Extension, Memory};
 
 use std::any::Any;
 use std::fmt;
@@ -51,7 +51,11 @@ impl TokenTree for TreeLeaf {
 
     fn set_as_exp(&mut self) {}
 
-    fn compute(&self, mem: &Memory, ext: Option<&mut Extension>) -> ComputorResult {
+    fn compute(
+        &self,
+        mem: &Memory,
+        ext: Option<&mut Extension>,
+    ) -> ComputorResult {
         self.token.get_result(mem, ext)
     }
 }
