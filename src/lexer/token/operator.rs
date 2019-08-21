@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 11:41:17 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/21 12:23:22 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,7 @@ use std::fmt;
 pub struct Operator {
     symbol: char,
     priority: i32,
-    // op: fn(
-    //     &Self,
-    //     &Token,
-    //     &Token,
-    //     bool,
-    // ) -> Result<(Vec<Rc<Token>>), ComputorError>,
+    op: fn(&Self, ComputorResult, ComputorResult) -> ComputorResult,
 }
 
 impl fmt::Display for Operator {
@@ -62,16 +57,34 @@ impl Token for Operator {
 impl Operator {
     pub fn new(symbol: char) -> Result<Self, LexerError> {
         let priority: i32;
+        let op: fn(&Self, ComputorResult, ComputorResult) -> ComputorResult;
         match symbol {
-            '=' => priority = 0,
-            '+' | '-' => priority = 1,
-            '*' | '/' => priority = 2,
+            '=' => {
+                priority = 0;
+                op = Operator::equal;
+            }
+            '+' => {
+                priority = 1;
+                op = Operator::add;
+            }
+            '-' => {
+                priority = 1;
+                op = Operator::sub;
+            }
+            '*' => {
+                priority = 2;
+                op = Operator::mul;
+            }
+            '/' => {
+                priority = 2;
+                op = Operator::div;
+            }
             _ => return Err(LexerError::InvalidOp(symbol)),
         };
         Ok(Operator {
             symbol: symbol,
             priority: priority,
-            // op: op,
+            op: op,
         })
     }
 
@@ -89,8 +102,46 @@ impl Operator {
         orand_l: ComputorResult,
         orand_r: ComputorResult,
     ) -> ComputorResult {
-        match (orand_l, orand_r) {
-            _ => ComputorResult::default(),
-        }
+        (self.op)(self, orand_l, orand_r)
+    }
+
+    fn equal(
+        &self,
+        orand_l: ComputorResult,
+        orand_r: ComputorResult,
+    ) -> ComputorResult {
+        ComputorResult::default()
+    }
+
+    fn mul(
+        &self,
+        orand_l: ComputorResult,
+        orand_r: ComputorResult,
+    ) -> ComputorResult {
+        ComputorResult::default()
+    }
+
+    fn div(
+        &self,
+        orand_l: ComputorResult,
+        orand_r: ComputorResult,
+    ) -> ComputorResult {
+        ComputorResult::default()
+    }
+
+    fn add(
+        &self,
+        orand_l: ComputorResult,
+        orand_r: ComputorResult,
+    ) -> ComputorResult {
+        ComputorResult::default()
+    }
+
+    fn sub(
+        &self,
+        orand_l: ComputorResult,
+        orand_r: ComputorResult,
+    ) -> ComputorResult {
+        ComputorResult::default()
     }
 }
