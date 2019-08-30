@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/30 12:24:25 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/30 14:07:04 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
-use crate::computor::{ComputorError as CError, ComputorResult as CResult};
+use crate::computor::{ComputorError as CErr, ComputorResult as CRes};
 use crate::memory::{Extension, Memory};
 use crate::types::Imaginary;
 
@@ -22,7 +22,7 @@ use std::fmt;
 pub struct Operator {
     symbol: char,
     priority: i32,
-    op: fn(&Self, CResult, CResult) -> CResult,
+    op: fn(&Self, CRes, CRes) -> CRes,
 }
 
 impl fmt::Display for Operator {
@@ -46,19 +46,15 @@ impl Token for Operator {
         self
     }
 
-    fn get_result(
-        &self,
-        _mem: &Memory,
-        _ext: Option<&mut Extension>,
-    ) -> CResult {
-        CResult::Err(CError::unparsed_token(self))
+    fn get_result(&self, _mem: &Memory, _ext: Option<&mut Extension>) -> CRes {
+        CRes::Err(CErr::unparsed_token(self))
     }
 }
 
 impl Operator {
     pub fn new(symbol: char) -> Result<Self, LexerError> {
         let priority: i32;
-        let op: fn(&Self, CResult, CResult) -> CResult;
+        let op: fn(&Self, CRes, CRes) -> CRes;
         match symbol {
             '=' => {
                 priority = 0;
@@ -80,6 +76,10 @@ impl Operator {
                 priority = 2;
                 op = Operator::div;
             }
+            '^' => {
+                priority = 3;
+                op = Operator::pow;
+            }
             _ => return Err(LexerError::InvalidOp(symbol)),
         };
         Ok(Operator {
@@ -94,57 +94,66 @@ impl Operator {
     }
 
     pub fn set_prior_as_exp(&mut self) {
-        self.priority = 3;
+        self.priority = 4;
     }
 
-    pub fn exec(
-        &self,
-        _mem: &Memory,
-        orand_l: CResult,
-        orand_r: CResult,
-    ) -> CResult {
+    pub fn exec(&self, _mem: &Memory, orand_l: CRes, orand_r: CRes) -> CRes {
         (self.op)(self, orand_l, orand_r)
     }
 
-    fn equal(&self, orand_l: CResult, orand_r: CResult) -> CResult {
+    fn equal(&self, orand_l: CRes, orand_r: CRes) -> CRes {
+        let one = Imaginary::new(1.0, 0.0);
         match (orand_l, orand_r) {
-            (CResult::Err(err), _) => CResult::Err(err),
-            (_, CResult::Err(err)) => CResult::Err(err),
-            (CResult::None, _) => CResult::Err(CError::bad_use_op(self.symbol)),
-            (_, CResult::None) => CResult::Err(CError::bad_use_op(self.symbol)),
-            (CResult::Val(val), CResult::Res) => CResult::Val(val),
-            (CResult::Var(var, coef, pow), CResult::Res) => {
-                CResult::Var(var, coef, pow)
-            }
-            (CResult::Var(var, coef, pow), CResult::Val(val)) => {
-                let one = Imaginary::new(1.0, 0.0);
+            (CRes::Err(err), _) => CRes::Err(err),
+            (_, CRes::Err(err)) => CRes::Err(err),
+            (CRes::None, _) => CRes::Err(CErr::bad_use_op(self.symbol)),
+            (_, CRes::None) => CRes::Err(CErr::bad_use_op(self.symbol)),
+            (CRes::Val(val), CRes::Res) => CRes::Val(val),
+            (CRes::Var(var, coef, pow), CRes::Res) => CRes::Var(var, coef, pow),
+            (CRes::Var(var, coef, pow), CRes::Val(val)) => {
                 if pow == one {
                     if coef == one {
-                        CResult::Set(var, val)
+                        CRes::Set(var, val)
                     } else {
-                        CResult::default()
+                        CRes::default()
                     }
                 } else {
-                    CResult::default()
+                    CRes::default()
                 }
             }
-            (_, _) => CResult::default(),
+            (CRes::Equ(id_l, vec_l, false), CRes::Equ(id_r, vec_r, false)) => {
+                if id_l == id_r {
+                    merge_equ(id_l, vec_l, vec_r)
+                } else {
+                    CRes::default()
+                }
+            }
+            (CRes::Equ(_, _, _), CRes::Equ(_, _, _)) => CRes::default(),
+            (_, _) => CRes::default(),
         }
     }
 
-    fn mul(&self, orand_l: CResult, orand_r: CResult) -> CResult {
-        CResult::default()
+    fn mul(&self, orand_l: CRes, orand_r: CRes) -> CRes {
+        CRes::default()
     }
 
-    fn div(&self, orand_l: CResult, orand_r: CResult) -> CResult {
-        CResult::default()
+    fn div(&self, orand_l: CRes, orand_r: CRes) -> CRes {
+        CRes::default()
     }
 
-    fn add(&self, orand_l: CResult, orand_r: CResult) -> CResult {
-        CResult::default()
+    fn add(&self, orand_l: CRes, orand_r: CRes) -> CRes {
+        CRes::default()
     }
 
-    fn sub(&self, orand_l: CResult, orand_r: CResult) -> CResult {
-        CResult::default()
+    fn sub(&self, orand_l: CRes, orand_r: CRes) -> CRes {
+        CRes::default()
     }
+
+    fn pow(&self, orand_l: CRes, orand_r: CRes) -> CRes {
+        CRes::default()
+    }
+}
+
+fn merge_equ(id: String, lft: Vec<Imaginary>, rght: Vec<Imaginary>) -> CRes {
+    CRes::Equ(id, Vec::new(), true)
 }
