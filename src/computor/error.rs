@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 12:28:36 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/30 10:42:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,14 +66,14 @@ impl ComputorError {
     pub fn fun_undef(name: &String) -> Self {
         ComputorError {
             kind: ErrorKind::FunUndefinded,
-            info: format!("{} is not defined as a function.", name),
+            info: format!("'{}' is not defined as a function.", name),
         }
     }
 
     pub fn fun_arg_inv(name: &String) -> Self {
         ComputorError {
             kind: ErrorKind::FunArgInv,
-            info: format!("{} did not received valid argument(s).", name),
+            info: format!("'{}' did not received valid argument(s).", name),
         }
     }
 

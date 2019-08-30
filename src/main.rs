@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 14:39:23 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/30 10:40:59 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,7 @@ use crate::timer::Timer;
 use std::{env, process};
 
 fn main() {
-    println!("Computor start.");
     let exit_code = main_wrapped();
-    println!("Computor stop.");
     process::exit(exit_code);
 }
 
