@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 11:58:43 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/30 17:15:36 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,17 +46,13 @@ impl Memory {
         };
     }
 
-    pub fn get_var<'ext, 'mem: 'ext>(
+    pub fn get_var_val<'ext, 'mem: 'ext>(
         &'mem self,
         name: &String,
-        tmp_var: Option<&'ext mut Extension>,
-    ) -> Option<&'ext Variable> {
-        match tmp_var {
-            Some(ext) => match ext.get(name) {
-                Some(var) => Some(var),
-                None => self.var.get(name),
-            },
-            None => self.var.get(name),
+    ) -> Option<Imaginary> {
+        match self.var.get(name) {
+            None => None,
+            Some(var) => var.get(),
         }
     }
 

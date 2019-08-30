@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/30 10:42:46 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/30 17:53:12 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ pub enum ErrorKind {
     InvalidInput,
     IO,
     IOStop,
+    TooManyEqual,
     UnparsedToken,
 }
 
@@ -35,6 +36,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::InvalidInput => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
+            ErrorKind::TooManyEqual => write!(f, "instruction"),
             ErrorKind::UnparsedToken => write!(f, "parser"),
         }
     }
@@ -109,6 +111,13 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::IOStop,
             info: String::from("Input interrupted."),
+        }
+    }
+
+    pub fn too_many_equal() -> Self {
+        ComputorError {
+            kind: ErrorKind::TooManyEqual,
+            info: String::from("Too many equal sign given."),
         }
     }
 

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/21 10:31:53 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 12:00:25 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/30 17:14:06 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,11 @@ impl Extension {
         self.tmp_var.insert(lowercase, new_tmp);
     }
 
-    pub fn get(&self, name: &String) -> Option<&Variable> {
+    pub fn get(&self, name: &String) -> Option<Imaginary> {
         let lowercase = name.to_lowercase();
-        self.tmp_var.get(&lowercase)
+        match self.tmp_var.get(&lowercase) {
+            None => None,
+            Some(var) => var.get(),
+        }
     }
 }

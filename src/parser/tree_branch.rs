@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 10:57:10 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/30 18:19:15 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,14 @@ impl TreeBranch {
     pub fn op_ref(&self) -> &Operator {
         let extractor = &self.token;
         return extractor.as_any().downcast_ref::<Operator>().unwrap();
+    }
+
+    pub fn extract(&mut self, extr: &mut Option<Box<TokenTree>>, side_l: bool) {
+        if side_l {
+            std::mem::swap(extr, &mut self.branch_left);
+        } else {
+            std::mem::swap(extr, &mut self.branch_right);
+        }
     }
 
     pub fn default_to_left(leaf: &mut Box<TokenTree>, next: Box<TokenTree>) {

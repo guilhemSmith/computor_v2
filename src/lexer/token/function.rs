@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 12:31:15 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/30 17:57:37 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,10 @@ impl FunctionTree {
                             lst.push(val);
                             Ok(true)
                         }
+                        CResult::VarCall(_, val) => {
+                            lst.push(val);
+                            Ok(true)
+                        }
                         _ => {
                             return Err(CResult::Err(CError::fun_arg_inv(
                                 &self.id,
@@ -156,15 +160,9 @@ impl FunctionTree {
             |extend: Option<&mut Extension>| -> Result<bool, CResult> {
                 match iter.next() {
                     Some(tree) => match tree.compute(mem, extend) {
-                        CResult::Var(name, coef, pow) => {
-                            if valid_var(coef, pow) {
-                                lst.push(name);
-                                return Ok(true);
-                            } else {
-                                return Err(CResult::Err(CError::fun_arg_inv(
-                                    &self.id,
-                                )));
-                            }
+                        CResult::VarSet(name) => {
+                            lst.push(name);
+                            return Ok(true);
                         }
                         _ => {
                             return Err(CResult::Err(CError::fun_arg_inv(
@@ -193,7 +191,7 @@ impl FunctionTree {
                 }
             },
         }
-        CResult::Fun(self.id.to_lowercase(), lst, None)
+        CResult::FunSet(self.id.to_lowercase(), lst)
     }
 }
 
@@ -220,12 +218,11 @@ impl Token for FunctionTree {
                         CResult::Val(val) => {
                             self.exec_fun(mem, extend, val, iter_param)
                         }
-                        CResult::Var(name, coef, pow) => {
-                            if valid_var(coef, pow) {
-                                self.setup_fun(mem, extend, name, iter_param)
-                            } else {
-                                CResult::Err(CError::fun_arg_inv(&self.id))
-                            }
+                        CResult::VarCall(_, val) => {
+                            self.exec_fun(mem, extend, val, iter_param)
+                        }
+                        CResult::VarSet(name) => {
+                            self.setup_fun(mem, extend, name, iter_param)
                         }
                         _ => CResult::Err(CError::fun_arg_inv(&self.id)),
                     },
@@ -281,8 +278,4 @@ impl fmt::Debug for FunctionTree {
         }
         write!(f, "[fun:{}({})]", self.id, param.trim_start_matches(","))
     }
-}
-
-fn valid_var(coef: Imaginary, pow: Imaginary) -> bool {
-    coef == Imaginary::new(1.0, 0.0) && pow == Imaginary::new(1.0, 0.0)
 }
