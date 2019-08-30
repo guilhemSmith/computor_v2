@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:16:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 10:50:36 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/30 11:51:13 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,16 +61,9 @@ impl Token for Variable {
 
     fn get_result(
         &self,
-        mem: &Memory,
-        ext: Option<&mut Extension>,
+        _mem: &Memory,
+        _ext: Option<&mut Extension>,
     ) -> ComputorResult {
-        match mem.get_var(&self.id, ext) {
-            Some(var) => match var.get() {
-                Some(val) => return ComputorResult::Val(val),
-                None => {}
-            },
-            None => {}
-        };
         ComputorResult::Var(
             self.id.to_lowercase(),
             Imaginary::new(1.0, 0.0),

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 11:35:25 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/08/30 11:55:15 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,12 @@ impl Computor {
         match &tree.count(token::count_error) {
             0 => match tree.compute(&mut self.memory, None) {
                 ComputorResult::Val(val) => println!("{}", val),
-                ComputorResult::Var(var, _, _) => self.catch_var(var),
-                ComputorResult::Equ(id, coefs) => self.solve(id, coefs),
+                ComputorResult::Var(var, coef, pow) => {
+                    self.catch_var(var, coef, pow)
+                }
+                ComputorResult::Set(var, val) => self.set_var(var, val),
+                ComputorResult::Equ(id, coefs, true) => self.solve(id, coefs),
+                ComputorResult::Equ(_, _, false) => self.uncomplete(),
                 ComputorResult::Fun(id, param, exp) => {
                     self.set_fun(id, param, exp)
                 }
@@ -69,11 +73,26 @@ impl Computor {
         }
     }
 
-    fn catch_var(&self, id: String) {
-        eprintln!("{}Unknown variable: '{}'.", LOG, id);
+    fn catch_var(&self, id: String, coef: Imaginary, pow: Imaginary) {
+        match self.memory.get_var(&id, None) {
+            Some(var) => match var.get() {
+                Some(val) => println!("{}", coef * val),
+                None => eprintln!("{}Unknown variable: '{}'.", LOG, id),
+            },
+            None => eprintln!("{}Unknown variable: '{}'.", LOG, id),
+        };
     }
 
-    fn solve(&mut self, _id: String, _coefs: Vec<Imaginary>) {}
+    fn set_var(&mut self, var: String, val: Imaginary) {
+        self.memory.set_var(var, Some(val));
+        println!("{}", val);
+    }
+
+    fn solve(&self, _id: String, _coefs: Vec<Imaginary>) {}
+
+    fn uncomplete(&self) {
+        eprintln!("{}Can't compute uncompleted expression.", LOG);
+    }
 
     fn set_fun(
         &mut self,
