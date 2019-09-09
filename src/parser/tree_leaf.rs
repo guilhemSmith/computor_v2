@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 10:39:24 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 11:57:11 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@ use std::any::Any;
 use std::fmt;
 
 pub struct TreeLeaf {
-    token: Box<Token>,
+    token: Box<dyn Token>,
 }
 
 impl TreeLeaf {
-    pub fn new(token: Box<Token>) -> Self {
+    pub fn new(token: Box<dyn Token>) -> Self {
         TreeLeaf { token: token }
     }
 }
@@ -33,15 +33,15 @@ impl TokenTree for TreeLeaf {
         self
     }
 
-    fn token(&self) -> &Box<Token> {
+    fn token(&self) -> &Box<dyn Token> {
         &self.token
     }
 
-    fn iter(&self, foo: fn(&Box<Token>)) {
+    fn iter(&self, foo: fn(&Box<dyn Token>)) {
         foo(self.token());
     }
 
-    fn count(&self, foo: fn(&Box<Token>) -> i32) -> i32 {
+    fn count(&self, foo: fn(&Box<dyn Token>) -> i32) -> i32 {
         foo(&self.token)
     }
 

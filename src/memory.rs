@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/30 17:15:36 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 12:00:07 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ impl Memory {
         &mut self,
         name: String,
         var: Vec<String>,
-        exp: Box<TokenTree>,
+        exp: Box<dyn TokenTree>,
     ) {
         let case = name.to_lowercase();
 

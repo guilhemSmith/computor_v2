@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 15:47:12 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 12:31:30 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 11:59:11 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ pub enum LexerError {
     InvalidVal(String),
     InvalidVar(String),
     InvalidPar(String),
-    InvalidFun(String, Vec<Vec<Box<Token>>>),
+    InvalidFun(String, Vec<Vec<Box<dyn Token>>>),
 }
 
 impl Error for LexerError {}

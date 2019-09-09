@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:28:47 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 12:34:28 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 12:06:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ use std::any::Any;
 use std::fmt;
 
 pub struct Expression {
-    tokens: Vec<Box<Token>>,
+    tokens: Vec<Box<dyn Token>>,
 }
 
 impl fmt::Display for Expression {
@@ -51,7 +51,7 @@ impl Token for Expression {
 }
 
 impl Expression {
-    pub fn new(tokens: Vec<Box<Token>>) -> Self {
+    pub fn new(tokens: Vec<Box<dyn Token>>) -> Self {
         Expression { tokens: tokens }
     }
 
@@ -59,8 +59,8 @@ impl Expression {
         self.tokens.len()
     }
 
-    pub fn consume_tokens(&mut self) -> Vec<Box<Token>> {
-        let mut extractor: Vec<Box<Token>> = Vec::new();
+    pub fn consume_tokens(&mut self) -> Vec<Box<dyn Token>> {
+        let mut extractor: Vec<Box<dyn Token>> = Vec::new();
         std::mem::swap(&mut self.tokens, &mut extractor);
         return extractor;
     }

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/30 17:53:12 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 12:21:06 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@ use std::{error::Error, fmt};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ErrorKind {
+    BadResolve,
     BadUseOperator,
     FunUndefinded,
     FunArgInv,
@@ -29,6 +30,7 @@ pub enum ErrorKind {
 impl fmt::Display for ErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            ErrorKind::BadResolve => write!(f, "bad use"),
             ErrorKind::BadUseOperator => write!(f, "bad use"),
             ErrorKind::FunUndefinded => write!(f, "function"),
             ErrorKind::FunArgInv => write!(f, "function"),
@@ -51,6 +53,15 @@ pub struct ComputorError {
 impl ComputorError {
     pub fn kind(&self) -> &ErrorKind {
         &self.kind
+    }
+
+    pub fn bad_resolve() -> Self {
+        ComputorError {
+            kind: ErrorKind::BadResolve,
+            info: String::from(
+                "Resolve symbol '?' must be at the end of the instruction.",
+            ),
+        }
     }
 
     pub fn bad_use_op(op: char) -> Self {

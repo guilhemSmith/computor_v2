@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/30 17:57:37 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 11:59:32 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,13 @@ use std::slice::Iter;
 
 pub struct FunctionToken {
     id: String,
-    param: Vec<Vec<Box<Token>>>,
+    param: Vec<Vec<Box<dyn Token>>>,
 }
 
 impl FunctionToken {
     pub fn new(
         id: String,
-        vars: Vec<Vec<Box<Token>>>,
+        vars: Vec<Vec<Box<dyn Token>>>,
     ) -> Result<Self, LexerError> {
         let mut chars = id.chars();
 
@@ -50,8 +50,8 @@ impl FunctionToken {
         &self.id
     }
 
-    pub fn consume_param(&mut self) -> Vec<Vec<Box<Token>>> {
-        let mut extractor: Vec<Vec<Box<Token>>> = Vec::new();
+    pub fn consume_param(&mut self) -> Vec<Vec<Box<dyn Token>>> {
+        let mut extractor: Vec<Vec<Box<dyn Token>>> = Vec::new();
         std::mem::swap(&mut self.param, &mut extractor);
         return extractor;
     }
@@ -77,18 +77,18 @@ impl Token for FunctionToken {
 
 pub struct FunctionTree {
     id: String,
-    param: Vec<Box<TokenTree>>,
+    param: Vec<Box<dyn TokenTree>>,
 }
 
 impl FunctionTree {
-    pub fn new(id: String, vars: Vec<Box<TokenTree>>) -> Self {
+    pub fn new(id: String, vars: Vec<Box<dyn TokenTree>>) -> Self {
         FunctionTree {
             id: id,
             param: vars,
         }
     }
 
-    pub fn param(&self) -> &Vec<Box<TokenTree>> {
+    pub fn param(&self) -> &Vec<Box<dyn TokenTree>> {
         &self.param
     }
 
@@ -97,7 +97,7 @@ impl FunctionTree {
         mem: &Memory,
         mut ext: Option<&mut Extension>,
         first: Imaginary,
-        mut iter: Iter<Box<TokenTree>>,
+        mut iter: Iter<Box<dyn TokenTree>>,
     ) -> CResult {
         let mut lst = vec![first];
 
@@ -152,7 +152,7 @@ impl FunctionTree {
         mem: &Memory,
         mut ext: Option<&mut Extension>,
         first: String,
-        mut iter: Iter<Box<TokenTree>>,
+        mut iter: Iter<Box<dyn TokenTree>>,
     ) -> CResult {
         let mut lst = vec![first];
 

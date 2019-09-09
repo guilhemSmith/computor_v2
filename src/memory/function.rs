@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 12:00:09 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 11:58:17 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ use std::{fmt, vec::Vec};
 pub struct Function {
     name: String,
     var: Vec<String>,
-    expr: Option<Box<TokenTree>>,
+    expr: Option<Box<dyn TokenTree>>,
 }
 
 impl Function {
@@ -33,7 +33,7 @@ impl Function {
         }
     }
 
-    pub fn set(&mut self, mut vars: Vec<String>, expr: Box<TokenTree>) {
+    pub fn set(&mut self, mut vars: Vec<String>, expr: Box<dyn TokenTree>) {
         vars.reverse();
         loop {
             match vars.pop() {

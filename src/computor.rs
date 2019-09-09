@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/30 18:43:53 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 12:25:32 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ impl Computor {
         }
     }
 
-    pub fn read_tokens(&mut self, tree: Box<TokenTree>) {
+    pub fn read_tokens(&mut self, tree: Box<dyn TokenTree>) {
         if self.verbose {
             println!("[v:Computor] -> tree received: {:?}", tree)
         }
@@ -53,46 +53,33 @@ impl Computor {
         }
     }
 
-    fn compute(&mut self, mut tree: Box<TokenTree>) {
+    fn compute(&mut self, mut tree: Box<dyn TokenTree>) {
         let n = tree.count(token::count_error);
         if n > 0 {
             eprintln!("{}{} invalid tokens. Abort.", LOG, n);
             return;
         }
 
-        let mut left: Option<Box<TokenTree>> = None;
-        let mut right: Option<Box<TokenTree>> = None;
+        let left: Option<Box<dyn TokenTree>>;
+        let right: Option<Box<dyn TokenTree>>;
         match tree.as_any().downcast_mut::<TreeBranch>() {
-            None => self.single_part(tree),
+            None => return self.single_part(tree),
             Some(branch) => {
                 if branch.op_ref().symbol() != '=' {
-                    self.single_part(tree);
-                    return;
+                    return self.single_part(tree);
                 } else {
-                    branch.extract(&mut left, true);
-                    branch.extract(&mut right, false);
+                    left = branch.extract(true);
+                    right = branch.extract(false);
                 }
             }
         };
-        match (left, right) {
-            (Some(br_left), Some(br_right)) => {
-                let comp_l = br_left.compute(&mut self.memory, None);
-                let comp_r = br_right.compute(&mut self.memory, None);
-                match (comp_l, comp_r) {
-                    (_, CRes::Err(err)) => self.print_err(err),
-                    (CRes::Err(err), _) => self.print_err(err),
-                    (CRes::None, _) => self.log_err("Instruction side empty"),
-                    (_, CRes::None) => self.log_err("Instruction side empty"),
-                    (CRes::Val(val), CRes::Res) => println!("{}", val),
-                    (CRes::VarCall(_, val), CRes::Res) => println!("{}", val),
-                    (_, CRes::Res) => self.log_err("Invalid '?' use"),
-                }
-            }
-            (_, _) => eprintln!("{}", ComputorError::bad_use_op('=')),
-        }
+        if let (Some(br_left), Some(br_right)) = (left, right) {
+            return self.dual_part(br_left, br_right);
+        };
+        eprintln!("{}", ComputorError::bad_use_op('='));
     }
 
-    fn single_part(&mut self, tree: Box<TokenTree>) {
+    fn single_part(&mut self, tree: Box<dyn TokenTree>) {
         match tree.compute(&mut self.memory, None) {
             CRes::None => self.log_err("Empty instruction given"),
             CRes::Res => self.mem_dump(),
@@ -103,6 +90,19 @@ impl Computor {
             CRes::FunSet(_, _) => self.log_err("Unknown function"),
             CRes::Equ(_, _) => self.log_err("One sided equation"),
         };
+    }
+
+    fn dual_part(&mut self, left: Box<dyn TokenTree>, right: Box<dyn TokenTree>) {
+        match left.compute(&mut self.memory, None) {
+            CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
+            CRes::Res => eprintln!("{}", ComputorError::bad_resolve()),
+            CRes::Err(err) => self.print_err(err),
+            CRes::Val(val) => println!("{}", val),
+            CRes::VarCall(_, val) => println!("{}", val),
+            CRes::VarSet(_) => self.log_err("Unknown variable"),
+            CRes::FunSet(_, _) => self.log_err("Unknown function"),
+            CRes::Equ(_, _) => self.log_err("One sided equation"),
+        }
     }
 
     // fn var_pr(&self, id: String, coef: Imaginary, pow: Imaginary) {
@@ -123,7 +123,7 @@ impl Computor {
     //     &mut self,
     //     id: String,
     //     param: Vec<String>,
-    //     exp: Option<Box<TokenTree>>,
+    //     exp: Option<Box<dyn TokenTree>>,
     // ) {
     //     match exp {
     //         Some(fun) => self.memory.set_fun(id, param, fun),

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 11:26:23 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 11:56:41 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,8 @@ impl Parser {
 
     pub fn parse_tokens(
         &self,
-        tokens: Vec<Box<Token>>,
-    ) -> Option<Box<TokenTree>> {
+        tokens: Vec<Box<dyn Token>>,
+    ) -> Option<Box<dyn TokenTree>> {
         if self.verbose {
             println!(
                 "[v:Parser] - token stack received : {}",
@@ -58,8 +58,11 @@ impl Parser {
         }
     }
 
-    fn parse(&self, mut tokens: Vec<Box<Token>>) -> Option<Box<TokenTree>> {
-        let mut tree: Box<TokenTree>;
+    fn parse(
+        &self,
+        mut tokens: Vec<Box<dyn Token>>,
+    ) -> Option<Box<dyn TokenTree>> {
+        let mut tree: Box<dyn TokenTree>;
 
         match tokens.pop() {
             Some(token) => {
@@ -84,7 +87,10 @@ impl Parser {
         }
     }
 
-    fn token_to_node(&self, mut token: Box<Token>) -> Option<Box<TokenTree>> {
+    fn token_to_node(
+        &self,
+        mut token: Box<dyn Token>,
+    ) -> Option<Box<dyn TokenTree>> {
         let op = &mut token;
         match op.as_any_mut().downcast_mut::<Operator>() {
             None => match op.as_any_mut().downcast_mut::<Expression>() {
@@ -98,7 +104,7 @@ impl Parser {
         }
     }
 
-    fn expr_to_node(&self, exp: &mut Expression) -> Option<Box<TokenTree>> {
+    fn expr_to_node(&self, exp: &mut Expression) -> Option<Box<dyn TokenTree>> {
         let mut exp_token = self.parse_tokens(exp.consume_tokens());
         match &mut exp_token {
             None => {}
@@ -107,9 +113,12 @@ impl Parser {
         exp_token
     }
 
-    fn fun_to_node(&self, fun: &mut FunctionToken) -> Option<Box<TokenTree>> {
+    fn fun_to_node(
+        &self,
+        fun: &mut FunctionToken,
+    ) -> Option<Box<dyn TokenTree>> {
         let id = fun.id().clone();
-        let mut param_tree: Vec<Box<TokenTree>> = Vec::new();
+        let mut param_tree: Vec<Box<dyn TokenTree>> = Vec::new();
         for param in fun.consume_param() {
             let arg = self.parse_tokens(param);
             match arg {
@@ -120,7 +129,7 @@ impl Parser {
                 Some(boxed_tree) => param_tree.push(boxed_tree),
             }
         }
-        let token: Box<Token> = Box::new(FunctionTree::new(id, param_tree));
+        let token: Box<dyn Token> = Box::new(FunctionTree::new(id, param_tree));
         return Some(Box::new(TreeLeaf::new(token)));
     }
 }

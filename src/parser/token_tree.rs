@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:13:01 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 10:38:54 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 11:58:01 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@ use std::fmt;
 
 pub trait TokenTree: fmt::Display + fmt::Debug {
     fn as_any(&mut self) -> &mut dyn Any;
-    fn token(&self) -> &Box<Token>;
-    fn iter(&self, foo: fn(&Box<Token>));
-    fn count(&self, foo: fn(&Box<Token>) -> i32) -> i32;
+    fn token(&self) -> &Box<dyn Token>;
+    fn iter(&self, foo: fn(&Box<dyn Token>));
+    fn count(&self, foo: fn(&Box<dyn Token>) -> i32) -> i32;
     fn is_full(&self) -> bool;
     fn set_as_exp(&mut self);
     fn compute(
@@ -32,7 +32,10 @@ pub trait TokenTree: fmt::Display + fmt::Debug {
     ) -> ComputorResult;
 }
 
-pub fn insert_in_tree(b_tree: &mut Box<TokenTree>, mut b_new: Box<TokenTree>) {
+pub fn insert_in_tree(
+    b_tree: &mut Box<dyn TokenTree>,
+    mut b_new: Box<dyn TokenTree>,
+) {
     let tree = b_tree.as_any().downcast_mut::<TreeBranch>();
     let new = b_new.as_any().downcast_mut::<TreeBranch>();
 

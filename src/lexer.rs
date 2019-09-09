@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/20 14:39:09 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 11:56:04 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ impl Lexer {
         }
     }
 
-    pub fn read_input(&mut self) -> Result<Vec<Box<Token>>, ComputorError> {
+    pub fn read_input(&mut self) -> Result<Vec<Box<dyn Token>>, ComputorError> {
         let readline = self.line.readline(PROMPT);
         match readline {
             Ok(line) => {
@@ -72,7 +72,10 @@ impl Lexer {
         }
     }
 
-    fn lexe(&mut self, l: String) -> Result<Vec<Box<Token>>, ComputorError> {
+    fn lexe(
+        &mut self,
+        l: String,
+    ) -> Result<Vec<Box<dyn Token>>, ComputorError> {
         let cleared = self.clear_input(l);
         let mut iter = cleared.chars();
         let tokens;
@@ -86,8 +89,12 @@ impl Lexer {
         }
     }
 
-    fn tokenize(&mut self, chars: &mut Chars, fun: bool) -> Vec<Box<Token>> {
-        let mut tokens: Vec<Box<Token>> = Vec::new();
+    fn tokenize(
+        &mut self,
+        chars: &mut Chars,
+        fun: bool,
+    ) -> Vec<Box<dyn Token>> {
+        let mut tokens: Vec<Box<dyn Token>> = Vec::new();
         let mut cur = chars.next();
         loop {
             match cur {
@@ -130,7 +137,7 @@ impl Lexer {
         return tokens;
     }
 
-    fn read_operand(&mut self, chars: &mut Chars) -> Box<Token> {
+    fn read_operand(&mut self, chars: &mut Chars) -> Box<dyn Token> {
         if self.last_ch.unwrap().is_digit(10) {
             self.read_val(chars)
         } else {
@@ -138,7 +145,7 @@ impl Lexer {
         }
     }
 
-    fn read_val(&mut self, chars: &mut Chars) -> Box<Token> {
+    fn read_val(&mut self, chars: &mut Chars) -> Box<dyn Token> {
         let mut raw = String::new();
 
         raw.push(self.last_ch.unwrap());
@@ -167,7 +174,7 @@ impl Lexer {
         }
     }
 
-    fn read_id(&mut self, chars: &mut Chars) -> Box<Token> {
+    fn read_id(&mut self, chars: &mut Chars) -> Box<dyn Token> {
         let mut raw = String::new();
 
         raw.push(self.last_ch.unwrap());
@@ -176,7 +183,7 @@ impl Lexer {
                 Some(ch) if ch.is_alphabetic() => raw.push(ch),
                 Some(ch) if ch == '(' => {
                     self.depth += 1;
-                    let mut param_lst: Vec<Vec<Box<Token>>> = Vec::new();
+                    let mut param_lst: Vec<Vec<Box<dyn Token>>> = Vec::new();
                     param_lst.push(self.tokenize(chars, true));
                     while self.last_ch == Some(',') {
                         param_lst.push(self.tokenize(chars, true));

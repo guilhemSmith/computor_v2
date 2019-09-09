@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 10:44:06 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 11:58:33 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ pub trait Token: fmt::Display + fmt::Debug {
     ) -> ComputorResult;
 }
 
-pub fn count_error(token: &Box<Token>) -> i32 {
+pub fn count_error(token: &Box<dyn Token>) -> i32 {
     match token.as_any().downcast_ref::<LexerError>() {
         None => match token.as_any().downcast_ref::<FunctionTree>() {
             None => 0,
@@ -62,7 +62,7 @@ pub fn count_error(token: &Box<Token>) -> i32 {
     }
 }
 
-pub fn display_token(tokens: &Vec<Box<Token>>) -> String {
+pub fn display_token(tokens: &Vec<Box<dyn Token>>) -> String {
     let mut vec = String::new();
     for tok in tokens {
         vec = format!("{}{}", vec, tok);
@@ -70,7 +70,7 @@ pub fn display_token(tokens: &Vec<Box<Token>>) -> String {
     vec
 }
 
-pub fn debug_token(tokens: &Vec<Box<Token>>) -> String {
+pub fn debug_token(tokens: &Vec<Box<dyn Token>>) -> String {
     let mut vec = String::new();
     for tok in tokens {
         vec = format!("{}{:?}", vec, tok);
@@ -78,7 +78,7 @@ pub fn debug_token(tokens: &Vec<Box<Token>>) -> String {
     vec
 }
 
-// pub fn debug_token(tokens: &Vec<Box<Token>>) -> String {
+// pub fn debug_token(tokens: &Vec<Box<dyn Token>>) -> String {
 //     let mut debug = String::new();
 
 //     for token in tokens {
@@ -87,7 +87,7 @@ pub fn debug_token(tokens: &Vec<Box<Token>>) -> String {
 //     return String::from(debug.trim_start_matches(sep));
 // }
 
-// pub fn display_token(tokens: &Vec<Box<Token>>, sep: &str) -> String {
+// pub fn display_token(tokens: &Vec<Box<dyn Token>>, sep: &str) -> String {
 //     let mut display = String::new();
 
 //     for token in tokens {

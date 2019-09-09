@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/30 17:39:10 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 11:58:57 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,40 +106,6 @@ impl Operator {
 
     fn equal(&self, _orand_l: CRes, _orand_r: CRes) -> CRes {
         CRes::Err(CErr::too_many_equal())
-        // let one = Imaginary::new(1.0, 0.0);
-        // match (orand_l, orand_r) {
-        //     (CRes::Err(err), _) => CRes::Err(err),
-        //     (_, CRes::Err(err)) => CRes::Err(err),
-        //     (CRes::None, _) => CRes::Err(CErr::bad_use_op(self.symbol)),
-        //     (_, CRes::None) => CRes::Err(CErr::bad_use_op(self.symbol)),
-        //     (CRes::Val(val), CRes::Res) => CRes::Val(val),
-        //     (CRes::Var(var, coef, pow), CRes::Res) => CRes::Var(var, coef, pow),
-        //     (_, CRes::Res) => CRes::default(),
-        //     (CRes::Res, _) => CRes::default(),
-        //     (CRes::Var(var, coef, pow), CRes::Val(val)) => {
-        //         if pow == one {
-        //             if coef == one {
-        //                 CRes::Set(var, val)
-        //             } else {
-        //                 CRes::default()
-        //             }
-        //         } else {
-        //             CRes::default()
-        //         }
-        //     },
-        //     (CRes::Set(_, _), _) => CRes::default(),
-        //     (_, CRes::Set(_, _)) => CRes::default(),
-        //     (_, CRes::Fun(_,_,_)) => CRes::default(),
-        //     (CRes::Equ(id_l, vec_l, false), CRes::Equ(id_r, vec_r, false)) => {
-        //         if id_l == id_r {
-        //             merge_equ(id_l, vec_l, vec_r)
-        //         } else {
-        //             CRes::default()
-        //         }
-        //     }
-        //     (CRes::Equ(_, _, _), CRes::Equ(_, _, _)) => CRes::default(),
-        //     // (_, _) => CRes::default(),
-        // }
     }
 
     fn mul(&self, orand_l: CRes, orand_r: CRes) -> CRes {
