@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 12:25:32 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 13:02:58 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,16 +92,20 @@ impl Computor {
         };
     }
 
-    fn dual_part(&mut self, left: Box<dyn TokenTree>, right: Box<dyn TokenTree>) {
+    fn dual_part(
+        &mut self,
+        left: Box<dyn TokenTree>,
+        right: Box<dyn TokenTree>,
+    ) {
         match left.compute(&mut self.memory, None) {
             CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
             CRes::Res => eprintln!("{}", ComputorError::bad_resolve()),
             CRes::Err(err) => self.print_err(err),
             CRes::Val(val) => println!("{}", val),
             CRes::VarCall(_, val) => println!("{}", val),
-            CRes::VarSet(_) => self.log_err("Unknown variable"),
-            CRes::FunSet(_, _) => self.log_err("Unknown function"),
-            CRes::Equ(_, _) => self.log_err("One sided equation"),
+            CRes::VarSet(id) => self.set_var(id, right),
+            CRes::FunSet(id, param) => self.set_fun(id, param, right),
+            CRes::Equ(_, _) => self.log_err("Can't compute equation for now."),
         }
     }
 
@@ -112,24 +116,43 @@ impl Computor {
     //     };
     // }
 
-    // fn set_var(&mut self, var: String, val: Imaginary) {
-    //     self.memory.set_var(var, Some(val));
-    //     println!("{}", val);
-    // }
+    fn set_var(&mut self, var: String, right: Box<dyn TokenTree>) {
+        match right.compute(&mut self.memory, None) {
+            CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
+            CRes::Res => self.log_err(&format!("Unknown variable '{}'.", var)),
+            CRes::Err(err) => self.print_err(err),
+            CRes::Val(val) => {
+                self.memory.set_var(var, Some(val));
+                println!("{}", val);
+            }
+            CRes::VarCall(_, val) => {
+                self.memory.set_var(var, Some(val));
+                println!("{}", val);
+            }
+            CRes::VarSet(id) => {
+                if id != var {
+                    self.log_err(&format!("Unknown variable '{}'.", var))
+                } else {
+                    self.log_err("Is this an equation ?")
+                }
+            }
+            CRes::FunSet(id, _) => {
+                self.log_err(&format!("Unknown function '{}'.", id))
+            }
+            CRes::Equ(_, _) => self.log_err("Can't compute equation for now."),
+        };
+    }
 
     // fn solve(&self, _id: String, _coefs: Vec<Imaginary>) {}
 
-    // fn set_fun(
-    //     &mut self,
-    //     id: String,
-    //     param: Vec<String>,
-    //     exp: Option<Box<dyn TokenTree>>,
-    // ) {
-    //     match exp {
-    //         Some(fun) => self.memory.set_fun(id, param, fun),
-    //         None => eprintln!("{}'{}' need an expression to be set.", LOG, id),
-    //     }
-    // }
+    fn set_fun(
+        &mut self,
+        id: String,
+        param: Vec<String>,
+        exp: Box<dyn TokenTree>,
+    ) {
+        self.memory.set_fun(id, param, exp);
+    }
 
     fn print_err(&self, err: ComputorError) {
         eprintln!("{}", err);
