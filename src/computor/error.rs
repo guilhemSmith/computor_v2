@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 13:59:35 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 15:25:39 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@ use std::{error::Error, fmt};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ErrorKind {
+    BadPow,
     BadResolve,
     BadUseOperator,
     FunUndefinded,
     FunArgInv,
-    DivByZero,
     InvalidInput,
     IO,
     IOStop,
@@ -30,11 +30,11 @@ pub enum ErrorKind {
 impl fmt::Display for ErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            ErrorKind::BadPow => write!(f, "bad use"),
             ErrorKind::BadResolve => write!(f, "bad use"),
             ErrorKind::BadUseOperator => write!(f, "bad use"),
             ErrorKind::FunUndefinded => write!(f, "function"),
             ErrorKind::FunArgInv => write!(f, "function"),
-            ErrorKind::DivByZero => write!(f, "math"),
             ErrorKind::InvalidInput => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
@@ -53,6 +53,16 @@ pub struct ComputorError {
 impl ComputorError {
     pub fn kind(&self) -> &ErrorKind {
         &self.kind
+    }
+
+    pub fn bad_pow() -> Self {
+        ComputorError {
+            kind: ErrorKind::BadPow,
+            info: format!(
+                "Pow operator '^' only accept {} for the second argument.",
+                "real integer value"
+            ),
+        }
     }
 
     pub fn bad_resolve() -> Self {
@@ -90,16 +100,6 @@ impl ComputorError {
         }
     }
 
-    pub fn div_by_zero(left_op: String, right_op: String, op: char) -> Self {
-        ComputorError {
-            kind: ErrorKind::DivByZero,
-            info: format!(
-                "Division by zero is not allowed : {} {} {}",
-                left_op, op, right_op
-            ),
-        }
-    }
-
     pub fn invalid_input() -> Self {
         ComputorError {
             kind: ErrorKind::InvalidInput,
@@ -132,7 +132,7 @@ impl ComputorError {
         }
     }
 
-    pub fn unparsed_token(token: &Token) -> Self {
+    pub fn unparsed_token(token: &dyn Token) -> Self {
         ComputorError {
             kind: ErrorKind::UnparsedToken,
             info: format!("Token left behind: {:?}.", token),

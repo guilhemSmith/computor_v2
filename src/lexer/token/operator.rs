@@ -6,13 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 11:58:57 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 16:05:04 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
 use crate::computor::{ComputorError as CErr, ComputorResult as CRes};
 use crate::memory::{Extension, Memory};
+use crate::types::Imaginary;
 
 use std::any::Any;
 use std::fmt;
@@ -124,7 +125,23 @@ impl Operator {
         CRes::default()
     }
 
-    fn pow(&self, orand_l: CRes, orand_r: CRes) -> CRes {
-        CRes::default()
+    fn pow(&self, left: CRes, right: CRes) -> CRes {
+        match (left, right) {
+            (CRes::VarSet(var), CRes::Val(val)) => CRes::default(),
+            (CRes::VarSet(var), CRes::VarCall(_, val)) => CRes::default(),
+            (CRes::Val(v_a), CRes::Val(v_b)) => pow_ex(v_a, v_b),
+            (CRes::Val(v_a), CRes::VarCall(_, v_b)) => pow_ex(v_a, v_b),
+            (CRes::VarCall(_, v_a), CRes::Val(v_b)) => pow_ex(v_a, v_b),
+            (CRes::VarCall(_, v_a), CRes::VarCall(_, v_b)) => pow_ex(v_a, v_b),
+            _ => CRes::default(),
+        }
     }
+}
+
+fn pow_ex(val_a: Imaginary, val_b: Imaginary) -> CRes {
+    if !val_b.is_real() || !val_b.is_int() {
+        return CRes::Err(CErr::bad_pow());
+    }
+    let res = val_a.pow(val_b.get_real());
+    return CRes::Val(res);
 }

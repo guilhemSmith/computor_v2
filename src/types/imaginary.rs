@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/15 17:16:32 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 19:36:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,51 @@ impl Imaginary {
             irreal: Rational::new(irreal),
         }
     }
+
+    pub fn pow(&self, power: u32) -> Imaginary {
+        if power == 0 {
+            return Imaginary::new(1.0, 0.0);
+        }
+
+        let mut real = Rational::zero();
+        let mut irreal = Rational::zero();
+
+        let mut i: u32 = 0;
+
+        while power >= i {
+            let sign = Rational::new(if i % 4 < 2 { 1.0 } else { -1.0 });
+            let new_val = self.real.pow(power - i) * self.irreal.pow(i) * sign;
+            let new_coef = Rational::new(pascal_num(power, i) as f64);
+            if i % 2 == 0 {
+                real = real + new_coef * new_val;
+            } else {
+                irreal = irreal + new_coef * new_val;
+            }
+            i += 1;
+        }
+        real.simplify();
+        irreal.simplify();
+        return Imaginary { real, irreal };
+    }
+
+    pub fn get_real(&self) -> u32 {
+        self.real.get_val() as u32
+    }
+
+    pub fn is_real(&self) -> bool {
+        self.irreal == Rational::zero()
+    }
+
+    pub fn is_int(&self) -> bool {
+        self.real.is_int() && self.irreal.is_int()
+    }
+}
+
+fn pascal_num(p: u32, n: u32) -> u32 {
+    if p == 0 || n == 0 || n == p {
+        return 1;
+    }
+    pascal_num(p - 1, n) + pascal_num(p - 1, n - 1)
 }
 
 impl fmt::Display for Imaginary {
@@ -186,5 +231,50 @@ mod operator {
 
         assert_eq!(zero / complex_2, zero);
         assert_eq!(complex_2 / complex_3, complex_4);
+    }
+}
+
+#[cfg(test)]
+mod pow {
+    use super::pascal_num;
+    use super::Imaginary;
+
+    #[test]
+    fn square() {
+        let zero = Imaginary::new(0.0, 0.0);
+        let raw = Imaginary::new(4.0, -6.2);
+        let res = Imaginary::new(-22.44, -49.6);
+
+        assert_eq!(zero.pow(2), zero);
+        assert_eq!(raw.pow(2), res);
+    }
+
+    #[test]
+    fn third() {
+        let zero = Imaginary::new(0.0, 0.0);
+        let raw = Imaginary::new(8.2, -5.0);
+        let res = Imaginary::new(-63.632, -883.6);
+
+        assert_eq!(zero.pow(3), zero);
+        assert_eq!(raw.pow(3), res);
+    }
+
+    #[test]
+    fn pascal() {
+        assert_eq!(pascal_num(0, 0), 1);
+        assert_eq!(pascal_num(1, 0), 1);
+        assert_eq!(pascal_num(1, 1), 1);
+        assert_eq!(pascal_num(2, 0), 1);
+        assert_eq!(pascal_num(2, 1), 2);
+        assert_eq!(pascal_num(2, 2), 1);
+        assert_eq!(pascal_num(3, 0), 1);
+        assert_eq!(pascal_num(3, 1), 3);
+        assert_eq!(pascal_num(3, 2), 3);
+        assert_eq!(pascal_num(3, 3), 1);
+        assert_eq!(pascal_num(4, 0), 1);
+        assert_eq!(pascal_num(4, 1), 4);
+        assert_eq!(pascal_num(4, 2), 6);
+        assert_eq!(pascal_num(4, 3), 4);
+        assert_eq!(pascal_num(4, 4), 1);
     }
 }

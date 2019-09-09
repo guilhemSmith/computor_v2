@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/13 12:48:14 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 17:07:01 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,12 +58,30 @@ impl Rational {
                 numerator: 1,
                 denominator: 1,
             },
-            _ => Rational {
-                positiv: self.positiv,
-                numerator: self.numerator.pow(power),
-                denominator: self.denominator.pow(power),
-            },
+            _ => {
+                let mut num = self.numerator.pow(power);
+                let mut den = self.denominator.pow(power);
+                simplify_gcd(&mut num, &mut den);
+                Rational {
+                    positiv: self.positiv || power % 2 == 0,
+                    numerator: self.numerator.pow(power),
+                    denominator: self.denominator.pow(power),
+                }
+            }
         }
+    }
+
+    pub fn is_int(&self) -> bool {
+        (self.numerator as f64 / self.denominator as f64).fract() == 0.0
+    }
+
+    pub fn get_val(&self) -> f64 {
+        self.numerator as f64 / self.denominator as f64
+            * if self.positiv { 1.0 } else { -1.0 }
+    }
+
+    pub fn simplify(&mut self) {
+        simplify_gcd(&mut self.numerator, &mut self.denominator)
     }
 }
 
@@ -90,7 +108,6 @@ impl cmp::PartialEq for Rational {
         self.positiv == rhs.positiv
             && self.numerator == rhs.numerator
             && self.denominator == rhs.denominator
-        // && self.numerator / self.denominator == rhs.numerator / rhs.denominator
     }
 }
 
@@ -516,6 +533,37 @@ mod operator {
         assert!(val_a >= val_b);
         assert!(!(val_a < val_b));
         assert!(!(val_a <= val_b));
+    }
+}
+
+#[cfg(test)]
+mod pow {
+    use super::Rational;
+
+    #[test]
+    fn square() {
+        let zero = Rational::zero();
+        let neg_big = Rational::new(-100042.4242);
+        let neg_small = Rational::new(-0.4256);
+        let pos_big = Rational::new(2345678.254);
+        let pos_small = Rational::new(0.85642);
+
+        assert_eq!(zero.pow(2).get_val(), 0.0);
+        assert_eq!(neg_big.pow(2).get_val(), 10008486639.81274564);
+        assert_eq!(neg_small.pow(2).get_val(), 0.18113536);
+        assert_eq!(pos_big.pow(2).get_val(), 5502206471288.489);
+        assert_eq!(pos_small.pow(2).get_val(), 0.7334552164);
+    }
+
+    #[test]
+    fn fith() {
+        let zero = Rational::zero();
+        let neg = Rational::new(-12.42);
+        let pos = Rational::new(53.89);
+
+        assert_eq!(zero.pow(5).get_val(), 0.0);
+        assert_eq!(neg.pow(5).get_val(), -295534.3588067232);
+        assert_eq!(pos.pow(5).get_val(), 454507357.5715545949);
     }
 }
 
