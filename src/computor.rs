@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 13:02:58 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 13:58:24 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ use crate::lexer::token;
 use crate::memory::Memory;
 use crate::parser::{TokenTree, TreeBranch};
 use crate::timer::Timer;
+use crate::types::Imaginary;
 use ComputorResult as CRes;
 
 const LOG: &str = "[err:Computor] -> ";
@@ -81,14 +82,14 @@ impl Computor {
 
     fn single_part(&mut self, tree: Box<dyn TokenTree>) {
         match tree.compute(&mut self.memory, None) {
-            CRes::None => self.log_err("Empty instruction given"),
+            CRes::None => log_err("Empty instruction given"),
             CRes::Res => self.mem_dump(),
             CRes::Err(err) => self.print_err(err),
             CRes::Val(val) => println!("{}", val),
             CRes::VarCall(_, val) => println!("{}", val),
-            CRes::VarSet(_) => self.log_err("Unknown variable"),
-            CRes::FunSet(_, _) => self.log_err("Unknown function"),
-            CRes::Equ(_, _) => self.log_err("One sided equation"),
+            CRes::VarSet(v) => log_err(&format!("Unknown variable '{}'", v)),
+            CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            CRes::Equ(_, _) => log_err("Equation not complete"),
         };
     }
 
@@ -101,25 +102,55 @@ impl Computor {
             CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
             CRes::Res => eprintln!("{}", ComputorError::bad_resolve()),
             CRes::Err(err) => self.print_err(err),
-            CRes::Val(val) => println!("{}", val),
-            CRes::VarCall(_, val) => println!("{}", val),
+            CRes::Val(val) => self.left_val(val, right),
+            CRes::VarCall(id, val) => self.call_var(id, val, right),
             CRes::VarSet(id) => self.set_var(id, right),
             CRes::FunSet(id, param) => self.set_fun(id, param, right),
-            CRes::Equ(_, _) => self.log_err("Can't compute equation for now."),
+            CRes::Equ(_, _) => log_err("Can't compute equation for now"),
         }
     }
 
-    // fn var_pr(&self, id: String, coef: Imaginary, pow: Imaginary) {
-    //     match self.memory.get_var_val(&id) {
-    //         Some(val) => println!("{}", coef * val),
-    //         None => eprintln!("{}Unknown variable: '{}'.", LOG, id),
-    //     };
-    // }
+    fn left_val(&mut self, val: Imaginary, right: Box<dyn TokenTree>) {
+        match right.compute(&mut self.memory, None) {
+            CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
+            CRes::Res => println!("{}", val),
+            CRes::Err(err) => self.print_err(err),
+            CRes::Val(_) => log_err("This is an equation"),
+            CRes::VarCall(_, _) => log_err("This is an equation"),
+            CRes::VarSet(v) => log_err(&format!("Unknown variable '{}'", v)),
+            CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            CRes::Equ(_, _) => log_err("Can't compute equation for now"),
+        };
+    }
+
+    fn call_var(
+        &mut self,
+        var: String,
+        val: Imaginary,
+        right: Box<dyn TokenTree>,
+    ) {
+        match right.compute(&mut self.memory, None) {
+            CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
+            CRes::Res => println!("{}", val),
+            CRes::Err(err) => self.print_err(err),
+            CRes::Val(nval) => {
+                self.memory.set_var(var, Some(nval));
+                println!("{}", nval);
+            }
+            CRes::VarCall(_, nval) => {
+                self.memory.set_var(var, Some(nval));
+                println!("{}", nval);
+            }
+            CRes::VarSet(v) => log_err(&format!("Unknown variable '{}'", v)),
+            CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            CRes::Equ(_, _) => log_err("Can't compute equation for now"),
+        }
+    }
 
     fn set_var(&mut self, var: String, right: Box<dyn TokenTree>) {
         match right.compute(&mut self.memory, None) {
             CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
-            CRes::Res => self.log_err(&format!("Unknown variable '{}'.", var)),
+            CRes::Res => log_err(&format!("Unknown variable '{}'", var)),
             CRes::Err(err) => self.print_err(err),
             CRes::Val(val) => {
                 self.memory.set_var(var, Some(val));
@@ -131,19 +162,15 @@ impl Computor {
             }
             CRes::VarSet(id) => {
                 if id != var {
-                    self.log_err(&format!("Unknown variable '{}'.", var))
+                    log_err(&format!("Unknown variable '{}'", id))
                 } else {
-                    self.log_err("Is this an equation ?")
+                    log_err("This is an equation")
                 }
             }
-            CRes::FunSet(id, _) => {
-                self.log_err(&format!("Unknown function '{}'.", id))
-            }
-            CRes::Equ(_, _) => self.log_err("Can't compute equation for now."),
+            CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            CRes::Equ(_, _) => log_err("Can't compute equation for now"),
         };
     }
-
-    // fn solve(&self, _id: String, _coefs: Vec<Imaginary>) {}
 
     fn set_fun(
         &mut self,
@@ -158,11 +185,11 @@ impl Computor {
         eprintln!("{}", err);
     }
 
-    fn log_err(&self, msg: &str) {
-        eprintln!("{}{}.", LOG, msg);
-    }
-
     fn mem_dump(&self) {
         println!("{}", self.memory);
     }
+}
+
+fn log_err(msg: &str) {
+    eprintln!("{}{}.", LOG, msg);
 }

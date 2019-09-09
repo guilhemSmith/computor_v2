@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 12:21:06 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/09 13:59:35 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::BadUseOperator,
             info: format!(
-                "Operator: '{}', {}, and {}",
+                "Operator: '{}' {}, and {}",
                 op,
                 "must be preceded by a value",
                 "followed by a another value."
