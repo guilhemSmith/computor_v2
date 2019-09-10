@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 11:58:17 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/10 09:17:07 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ impl Function {
 
     pub fn set(&mut self, mut vars: Vec<String>, expr: Box<dyn TokenTree>) {
         vars.reverse();
+        self.var = Vec::new();
         loop {
             match vars.pop() {
                 Some(var) => self.var.push(var),
