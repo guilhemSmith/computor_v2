@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 11:56:41 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/10 17:56:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ pub use tree_branch::TreeBranch;
 pub use tree_leaf::TreeLeaf;
 
 use crate::lexer::token::{
-    self, Expression, FunctionToken, FunctionTree, LexerError, Operator,
+    self, Expression, FunctionToken, FunctionTree, LexerError,
 };
 
 use crate::arg_parse::Param;
@@ -92,7 +92,7 @@ impl Parser {
         mut token: Box<dyn Token>,
     ) -> Option<Box<dyn TokenTree>> {
         let op = &mut token;
-        match op.as_any_mut().downcast_mut::<Operator>() {
+        match op.as_op_mut() {
             None => match op.as_any_mut().downcast_mut::<Expression>() {
                 None => match op.as_any_mut().downcast_mut::<FunctionToken>() {
                     None => Some(Box::new(TreeLeaf::new(token))),

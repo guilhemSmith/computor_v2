@@ -6,13 +6,16 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 12:05:19 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/10 17:37:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::TokenTree;
 use crate::computor::ComputorResult;
-use crate::lexer::{token::Operator, Token};
+use crate::lexer::{
+    token::{new_operator, Operator},
+    Token,
+};
 use crate::memory::{Extension, Memory};
 
 use std::any::Any;
@@ -39,14 +42,14 @@ impl TreeBranch {
         self.was_expr
     }
 
-    pub fn op_mut(&mut self) -> &mut Operator {
+    pub fn op_mut(&mut self) -> &mut dyn Operator {
         let extractor = &mut self.token;
-        return extractor.as_any_mut().downcast_mut::<Operator>().unwrap();
+        return extractor.as_op_mut().unwrap();
     }
 
-    pub fn op_ref(&self) -> &Operator {
+    pub fn op_ref(&self) -> &dyn Operator {
         let extractor = &self.token;
-        return extractor.as_any().downcast_ref::<Operator>().unwrap();
+        return extractor.as_op_ref().unwrap();
     }
 
     pub fn extract(&mut self, side_l: bool) -> Option<Box<dyn TokenTree>> {
@@ -61,8 +64,8 @@ impl TreeBranch {
         leaf: &mut Box<dyn TokenTree>,
         next: Box<dyn TokenTree>,
     ) {
-        let op = Operator::new('*').unwrap();
-        let mut new_tree = TreeBranch::new(Box::new(op));
+        let op = new_operator('*').unwrap();
+        let mut new_tree = TreeBranch::new(op);
         new_tree.insert_left(next);
         let mut box_tree: Box<dyn TokenTree> = Box::new(new_tree);
         std::mem::swap(leaf, &mut box_tree);
@@ -75,8 +78,8 @@ impl TreeBranch {
         leaf: &mut Box<dyn TokenTree>,
         next: Box<dyn TokenTree>,
     ) {
-        let op = Operator::new('*').unwrap();
-        let mut new_tree = TreeBranch::new(Box::new(op));
+        let op = new_operator('*').unwrap();
+        let mut new_tree = TreeBranch::new(op);
         new_tree.insert_right(next);
         let mut box_tree: Box<dyn TokenTree> = Box::new(new_tree);
         std::mem::swap(leaf, &mut box_tree);

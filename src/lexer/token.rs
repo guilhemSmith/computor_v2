@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 11:58:33 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/10 17:34:53 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ pub use expression::Expression;
 pub use function::FunctionToken;
 pub use function::FunctionTree;
 pub use lexer_error::LexerError;
+pub use operator::new_operator;
 pub use operator::Operator;
 pub use resolve::Resolve;
 pub use value::Value;
@@ -36,6 +37,12 @@ use std::fmt;
 pub trait Token: fmt::Display + fmt::Debug {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
+    fn as_op_ref(&self) -> Option<&dyn Operator> {
+        None
+    }
+    fn as_op_mut(&mut self) -> Option<&mut dyn Operator> {
+        None
+    }
     fn get_result(
         &self,
         mem: &Memory,

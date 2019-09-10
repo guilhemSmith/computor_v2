@@ -6,16 +6,16 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 11:56:04 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/10 17:23:49 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 pub mod token;
 pub use token::Token;
 
+use token::new_operator;
 use token::Expression;
 use token::FunctionToken;
-use token::Operator;
 use token::Resolve;
 use token::Value;
 use token::Variable;
@@ -121,8 +121,8 @@ impl Lexer {
                     self.last_ch = Some(',');
                     return tokens;
                 }
-                Some(ch) => match Operator::new(ch) {
-                    Ok(val) => tokens.push(Box::new(val)),
+                Some(ch) => match new_operator(ch) {
+                    Ok(val) => tokens.push(val),
                     Err(err) => tokens.push(Box::new(err)),
                 },
                 None => break,
