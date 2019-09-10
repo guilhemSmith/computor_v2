@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/10 10:04:28 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/10 10:42:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ pub enum ErrorKind {
     IO,
     IOStop,
     TooManyEqual,
+    TooManyUnknown,
     UnparsedToken,
 }
 
@@ -41,6 +42,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
             ErrorKind::TooManyEqual => write!(f, "instruction"),
+            ErrorKind::TooManyUnknown => write!(f, "instruction"),
             ErrorKind::UnparsedToken => write!(f, "parser"),
         }
     }
@@ -138,6 +140,13 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::TooManyEqual,
             info: String::from("Too many equal sign given."),
+        }
+    }
+
+    pub fn too_many_unknown() -> Self {
+        ComputorError {
+            kind: ErrorKind::TooManyUnknown,
+            info: String::from("Too many unknown variable given."),
         }
     }
 
