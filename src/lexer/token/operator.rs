@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/10 17:55:03 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/10 18:35:14 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ pub trait Operator: Token + fmt::Display {
 pub fn new_operator(symbol: char) -> Result<Box<dyn Token>, LexerError> {
     match symbol {
         '*' => Ok(Box::new(OpMul::new())),
+        '+' => Ok(Box::new(OpAdd::new())),
         _ => Err(LexerError::InvalidOp(symbol)),
     }
 }
@@ -137,6 +138,7 @@ impl Operator for OpMul {
     }
 
     fn op(&self, val_a: Imaginary, val_b: Imaginary) -> CRes {
+        // overflow protection here
         CRes::Val(val_a * val_b)
     }
 
@@ -196,6 +198,137 @@ impl Operator for OpMul {
     }
 }
 
+struct OpAdd {
+    priority: i32,
+}
+
+impl OpAdd {
+    fn new() -> Self {
+        OpAdd { priority: 1 }
+    }
+}
+
+impl fmt::Display for OpAdd {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "+")
+    }
+}
+
+impl fmt::Debug for OpAdd {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[op:+]")
+    }
+}
+
+impl Token for OpAdd {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn as_op_ref(&self) -> Option<&dyn Operator> {
+        Some(self as &dyn Operator)
+    }
+
+    fn as_op_mut(&mut self) -> Option<&mut dyn Operator> {
+        Some(self as &mut dyn Operator)
+    }
+
+    fn get_result(&self, _mem: &Memory, _ext: Option<&mut Extension>) -> CRes {
+        CRes::Err(CErr::unparsed_token(self))
+    }
+}
+
+impl Operator for OpAdd {
+    fn priority(&self) -> i32 {
+        self.priority
+    }
+
+    fn is_prior(&self, other: &dyn Operator) -> bool {
+        self.priority > other.priority()
+    }
+
+    fn set_prior_as_exp(&mut self) {
+        self.priority = 4;
+    }
+
+    fn symbol(&self) -> char {
+        '+'
+    }
+
+    fn op(&self, val_a: Imaginary, val_b: Imaginary) -> CRes {
+        // overflow protection here
+        CRes::Val(val_a + val_b)
+    }
+
+    fn dual_var(&self, var_a: String, var_b: String) -> CRes {
+        if var_a != var_b {
+            return CRes::Err(CErr::too_many_unknown());
+        }
+        let mut eq: Equ = HashMap::new();
+        eq.insert(1, Imaginary::new(2.0, 0.0));
+        return CRes::Equ(var_a, eq);
+    }
+
+    fn fus_eq(
+        &self,
+        id_a: String,
+        id_b: String,
+        mut eq_a: Equ,
+        eq_b: Equ,
+    ) -> CRes {
+        if id_a != id_b {
+            return CRes::Err(CErr::too_many_unknown());
+        }
+
+        for (pow_b, coef_b) in eq_b.into_iter() {
+            match eq_a.get_mut(&pow_b) {
+                None => {
+                    eq_a.insert(pow_b, coef_b);
+                }
+                Some(coef_a) => *coef_a = *coef_a + coef_b,
+            }
+        }
+        return CRes::Equ(id_a, eq_a);
+    }
+
+    fn var_eq(&self, id_var: String, id_eq: String, mut eq: Equ) -> CRes {
+        if id_var != id_eq {
+            return CRes::Err(CErr::too_many_unknown());
+        }
+        let one: u32 = 1;
+
+        match eq.get_mut(&one) {
+            None => {
+                eq.insert(one, Imaginary::new(1.0, 0.0));
+            }
+            Some(coef) => *coef = *coef + Imaginary::new(1.0, 0.0),
+        };
+        return CRes::Equ(id_var, eq);
+    }
+
+    fn val_eq(&self, val: Imaginary, id: String, mut eq: Equ) -> CRes {
+        let zero: u32 = 0;
+        match eq.get_mut(&zero) {
+            None => {
+                eq.insert(zero, val);
+            }
+            Some(coef) => *coef = *coef + val,
+        }
+        return CRes::Equ(id, eq);
+    }
+
+    fn new_eq(&self, var: String, val: Imaginary) -> CRes {
+        let mut eq: Equ = HashMap::new();
+        eq.insert(1, Imaginary::new(1.0, 0.0));
+        eq.insert(0, val);
+        return CRes::Equ(var, eq);
+    }
+}
+
 fn equal(_orand_l: CRes, _orand_r: CRes) -> CRes {
     CRes::Err(CErr::too_many_equal())
 }
@@ -213,10 +346,6 @@ fn div_ex(val_a: Imaginary, val_b: Imaginary) -> CRes {
         return CRes::Err(CErr::div_by_zero());
     }
     CRes::Val(val_a / val_b)
-}
-
-fn add_ex(val_a: Imaginary, val_b: Imaginary) -> CRes {
-    CRes::Val(val_a + val_b)
 }
 
 fn sub_ex(val_a: Imaginary, val_b: Imaginary) -> CRes {
@@ -238,13 +367,6 @@ fn new_eq_div(var: String, val: Imaginary) -> CRes {
     }
     let mut eq: Equ = HashMap::new();
     eq.insert(1, Imaginary::new(1.0, 0.0) / val);
-    return CRes::Equ(var, eq);
-}
-
-fn new_eq_add(var: String, val: Imaginary) -> CRes {
-    let mut eq: Equ = HashMap::new();
-    eq.insert(1, Imaginary::new(1.0, 0.0));
-    eq.insert(0, val);
     return CRes::Equ(var, eq);
 }
 
