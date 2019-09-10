@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 13:58:24 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/10 09:23:42 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ impl Computor {
             CRes::VarCall(_, val) => println!("{}", val),
             CRes::VarSet(v) => log_err(&format!("Unknown variable '{}'", v)),
             CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
-            CRes::Equ(_, _) => log_err("Equation not complete"),
+            CRes::Equ(_) => log_err("Equation not complete"),
         };
     }
 
@@ -106,7 +106,7 @@ impl Computor {
             CRes::VarCall(id, val) => self.call_var(id, val, right),
             CRes::VarSet(id) => self.set_var(id, right),
             CRes::FunSet(id, param) => self.set_fun(id, param, right),
-            CRes::Equ(_, _) => log_err("Can't compute equation for now"),
+            CRes::Equ(_) => log_err("Can't compute equation for now"),
         }
     }
 
@@ -119,7 +119,7 @@ impl Computor {
             CRes::VarCall(_, _) => log_err("This is an equation"),
             CRes::VarSet(v) => log_err(&format!("Unknown variable '{}'", v)),
             CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
-            CRes::Equ(_, _) => log_err("Can't compute equation for now"),
+            CRes::Equ(_) => log_err("Can't compute equation for now"),
         };
     }
 
@@ -143,7 +143,7 @@ impl Computor {
             }
             CRes::VarSet(v) => log_err(&format!("Unknown variable '{}'", v)),
             CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
-            CRes::Equ(_, _) => log_err("Can't compute equation for now"),
+            CRes::Equ(_) => log_err("Can't compute equation for now"),
         }
     }
 
@@ -168,7 +168,7 @@ impl Computor {
                 }
             }
             CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
-            CRes::Equ(_, _) => log_err("Can't compute equation for now"),
+            CRes::Equ(_) => log_err("Can't compute equation for now"),
         };
     }
 

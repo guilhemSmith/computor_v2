@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 16:05:04 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/10 10:06:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,26 +109,58 @@ impl Operator {
         CRes::Err(CErr::too_many_equal())
     }
 
-    fn mul(&self, orand_l: CRes, orand_r: CRes) -> CRes {
-        CRes::default()
+    fn mul(&self, left: CRes, right: CRes) -> CRes {
+        match (left, right) {
+            // (CRes::VarSet(var), CRes::Val(val)) => CRes::default(),
+            // (CRes::VarSet(var), CRes::VarCall(_, val)) => CRes::default(),
+            (CRes::Val(v_a), CRes::Val(v_b)) => mul_ex(v_a, v_b),
+            (CRes::Val(v_a), CRes::VarCall(_, v_b)) => mul_ex(v_a, v_b),
+            (CRes::VarCall(_, v_a), CRes::Val(v_b)) => mul_ex(v_a, v_b),
+            (CRes::VarCall(_, v_a), CRes::VarCall(_, v_b)) => mul_ex(v_a, v_b),
+            _ => CRes::default(),
+        }
     }
 
-    fn div(&self, orand_l: CRes, orand_r: CRes) -> CRes {
-        CRes::default()
+    fn div(&self, left: CRes, right: CRes) -> CRes {
+        match (left, right) {
+            // (CRes::VarSet(var), CRes::Val(val)) => CRes::default(),
+            // (CRes::VarSet(var), CRes::VarCall(_, val)) => CRes::default(),
+            (CRes::Val(v_a), CRes::Val(v_b)) => div_ex(v_a, v_b),
+            (CRes::Val(v_a), CRes::VarCall(_, v_b)) => div_ex(v_a, v_b),
+            (CRes::VarCall(_, v_a), CRes::Val(v_b)) => div_ex(v_a, v_b),
+            (CRes::VarCall(_, v_a), CRes::VarCall(_, v_b)) => div_ex(v_a, v_b),
+            _ => CRes::default(),
+        }
     }
 
-    fn add(&self, orand_l: CRes, orand_r: CRes) -> CRes {
-        CRes::default()
+    fn add(&self, left: CRes, right: CRes) -> CRes {
+        match (left, right) {
+            // (CRes::VarSet(var), CRes::Val(val)) => CRes::default(),
+            // (CRes::VarSet(var), CRes::VarCall(_, val)) => CRes::default(),
+            (CRes::Val(v_a), CRes::Val(v_b)) => add_ex(v_a, v_b),
+            (CRes::Val(v_a), CRes::VarCall(_, v_b)) => add_ex(v_a, v_b),
+            (CRes::VarCall(_, v_a), CRes::Val(v_b)) => add_ex(v_a, v_b),
+            (CRes::VarCall(_, v_a), CRes::VarCall(_, v_b)) => add_ex(v_a, v_b),
+            _ => CRes::default(),
+        }
     }
 
-    fn sub(&self, orand_l: CRes, orand_r: CRes) -> CRes {
-        CRes::default()
+    fn sub(&self, left: CRes, right: CRes) -> CRes {
+        match (left, right) {
+            // (CRes::VarSet(var), CRes::Val(val)) => CRes::default(),
+            // (CRes::VarSet(var), CRes::VarCall(_, val)) => CRes::default(),
+            (CRes::Val(v_a), CRes::Val(v_b)) => sub_ex(v_a, v_b),
+            (CRes::Val(v_a), CRes::VarCall(_, v_b)) => sub_ex(v_a, v_b),
+            (CRes::VarCall(_, v_a), CRes::Val(v_b)) => sub_ex(v_a, v_b),
+            (CRes::VarCall(_, v_a), CRes::VarCall(_, v_b)) => sub_ex(v_a, v_b),
+            _ => CRes::default(),
+        }
     }
 
     fn pow(&self, left: CRes, right: CRes) -> CRes {
         match (left, right) {
-            (CRes::VarSet(var), CRes::Val(val)) => CRes::default(),
-            (CRes::VarSet(var), CRes::VarCall(_, val)) => CRes::default(),
+            // (CRes::VarSet(var), CRes::Val(val)) => CRes::default(),
+            // (CRes::VarSet(var), CRes::VarCall(_, val)) => CRes::default(),
             (CRes::Val(v_a), CRes::Val(v_b)) => pow_ex(v_a, v_b),
             (CRes::Val(v_a), CRes::VarCall(_, v_b)) => pow_ex(v_a, v_b),
             (CRes::VarCall(_, v_a), CRes::Val(v_b)) => pow_ex(v_a, v_b),
@@ -144,4 +176,23 @@ fn pow_ex(val_a: Imaginary, val_b: Imaginary) -> CRes {
     }
     let res = val_a.pow(val_b.get_real());
     return CRes::Val(res);
+}
+
+fn mul_ex(val_a: Imaginary, val_b: Imaginary) -> CRes {
+    CRes::Val(val_a * val_b)
+}
+
+fn div_ex(val_a: Imaginary, val_b: Imaginary) -> CRes {
+    if val_b == Imaginary::new(0.0, 0.0) {
+        return CRes::Err(CErr::div_by_zero());
+    }
+    CRes::Val(val_a / val_b)
+}
+
+fn add_ex(val_a: Imaginary, val_b: Imaginary) -> CRes {
+    CRes::Val(val_a + val_b)
+}
+
+fn sub_ex(val_a: Imaginary, val_b: Imaginary) -> CRes {
+    CRes::Val(val_a - val_b)
 }

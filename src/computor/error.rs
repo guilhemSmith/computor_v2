@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 15:25:39 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/10 10:04:28 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ pub enum ErrorKind {
     BadPow,
     BadResolve,
     BadUseOperator,
+    DivByZero,
     FunUndefinded,
     FunArgInv,
     InvalidInput,
@@ -33,6 +34,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::BadPow => write!(f, "bad use"),
             ErrorKind::BadResolve => write!(f, "bad use"),
             ErrorKind::BadUseOperator => write!(f, "bad use"),
+            ErrorKind::DivByZero => write!(f, "math"),
             ErrorKind::FunUndefinded => write!(f, "function"),
             ErrorKind::FunArgInv => write!(f, "function"),
             ErrorKind::InvalidInput => write!(f, "syntax"),
@@ -83,6 +85,13 @@ impl ComputorError {
                 "must be preceded by a value",
                 "followed by a another value."
             ),
+        }
+    }
+
+    pub fn div_by_zero() -> Self {
+        ComputorError {
+            kind: ErrorKind::DivByZero,
+            info: String::from("Trying to div by zero, abort."),
         }
     }
 
