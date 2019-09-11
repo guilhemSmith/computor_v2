@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:13:01 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 11:58:01 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/11 09:48:06 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ pub fn insert_in_tree(
 
     match (tree, new) {
         (Some(ref mut root), _) if !root.was_expr() => root.insert_left(b_new),
-        (Some(_), _) => TreeBranch::default_to_left(b_tree, b_new),
+        (Some(ref mut root), Some(_)) => root.insert_left(b_new),
+        (Some(_), None) => TreeBranch::default_to_left(b_tree, b_new),
         (None, Some(ref branch)) if !branch.was_expr() => {
             std::mem::swap(b_tree, &mut b_new);
             let any = b_tree.as_any();
