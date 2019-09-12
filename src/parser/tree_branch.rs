@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/10 17:37:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/12 16:45:47 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,12 @@ use crate::memory::{Extension, Memory};
 use std::any::Any;
 use std::fmt;
 
+type TTree = Box<dyn TokenTree>;
+
 pub struct TreeBranch {
     token: Box<dyn Token>,
-    branch_left: Option<Box<dyn TokenTree>>,
-    branch_right: Option<Box<dyn TokenTree>>,
+    branch_left: Option<TTree>,
+    branch_right: Option<TTree>,
     was_expr: bool,
 }
 
@@ -52,7 +54,7 @@ impl TreeBranch {
         return extractor.as_op_ref().unwrap();
     }
 
-    pub fn extract(&mut self, side_l: bool) -> Option<Box<dyn TokenTree>> {
+    pub fn extract(&mut self, side_l: bool) -> Option<TTree> {
         if side_l {
             self.branch_left.take()
         } else {
@@ -60,95 +62,155 @@ impl TreeBranch {
         }
     }
 
-    pub fn default_to_left(
-        leaf: &mut Box<dyn TokenTree>,
-        next: Box<dyn TokenTree>,
-    ) {
+    pub fn default_to_left(leaf: &mut TTree, next: TTree) {
         let op = new_operator('*').unwrap();
         let mut new_tree = TreeBranch::new(op);
-        new_tree.insert_left(next);
-        let mut box_tree: Box<dyn TokenTree> = Box::new(new_tree);
+        new_tree.rot_left(next);
+        let mut box_tree: TTree = Box::new(new_tree);
         std::mem::swap(leaf, &mut box_tree);
         let any = leaf.as_any();
         let nw_left = any.downcast_mut::<TreeBranch>().unwrap();
-        nw_left.insert_right(box_tree);
+        nw_left.rot_right(box_tree);
     }
 
-    fn default_to_right(
-        leaf: &mut Box<dyn TokenTree>,
-        next: Box<dyn TokenTree>,
-    ) {
-        let op = new_operator('*').unwrap();
-        let mut new_tree = TreeBranch::new(op);
-        new_tree.insert_right(next);
-        let mut box_tree: Box<dyn TokenTree> = Box::new(new_tree);
-        std::mem::swap(leaf, &mut box_tree);
-        let any = leaf.as_any();
-        let nw_left = any.downcast_mut::<TreeBranch>().unwrap();
-        nw_left.insert_left(box_tree);
-    }
-
-    pub fn insert_left(&mut self, mut new: Box<dyn TokenTree>) {
+    pub fn rot_left(&mut self, mut new: TTree) {
         match new.as_any().downcast_mut::<TreeBranch>() {
-            None => self.rotate_left(new),
+            None => self.insert_leaf_left(new),
             Some(branch) => {
-                if self.op_mut().is_prior(branch.op_mut()) {
-                    std::mem::swap(self, branch);
-                    self.insert_right(new);
+                if branch.op_ref().is_prior(self.op_ref()) {
+                    self.insert_branch_left(new);
                 } else {
-                    self.rotate_left(new);
+                    std::mem::swap(self, branch);
+                    self.insert_branch_right(new);
                 }
             }
         };
     }
 
-    pub fn insert_right(&mut self, mut new: Box<dyn TokenTree>) {
-        match new.as_any().downcast_mut::<TreeBranch>() {
-            None => self.rotate_right(new),
-            Some(branch) => {
-                if self.op_mut().is_prior(branch.op_mut()) {
-                    std::mem::swap(self, branch);
-                    self.insert_left(new);
+    pub fn insert_leaf_left(&mut self, new: TTree) {
+        if let Some(node) = &mut self.branch_left {
+            match node.as_any().downcast_mut::<TreeBranch>() {
+                None => TreeBranch::default_to_left(node, new),
+                Some(branch) => if !branch.was_expr {
+                    branch.insert_leaf_left(new)
                 } else {
-                    self.rotate_right(new);
-                }
-            }
-        };
-    }
-
-    fn rotate_right(&mut self, mut new: Box<dyn TokenTree>) {
-        match &mut self.branch_right {
-            None => self.branch_right = Some(new),
-            Some(child) => match child.as_any().downcast_mut::<TreeBranch>() {
-                Some(branch) => branch.insert_right(new),
-                None => match new.as_any().downcast_mut::<TreeBranch>() {
-                    None => TreeBranch::default_to_right(child, new),
-                    Some(_) => {
-                        std::mem::swap(child, &mut new);
-                        let any = child.as_any();
-                        let nw_child = any.downcast_mut::<TreeBranch>();
-                        nw_child.unwrap().insert_left(new);
-                    }
+                    TreeBranch::default_to_left(node, new)
                 },
-            },
+            };
+        } else {
+            self.branch_left = Some(new);
         }
     }
 
-    fn rotate_left(&mut self, mut new: Box<dyn TokenTree>) {
-        match &mut self.branch_left {
-            None => self.branch_left = Some(new),
-            Some(child) => match child.as_any().downcast_mut::<TreeBranch>() {
-                Some(branch) => branch.insert_left(new),
-                None => match new.as_any().downcast_mut::<TreeBranch>() {
-                    None => TreeBranch::default_to_left(child, new),
-                    Some(_) => {
-                        std::mem::swap(child, &mut new);
-                        let any = child.as_any();
-                        let nw_child = any.downcast_mut::<TreeBranch>();
-                        nw_child.unwrap().insert_right(new);
+    fn insert_branch_left(&mut self, mut new: TTree) {
+        if let Some(node) = &mut self.branch_left {
+            let n_branch = new.as_any().downcast_mut::<TreeBranch>().unwrap();
+            match node.as_any().downcast_mut::<TreeBranch>() {
+                None => {
+                    if !n_branch.was_expr {
+                        n_branch.branch_right = self.branch_left.take();
+                        self.branch_left = Some(new);
+                    } else {
+                        TreeBranch::default_to_left(node, new);
                     }
                 },
-            },
+                Some(branch) => {
+                    match (branch.was_expr, n_branch.was_expr) {
+                        (false, false) => {
+                            if n_branch.op_ref().is_prior(branch.op_ref()) {
+                                branch.insert_branch_left(new);
+                            } else {
+                                n_branch.branch_right = self.branch_left.take();
+                                self.branch_left = Some(new);
+                            }
+                        },
+                        (true, false) => {
+                            n_branch.branch_right = self.branch_left.take();
+                            self.branch_left = Some(new);
+                        },
+                        (false, true) => branch.insert_branch_left(new),
+                        (true, true) => TreeBranch::default_to_left(node, new),
+                    };
+                },
+            };
+        } else {
+            self.branch_left = Some(new);
+        }
+    }
+
+    pub fn default_to_right(leaf: &mut TTree, next: TTree) {
+        let op = new_operator('*').unwrap();
+        let mut new_tree = TreeBranch::new(op);
+        new_tree.rot_right(next);
+        let mut box_tree: TTree = Box::new(new_tree);
+        std::mem::swap(leaf, &mut box_tree);
+        let any = leaf.as_any();
+        let nw_left = any.downcast_mut::<TreeBranch>().unwrap();
+        nw_left.rot_left(box_tree);
+    }
+
+    pub fn rot_right(&mut self, mut new: TTree) {
+        match new.as_any().downcast_mut::<TreeBranch>() {
+            None => self.insert_leaf_right(new),
+            Some(branch) => {
+                if branch.op_ref().is_prior(self.op_ref()) {
+                    self.insert_branch_right(new);
+                } else {
+                    std::mem::swap(self, branch);
+                    self.insert_branch_left(new);
+                }
+            }
+        };
+    }
+
+    pub fn insert_leaf_right(&mut self, new: TTree) {
+        if let Some(node) = &mut self.branch_right {
+            match node.as_any().downcast_mut::<TreeBranch>() {
+                None => TreeBranch::default_to_right(node, new),
+                Some(branch) => if !branch.was_expr {
+                    branch.insert_leaf_right(new)
+                } else {
+                    TreeBranch::default_to_right(node, new)
+                },
+            };
+        } else {
+            self.branch_right = Some(new);
+        }
+    }
+
+    fn insert_branch_right(&mut self, mut new: TTree) {
+        if let Some(node) = &mut self.branch_right {
+            let n_branch = new.as_any().downcast_mut::<TreeBranch>().unwrap();
+            match node.as_any().downcast_mut::<TreeBranch>() {
+                None => {
+                    if !n_branch.was_expr {
+                        n_branch.branch_left = self.branch_right.take();
+                        self.branch_right = Some(new);
+                    } else {
+                        TreeBranch::default_to_right(node, new);
+                    }
+                },
+                Some(branch) => {
+                    match (branch.was_expr, n_branch.was_expr) {
+                        (false, false) => {
+                            if n_branch.op_ref().is_prior(branch.op_ref()) {
+                                branch.insert_branch_right(new);
+                            } else {
+                                n_branch.branch_left = self.branch_right.take();
+                                self.branch_right = Some(new);
+                            }
+                        },
+                        (true, false) => {
+                            n_branch.branch_left = self.branch_right.take();
+                            self.branch_right = Some(new);
+                        },
+                        (false, true) => branch.insert_branch_right(new),
+                        (true, true) => TreeBranch::default_to_right(node, new),
+                    };
+                },
+            };
+        } else {
+            self.branch_right = Some(new);
         }
     }
 }

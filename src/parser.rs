@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/10 17:56:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/12 16:43:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ impl Parser {
                         None => continue,
                         Some(token) => token,
                     };
-                    token_tree::insert_in_tree(&mut tree, new_node);
+                    token_tree::insert_tree(&mut tree, new_node);
                 }
             };
         }

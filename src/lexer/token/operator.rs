@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/11 14:05:50 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/12 13:19:42 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ type Equ = HashMap<i32, Im>;
 pub trait Operator: Token + fmt::Display {
     fn priority(&self) -> i32;
     fn is_prior(&self, other: &dyn Operator) -> bool {
-        self.priority() > other.priority()
+        self.priority() >= other.priority()
     }
     fn set_prior_as_exp(&mut self);
     fn symbol(&self) -> char;

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:13:01 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/11 09:48:06 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/12 16:42:49 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,23 +32,43 @@ pub trait TokenTree: fmt::Display + fmt::Debug {
     ) -> ComputorResult;
 }
 
-pub fn insert_in_tree(
-    b_tree: &mut Box<dyn TokenTree>,
-    mut b_new: Box<dyn TokenTree>,
-) {
-    let tree = b_tree.as_any().downcast_mut::<TreeBranch>();
+type TTree = Box<dyn TokenTree>;
+
+pub fn insert_tree(b_tree: &mut TTree, mut b_new: TTree) {
+    let mut tree = b_tree.as_any().downcast_mut::<TreeBranch>();
     let new = b_new.as_any().downcast_mut::<TreeBranch>();
 
-    match (tree, new) {
-        (Some(ref mut root), _) if !root.was_expr() => root.insert_left(b_new),
-        (Some(ref mut root), Some(_)) => root.insert_left(b_new),
-        (Some(_), None) => TreeBranch::default_to_left(b_tree, b_new),
-        (None, Some(ref branch)) if !branch.was_expr() => {
-            std::mem::swap(b_tree, &mut b_new);
-            let any = b_tree.as_any();
-            let nw_root = any.downcast_mut::<TreeBranch>().unwrap();
-            nw_root.insert_right(b_new);
-        }
-        _ => TreeBranch::default_to_left(b_tree, b_new),
-    }
+    match (&mut tree, &new) {
+        (None, None) => TreeBranch::default_to_left(b_tree, b_new),
+        (Some(root), Some(branch)) => {
+            if !root.was_expr() {
+                root.rot_left(b_new);
+            } else if !branch.was_expr() {
+                swap_tree(b_tree, b_new);
+            } else {
+                TreeBranch::default_to_left(b_tree, b_new);
+            }
+        },
+        (Some(root), None) => {
+            if !root.was_expr() {
+                root.rot_left(b_new);
+            } else {
+                TreeBranch::default_to_left(b_tree, b_new);
+            }
+        },
+        (None, Some(branch)) => {
+            if !branch.was_expr() {
+                swap_tree(b_tree, b_new);
+            } else {
+                TreeBranch::default_to_left(b_tree, b_new);
+            }
+        },
+    };
+}
+
+fn swap_tree(b_tree: &mut TTree, mut b_new: TTree) {
+    std::mem::swap(b_tree, &mut b_new);
+    let any = b_tree.as_any();
+    let root = any.downcast_mut::<TreeBranch>().unwrap();
+    root.rot_right(b_new)
 }
