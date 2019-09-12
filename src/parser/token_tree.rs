@@ -48,21 +48,21 @@ pub fn insert_tree(b_tree: &mut TTree, mut b_new: TTree) {
             } else {
                 TreeBranch::default_to_left(b_tree, b_new);
             }
-        },
+        }
         (Some(root), None) => {
             if !root.was_expr() {
                 root.rot_left(b_new);
             } else {
                 TreeBranch::default_to_left(b_tree, b_new);
             }
-        },
+        }
         (None, Some(branch)) => {
             if !branch.was_expr() {
                 swap_tree(b_tree, b_new);
             } else {
                 TreeBranch::default_to_left(b_tree, b_new);
             }
-        },
+        }
     };
 }
 

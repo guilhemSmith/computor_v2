@@ -91,11 +91,13 @@ impl TreeBranch {
         if let Some(node) = &mut self.branch_left {
             match node.as_any().downcast_mut::<TreeBranch>() {
                 None => TreeBranch::default_to_left(node, new),
-                Some(branch) => if !branch.was_expr {
-                    branch.insert_leaf_left(new)
-                } else {
-                    TreeBranch::default_to_left(node, new)
-                },
+                Some(branch) => {
+                    if !branch.was_expr {
+                        branch.insert_leaf_left(new)
+                    } else {
+                        TreeBranch::default_to_left(node, new)
+                    }
+                }
             };
         } else {
             self.branch_left = Some(new);
@@ -113,7 +115,7 @@ impl TreeBranch {
                     } else {
                         TreeBranch::default_to_left(node, new);
                     }
-                },
+                }
                 Some(branch) => {
                     match (branch.was_expr, n_branch.was_expr) {
                         (false, false) => {
@@ -123,15 +125,15 @@ impl TreeBranch {
                                 n_branch.branch_right = self.branch_left.take();
                                 self.branch_left = Some(new);
                             }
-                        },
+                        }
                         (true, false) => {
                             n_branch.branch_right = self.branch_left.take();
                             self.branch_left = Some(new);
-                        },
+                        }
                         (false, true) => branch.insert_branch_left(new),
                         (true, true) => TreeBranch::default_to_left(node, new),
                     };
-                },
+                }
             };
         } else {
             self.branch_left = Some(new);
@@ -167,11 +169,13 @@ impl TreeBranch {
         if let Some(node) = &mut self.branch_right {
             match node.as_any().downcast_mut::<TreeBranch>() {
                 None => TreeBranch::default_to_right(node, new),
-                Some(branch) => if !branch.was_expr {
-                    branch.insert_leaf_right(new)
-                } else {
-                    TreeBranch::default_to_right(node, new)
-                },
+                Some(branch) => {
+                    if !branch.was_expr {
+                        branch.insert_leaf_right(new)
+                    } else {
+                        TreeBranch::default_to_right(node, new)
+                    }
+                }
             };
         } else {
             self.branch_right = Some(new);
@@ -189,7 +193,7 @@ impl TreeBranch {
                     } else {
                         TreeBranch::default_to_right(node, new);
                     }
-                },
+                }
                 Some(branch) => {
                     match (branch.was_expr, n_branch.was_expr) {
                         (false, false) => {
@@ -199,15 +203,15 @@ impl TreeBranch {
                                 n_branch.branch_left = self.branch_right.take();
                                 self.branch_right = Some(new);
                             }
-                        },
+                        }
                         (true, false) => {
                             n_branch.branch_left = self.branch_right.take();
                             self.branch_right = Some(new);
-                        },
+                        }
                         (false, true) => branch.insert_branch_right(new),
                         (true, true) => TreeBranch::default_to_right(node, new),
                     };
-                },
+                }
             };
         } else {
             self.branch_right = Some(new);

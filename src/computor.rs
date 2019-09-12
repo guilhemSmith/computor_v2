@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/10 11:13:22 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/12 17:06:24 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,12 @@ use crate::timer::Timer;
 use crate::types::Imaginary;
 use ComputorResult as CRes;
 
+use std::collections::HashMap;
+
 const LOG: &str = "[err:Computor] -> ";
+
+type TTree = Box<dyn TokenTree>;
+type Equ = HashMap<i32, Imaginary>;
 
 pub struct Computor {
     verbose: bool,
@@ -41,7 +46,7 @@ impl Computor {
         }
     }
 
-    pub fn read_tokens(&mut self, tree: Box<dyn TokenTree>) {
+    pub fn read_tokens(&mut self, tree: TTree) {
         if self.verbose {
             println!("[v:Computor] -> tree received: {:?}", tree)
         }
@@ -54,15 +59,15 @@ impl Computor {
         }
     }
 
-    fn compute(&mut self, mut tree: Box<dyn TokenTree>) {
+    fn compute(&mut self, mut tree: TTree) {
         let n = tree.count(token::count_error);
         if n > 0 {
             eprintln!("{}{} invalid tokens. Abort.", LOG, n);
             return;
         }
 
-        let left: Option<Box<dyn TokenTree>>;
-        let right: Option<Box<dyn TokenTree>>;
+        let left: Option<TTree>;
+        let right: Option<TTree>;
         match tree.as_any().downcast_mut::<TreeBranch>() {
             None => return self.single_part(tree),
             Some(branch) => {
@@ -80,7 +85,7 @@ impl Computor {
         eprintln!("{}", ComputorError::bad_use_op('='));
     }
 
-    fn single_part(&mut self, tree: Box<dyn TokenTree>) {
+    fn single_part(&mut self, tree: TTree) {
         match tree.compute(&mut self.memory, None) {
             CRes::None => log_err("Empty instruction given"),
             CRes::Res => self.mem_dump(),
@@ -89,15 +94,11 @@ impl Computor {
             CRes::VarCall(_, val) => println!("{}", val),
             CRes::VarSet(v) => log_err(&format!("Unknown variable '{}'", v)),
             CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
-            CRes::Equ(_, _) => log_err("Equation not complete"),
+            CRes::Equ(_, eq) => self.eq_one_sided(eq),
         };
     }
 
-    fn dual_part(
-        &mut self,
-        left: Box<dyn TokenTree>,
-        right: Box<dyn TokenTree>,
-    ) {
+    fn dual_part(&mut self, left: TTree, right: TTree) {
         match left.compute(&mut self.memory, None) {
             CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
             CRes::Res => eprintln!("{}", ComputorError::bad_resolve()),
@@ -110,7 +111,21 @@ impl Computor {
         }
     }
 
-    fn left_val(&mut self, val: Imaginary, right: Box<dyn TokenTree>) {
+    fn eq_one_sided(&mut self, eq: Equ) {
+        let zero: i32 = 0;
+        for (pow, coef) in eq.iter() {
+            if *pow > 0 && *coef != Imaginary::new(0.0, 0.0) {
+                return log_err("Equation not complete");
+            }
+        }
+        if let Some(coef) = eq.get(&zero) {
+            println!("{}", *coef);
+        } else {
+            log_err("Equation not complete");
+        }
+    }
+
+    fn left_val(&mut self, val: Imaginary, right: TTree) {
         match right.compute(&mut self.memory, None) {
             CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
             CRes::Res => println!("{}", val),
@@ -123,12 +138,7 @@ impl Computor {
         };
     }
 
-    fn call_var(
-        &mut self,
-        var: String,
-        val: Imaginary,
-        right: Box<dyn TokenTree>,
-    ) {
+    fn call_var(&mut self, var: String, val: Imaginary, right: TTree) {
         match right.compute(&mut self.memory, None) {
             CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
             CRes::Res => println!("{}", val),
@@ -147,7 +157,7 @@ impl Computor {
         }
     }
 
-    fn set_var(&mut self, var: String, right: Box<dyn TokenTree>) {
+    fn set_var(&mut self, var: String, right: TTree) {
         match right.compute(&mut self.memory, None) {
             CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
             CRes::Res => log_err(&format!("Unknown variable '{}'", var)),
@@ -172,12 +182,7 @@ impl Computor {
         };
     }
 
-    fn set_fun(
-        &mut self,
-        id: String,
-        param: Vec<String>,
-        exp: Box<dyn TokenTree>,
-    ) {
+    fn set_fun(&mut self, id: String, param: Vec<String>, exp: TTree) {
         self.memory.set_fun(id, param, exp);
     }
 

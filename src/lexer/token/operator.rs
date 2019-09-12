@@ -32,7 +32,13 @@ pub trait Operator: Token + fmt::Display {
     fn new_eq(&self, var: String, val: Im, var_left: bool) -> CRes;
     fn op(&self, val_a: Im, val_b: Im) -> CRes;
     fn fus_eq(&self, id_a: String, id_b: String, eq_a: Equ, eq_b: Equ) -> CRes;
-    fn var_eq(&self, id_var: String, id_eq: String, eq: Equ, eq_left: bool) -> CRes;
+    fn var_eq(
+        &self,
+        id_var: String,
+        id_eq: String,
+        eq: Equ,
+        eq_left: bool,
+    ) -> CRes;
     fn val_eq(&self, val: Im, id: String, eq: Equ, eq_left: bool) -> CRes;
     fn exec(&self, _mem: &Memory, left: CRes, right: CRes) -> CRes {
         match (left, right) {
@@ -45,21 +51,35 @@ pub trait Operator: Token + fmt::Display {
             (CRes::None, right) => none_on_left(right, self.symbol()),
             (_, CRes::None) => CRes::Err(CErr::bad_use_op(self.symbol())),
             (CRes::VarSet(v_a), CRes::VarSet(v_b)) => self.dual_var(v_a, v_b),
-            (CRes::VarSet(var), CRes::VarCall(_, val)) => self.new_eq(var, val, true),
-            (CRes::VarCall(_, val), CRes::VarSet(var)) => self.new_eq(var, val, false),
+            (CRes::VarSet(var), CRes::VarCall(_, val)) => {
+                self.new_eq(var, val, true)
+            }
+            (CRes::VarCall(_, val), CRes::VarSet(var)) => {
+                self.new_eq(var, val, false)
+            }
             (CRes::VarSet(var), CRes::Val(val)) => self.new_eq(var, val, true),
             (CRes::Val(val), CRes::VarSet(var)) => self.new_eq(var, val, false),
             (CRes::Val(v_a), CRes::Val(v_b)) => self.op(v_a, v_b),
             (CRes::Val(v_a), CRes::VarCall(_, v_b)) => self.op(v_a, v_b),
             (CRes::VarCall(_, v_a), CRes::Val(v_b)) => self.op(v_a, v_b),
             (CRes::VarCall(_, v_a), CRes::VarCall(_, v_b)) => self.op(v_a, v_b),
-            (CRes::Equ(id_a, eq_a), CRes::Equ(id_b, eq_b)) => self.fus_eq(id_a, id_b, eq_a, eq_b),
-            (CRes::Equ(id_eq, eq), CRes::VarSet(id_v)) => self.var_eq(id_v, id_eq, eq, true),
-            (CRes::VarSet(id_v), CRes::Equ(id_eq, eq)) => self.var_eq(id_v, id_eq, eq, false),
+            (CRes::Equ(id_a, eq_a), CRes::Equ(id_b, eq_b)) => {
+                self.fus_eq(id_a, id_b, eq_a, eq_b)
+            }
+            (CRes::Equ(id_eq, eq), CRes::VarSet(id_v)) => {
+                self.var_eq(id_v, id_eq, eq, true)
+            }
+            (CRes::VarSet(id_v), CRes::Equ(id_eq, eq)) => {
+                self.var_eq(id_v, id_eq, eq, false)
+            }
             (CRes::Equ(id, eq), CRes::Val(v)) => self.val_eq(v, id, eq, true),
             (CRes::Val(v), CRes::Equ(id, eq)) => self.val_eq(v, id, eq, false),
-            (CRes::Equ(id, eq), CRes::VarCall(_, v)) => self.val_eq(v, id, eq, true),
-            (CRes::VarCall(_, v), CRes::Equ(id, eq)) => self.val_eq(v, id, eq, false),
+            (CRes::Equ(id, eq), CRes::VarCall(_, v)) => {
+                self.val_eq(v, id, eq, true)
+            }
+            (CRes::VarCall(_, v), CRes::Equ(id, eq)) => {
+                self.val_eq(v, id, eq, false)
+            }
         }
     }
 }
@@ -77,7 +97,7 @@ pub fn new_operator(symbol: char) -> Result<Box<dyn Token>, LexerError> {
 }
 
 struct OpEqual {
-    priority: i32
+    priority: i32,
 }
 
 impl OpEqual {
@@ -156,7 +176,7 @@ impl Operator for OpEqual {
     fn new_eq(&self, _: String, _: Im, _: bool) -> CRes {
         CRes::Err(CErr::too_many_equal())
     }
-    
+
     fn exec(&self, _: &Memory, _: CRes, _: CRes) -> CRes {
         CRes::Err(CErr::too_many_equal())
     }
@@ -373,7 +393,13 @@ impl Operator for OpAdd {
         return CRes::Equ(id_a, eq_a);
     }
 
-    fn var_eq(&self, id_var: String, id_eq: String, mut eq: Equ, _: bool) -> CRes {
+    fn var_eq(
+        &self,
+        id_var: String,
+        id_eq: String,
+        mut eq: Equ,
+        _: bool,
+    ) -> CRes {
         if id_var != id_eq {
             return CRes::Err(CErr::too_many_unknown());
         }
@@ -498,7 +524,13 @@ impl Operator for OpSub {
         return CRes::Equ(id_a, eq_a);
     }
 
-    fn var_eq(&self, id_var: String, id_eq: String, mut eq: Equ, eq_left: bool) -> CRes {
+    fn var_eq(
+        &self,
+        id_var: String,
+        id_eq: String,
+        mut eq: Equ,
+        eq_left: bool,
+    ) -> CRes {
         if id_var != id_eq {
             return CRes::Err(CErr::too_many_unknown());
         }
@@ -508,11 +540,13 @@ impl Operator for OpSub {
             None => {
                 eq.insert(one, Im::new(1.0, 0.0));
             }
-            Some(coef) => *coef = if eq_left {
-                *coef - Im::new(1.0, 0.0)
-            } else {
-                Im::new(1.0, 0.0) - *coef
-            },
+            Some(coef) => {
+                *coef = if eq_left {
+                    *coef - Im::new(1.0, 0.0)
+                } else {
+                    Im::new(1.0, 0.0) - *coef
+                }
+            }
         };
         return CRes::Equ(id_var, eq);
     }
@@ -523,11 +557,9 @@ impl Operator for OpSub {
             None => {
                 eq.insert(zero, val);
             }
-            Some(coef) => *coef = if eq_left {
-                *coef - val
-            } else {
-                val - *coef
-            },
+            Some(coef) => {
+                *coef = if eq_left { *coef - val } else { val - *coef }
+            }
         }
         return CRes::Equ(id, eq);
     }
@@ -643,7 +675,13 @@ impl Operator for OpDiv {
         return CRes::Equ(id_a, res);
     }
 
-    fn var_eq(&self, id_var: String, id_eq: String, eq: Equ, eq_left: bool) -> CRes {
+    fn var_eq(
+        &self,
+        id_var: String,
+        id_eq: String,
+        eq: Equ,
+        eq_left: bool,
+    ) -> CRes {
         if id_var != id_eq {
             return CRes::Err(CErr::too_many_unknown());
         }
@@ -690,7 +728,7 @@ impl Operator for OpDiv {
     }
 
     fn new_eq(&self, var: String, val: Im, var_left: bool) -> CRes {
-        if  var_left && val == Im::new(0.0, 0.0) {
+        if var_left && val == Im::new(0.0, 0.0) {
             return CRes::Err(CErr::div_by_zero());
         }
         let mut eq: Equ = HashMap::new();
@@ -704,11 +742,11 @@ impl Operator for OpDiv {
 }
 
 struct OpPow {
-    priority: i32
+    priority: i32,
 }
 
 impl OpPow {
-    pub fn new() ->  Self {
+    pub fn new() -> Self {
         OpPow { priority: 3 }
     }
 }
@@ -772,13 +810,7 @@ impl Operator for OpPow {
         CRes::Err(CErr::bad_pow())
     }
 
-    fn fus_eq(
-        &self,
-        id_a: String,
-        id_b: String,
-        _: Equ,
-        _: Equ,
-    ) -> CRes {
+    fn fus_eq(&self, id_a: String, id_b: String, _: Equ, _: Equ) -> CRes {
         if id_a != id_b {
             return CRes::Err(CErr::too_many_unknown());
         }
@@ -798,7 +830,7 @@ impl Operator for OpPow {
         }
         let mut res: Equ = HashMap::new();
         let power = val.get_real() as i32;
-        
+
         run_power(power, (0, Im::new(1.0, 0.0)), &mut res, &eq);
         return CRes::Equ(id, res);
     }
@@ -840,9 +872,9 @@ fn none_on_left(right: CRes, op: char) -> CRes {
                 }
                 CRes::Equ(id, res)
             }
-            _ => CRes::Err(CErr::bad_use_op(op))
+            _ => CRes::Err(CErr::bad_use_op(op)),
         },
         '+' => right,
-        _ => CRes::Err(CErr::bad_use_op(op))
+        _ => CRes::Err(CErr::bad_use_op(op)),
     }
 }
