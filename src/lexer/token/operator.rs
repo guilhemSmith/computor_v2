@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/13 12:00:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/13 14:02:20 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -814,7 +814,7 @@ impl Operator for OpPow {
         if !val_b.is_real() || !val_b.is_int() {
             return CRes::Err(CErr::bad_pow());
         }
-        let res = val_a.pow(val_b.get_real());
+        let res = val_a.pow(val_b.get_real().get_val() as u32);
         return CRes::Val(res);
     }
 
@@ -841,7 +841,7 @@ impl Operator for OpPow {
             return CRes::Err(CErr::bad_pow());
         }
         let mut res: Equ = HashMap::new();
-        let power = val.get_real() as i32;
+        let power = val.get_real().get_val() as i32;
 
         run_power(power, (0, Im::new(1.0, 0.0)), &mut res, &eq);
         return CRes::Equ(id, res);
@@ -852,7 +852,7 @@ impl Operator for OpPow {
             return CRes::Err(CErr::bad_pow());
         }
         let mut eq: Equ = HashMap::new();
-        eq.insert(val.get_real() as i32, Im::new(1.0, 0.0));
+        eq.insert(val.get_real().get_val() as i32, Im::new(1.0, 0.0));
         return CRes::Equ(var, eq);
     }
 }

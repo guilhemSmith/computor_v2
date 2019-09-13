@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/13 12:01:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/13 14:04:53 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,11 @@ use crate::lexer::token;
 use crate::memory::Memory;
 use crate::parser::{TokenTree, TreeBranch};
 use crate::timer::Timer;
-use crate::types::Imaginary;
+use crate::types::{Imaginary, Rational};
 use ComputorResult as CRes;
 
 use std::collections::HashMap;
+use std::i32::{MAX as I32_MAX, MIN as I32_MIN};
 
 const LOG: &str = "[err:Computor] -> ";
 
@@ -133,19 +134,19 @@ impl Computor {
             CRes::Err(err) => self.print_err(err),
             CRes::Val(val) => {
                 val_into_eq(&mut left, val);
-                solve_eq(left, id);
+                self.solve_eq(left, id);
             }
             CRes::VarCall(id_v, val) => {
                 var_into_eq(&mut left, &id, id_v, val);
-                solve_eq(left, id);
+                self.solve_eq(left, id);
             }
             CRes::VarSet(v) => match unknow_into_eq(&mut left, &id, v) {
                 Err(err) => self.print_err(err),
-                Ok(()) => solve_eq(left, id),
+                Ok(()) => self.solve_eq(left, id),
             },
             CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
             CRes::Equ(id_r, eq) => match fuse_eq(&mut left, &id, eq, id_r) {
-                Ok(()) => solve_eq(left, id),
+                Ok(()) => self.solve_eq(left, id),
                 Err(err) => self.print_err(err),
             },
         }
@@ -163,7 +164,7 @@ impl Computor {
             CRes::Equ(id, eq) => {
                 let mut eq = eq;
                 val_into_eq(&mut eq, val);
-                solve_eq(eq, id);
+                self.solve_eq(eq, id);
             }
         };
     }
@@ -186,7 +187,7 @@ impl Computor {
             CRes::Equ(id, eq) => {
                 let mut eq = eq;
                 var_into_eq(&mut eq, &id, var, val);
-                solve_eq(eq, id);
+                self.solve_eq(eq, id);
             }
         }
     }
@@ -216,7 +217,7 @@ impl Computor {
                 let mut eq = eq;
                 match unknow_into_eq(&mut eq, &id, var) {
                     Err(err) => self.print_err(err),
-                    Ok(()) => solve_eq(eq, id),
+                    Ok(()) => self.solve_eq(eq, id),
                 }
             }
         };
@@ -232,6 +233,27 @@ impl Computor {
 
     fn mem_dump(&self) {
         println!("{}", self.memory);
+    }
+
+    fn solve_eq(&self, mut eq: Equ, id: String) {
+        filter_eq(&mut eq);
+        if !valid_eq(&eq) {
+            return;
+        }
+        match eq.keys().max() {
+            None => println!("Any value for {} is a solution.", id),
+            Some(max) => match *max {
+                0 => println!("False."),
+                1 => eq_degree_one(eq, id),
+                2 => eq_degree_two(eq, id),
+                2..=I32_MAX => {
+                    println!("Can't solve equation with degree above 2.")
+                }
+                I32_MIN..=0 => {
+                    println!("Can't solve equation with degree below 0.")
+                }
+            },
+        };
     }
 }
 
@@ -311,20 +333,27 @@ fn solve_two_val(val_l: Im, val_r: Im) {
     }
 }
 
-fn solve_eq(mut eq: Equ, id: String) {
-    let zero = Im::new(0.0, 0.0);
-    filter_eq(&mut eq);
-    if eq.len() > 0 {
-        for (pow, coef) in eq {
-            if coef != zero {
-                print!(" (+) {} * {} ^ {}", coef, id, pow);
-            }
-        }
-        println!("");
+fn eq_degree_one(eq: Equ, id: String) {
+    let mut index: i32 = 0;
+    let zero = match eq.get(&index) {
+        None => Im::new(0.0, 0.0),
+        Some(val) => *val,
+    };
+    index += 1;
+    let one = *eq.get(&index).unwrap();
+    let sign = if zero.get_real() < Rational::zero() {
+        " "
     } else {
-        println!("0");
-    }
+        " + "
+    };
+    println!(
+        "Equation of degree 1:\n{} * {}{}{} = 0",
+        one, id, sign, zero
+    );
+    println!("Solution: {} = {}", id, (Im::new(0.0, 0.0) - zero) / one);
 }
+
+fn eq_degree_two(eq: Equ, id: String) {}
 
 fn log_err(msg: &str) {
     eprintln!("{}{}.", LOG, msg);
@@ -341,4 +370,18 @@ pub fn filter_eq(eq: &mut Equ) {
     for key in dead_key.iter() {
         eq.remove(key);
     }
+}
+
+fn valid_eq(eq: &Equ) -> bool {
+    for (pow, coef) in eq.iter() {
+        if *pow < 0 {
+            println!("Can't compute equation with negative pow.");
+            return false;
+        }
+        if !coef.is_real() {
+            println!("Can't compute equation with complex coeficient.");
+            return false;
+        }
+    }
+    return true;
 }

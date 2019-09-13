@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 19:36:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/13 14:01:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,8 +53,8 @@ impl Imaginary {
         return Imaginary { real, irreal };
     }
 
-    pub fn get_real(&self) -> u32 {
-        self.real.get_val() as u32
+    pub fn get_real(&self) -> Rational {
+        self.real
     }
 
     pub fn is_real(&self) -> bool {
