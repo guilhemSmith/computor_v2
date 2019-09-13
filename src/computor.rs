@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/13 14:04:53 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/13 15:20:18 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,13 +347,79 @@ fn eq_degree_one(eq: Equ, id: String) {
         " + "
     };
     println!(
-        "Equation of degree 1:\n{} * {}{}{} = 0",
-        one, id, sign, zero
+        "Equation of degree 1:\n{} * {}{} = 0",
+        one,
+        id,
+        if zero.get_real() != Rational::zero() {
+            format!("{}{}", sign, zero)
+        } else {
+            String::new()
+        }
     );
     println!("Solution: {} = {}", id, (Im::new(0.0, 0.0) - zero) / one);
 }
 
-fn eq_degree_two(eq: Equ, id: String) {}
+fn eq_degree_two(eq: Equ, id: String) {
+    let mut index: i32 = 0;
+    let deg_zero = match eq.get(&index) {
+        None => Rational::new(0.0),
+        Some(val) => (*val).get_real(),
+    };
+    index += 1;
+    let deg_one = match eq.get(&index) {
+        None => Rational::new(0.0),
+        Some(val) => (*val).get_real(),
+    };
+    index += 1;
+    let deg_two = (*eq.get(&index).unwrap()).get_real();
+    print!("Equation of degree 2:\n{} * {}^2", deg_two, id);
+    if deg_one != Rational::zero() {
+        print!(
+            "{}{} * {}",
+            if deg_one < Rational::zero() {
+                " "
+            } else {
+                " + "
+            },
+            deg_one,
+            id,
+        );
+    }
+    if deg_zero != Rational::zero() {
+        print!(
+            "{}{}",
+            if deg_zero < Rational::zero() {
+                " "
+            } else {
+                " + "
+            },
+            deg_zero,
+        );
+    }
+    println!(" = 0");
+    let delta = deg_one.pow(2) - Rational::new(4.0) * deg_two * deg_zero;
+    let div = deg_two * Rational::new(2.0);
+    if delta > Rational::zero() {
+        let root = delta.get_val().sqrt();
+        let sol_a = (Rational::new(-root) - deg_one) / div;
+        let sol_b = (Rational::new(root) - deg_one) / div;
+        println!(
+            "Delta is positive, 2 real solutions:\n{} = {}\n{} = {}",
+            id, sol_a, id, sol_b
+        );
+    } else if delta < Rational::zero() {
+        let root = (-delta.get_val()).sqrt();
+        let sol_a = Im::new((deg_one / div).get_val(), root / div.get_val());
+        let sol_b = Im::new((deg_one / div).get_val(), -root / div.get_val());
+        println!(
+            "Delta is negative, 2 imaginary solutions:\n{} = {}\n{} = {}",
+            id, sol_a, id, sol_b
+        );
+    } else {
+        let sol = (Rational::zero() - deg_one) / div;
+        println!("Delta is null, 1 real solution:\n{} = {}", id, sol);
+    }
+}
 
 fn log_err(msg: &str) {
     eprintln!("{}{}.", LOG, msg);
