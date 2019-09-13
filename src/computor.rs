@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/13 15:20:18 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/13 15:45:08 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -341,21 +341,7 @@ fn eq_degree_one(eq: Equ, id: String) {
     };
     index += 1;
     let one = *eq.get(&index).unwrap();
-    let sign = if zero.get_real() < Rational::zero() {
-        " "
-    } else {
-        " + "
-    };
-    println!(
-        "Equation of degree 1:\n{} * {}{} = 0",
-        one,
-        id,
-        if zero.get_real() != Rational::zero() {
-            format!("{}{}", sign, zero)
-        } else {
-            String::new()
-        }
-    );
+    print_eq(&eq, &id, 1);
     println!("Solution: {} = {}", id, (Im::new(0.0, 0.0) - zero) / one);
 }
 
@@ -372,31 +358,7 @@ fn eq_degree_two(eq: Equ, id: String) {
     };
     index += 1;
     let deg_two = (*eq.get(&index).unwrap()).get_real();
-    print!("Equation of degree 2:\n{} * {}^2", deg_two, id);
-    if deg_one != Rational::zero() {
-        print!(
-            "{}{} * {}",
-            if deg_one < Rational::zero() {
-                " "
-            } else {
-                " + "
-            },
-            deg_one,
-            id,
-        );
-    }
-    if deg_zero != Rational::zero() {
-        print!(
-            "{}{}",
-            if deg_zero < Rational::zero() {
-                " "
-            } else {
-                " + "
-            },
-            deg_zero,
-        );
-    }
-    println!(" = 0");
+    print_eq(&eq, &id, 2);
     let delta = deg_one.pow(2) - Rational::new(4.0) * deg_two * deg_zero;
     let div = deg_two * Rational::new(2.0);
     if delta > Rational::zero() {
@@ -450,4 +412,37 @@ fn valid_eq(eq: &Equ) -> bool {
         }
     }
     return true;
+}
+
+fn print_eq(eq: &Equ, id: &String, degree: i32) {
+    let mut pow: i32 = degree;
+    let mut to_print = eq.len();
+    println!("Equation of degree {}:", degree);
+    while to_print > 0 {
+        if let Some(coef) = eq.get(&pow) {
+            to_print -= 1;
+            let val = *coef;
+            print!(
+                "{}{}{}{}",
+                if val.get_real().get_val() < 0.0 || pow == degree {
+                    " "
+                } else {
+                    " + "
+                },
+                val,
+                if pow != 0 {
+                    format!(" * {}", id)
+                } else {
+                    String::new()
+                },
+                if pow != 0 && pow != 1 {
+                    format!("^{}", pow)
+                } else {
+                    String::new()
+                },
+            );
+        }
+        pow -= 1;
+    }
+    println!(" = 0");
 }
