@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/13 14:02:20 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/13 14:30:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -877,6 +877,11 @@ fn none_on_left(right: CRes, op: char) -> CRes {
         '-' => match right {
             CRes::Val(val) => CRes::Val(zero - val),
             CRes::VarCall(_, val) => CRes::Val(zero - val),
+            CRes::VarSet(id) => {
+                let mut res: Equ = HashMap::new();
+                res.insert(1, Im::new(-1.0, 0.0));
+                CRes::Equ(id, res)
+            }
             CRes::Equ(id, eq) => {
                 let mut res = eq;
                 for (_, coef) in res.iter_mut() {
