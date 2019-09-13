@@ -6,12 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/12 13:19:42 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/13 12:00:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
-use crate::computor::{ComputorError as CErr, ComputorResult as CRes};
+use crate::computor::{
+    filter_eq, ComputorError as CErr, ComputorResult as CRes,
+};
 use crate::memory::{Extension, Memory};
 use crate::types::Imaginary as Im;
 
@@ -555,7 +557,7 @@ impl Operator for OpSub {
         let zero: i32 = 0;
         match eq.get_mut(&zero) {
             None => {
-                eq.insert(zero, val);
+                eq.insert(zero, Im::new(0.0, 0.0) - val);
             }
             Some(coef) => {
                 *coef = if eq_left { *coef - val } else { val - *coef }
@@ -649,9 +651,19 @@ impl Operator for OpDiv {
         return CRes::Val(Im::new(1.0, 0.0));
     }
 
-    fn fus_eq(&self, id_a: String, id_b: String, eq_a: Equ, eq_b: Equ) -> CRes {
+    fn fus_eq(
+        &self,
+        id_a: String,
+        id_b: String,
+        eq_a: Equ,
+        mut eq_b: Equ,
+    ) -> CRes {
         if id_a != id_b {
             return CRes::Err(CErr::too_many_unknown());
+        }
+        filter_eq(&mut eq_b);
+        if eq_b.len() > 1 {
+            return CRes::Err(CErr::div_by_eq());
         }
         let mut res: Equ = HashMap::new();
         let zero = Im::new(0.0, 0.0);

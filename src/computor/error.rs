@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/11 11:57:15 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/13 11:48:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ pub enum ErrorKind {
     BadPow,
     BadResolve,
     BadUseOperator,
+    DivByEq,
     DivByZero,
     FunUndefinded,
     FunArgInv,
@@ -35,6 +36,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::BadPow => write!(f, "bad use"),
             ErrorKind::BadResolve => write!(f, "bad use"),
             ErrorKind::BadUseOperator => write!(f, "bad use"),
+            ErrorKind::DivByEq => write!(f, "math"),
             ErrorKind::DivByZero => write!(f, "math"),
             ErrorKind::FunUndefinded => write!(f, "function"),
             ErrorKind::FunArgInv => write!(f, "function"),
@@ -87,6 +89,13 @@ impl ComputorError {
                 "must be preceded by a value",
                 "followed by a another value."
             ),
+        }
+    }
+
+    pub fn div_by_eq() -> Self {
+        ComputorError {
+            kind: ErrorKind::DivByEq,
+            info: String::from("Can't divide an equation by another equation."),
         }
     }
 

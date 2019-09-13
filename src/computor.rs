@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/13 10:43:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/13 12:01:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -311,8 +311,34 @@ fn solve_two_val(val_l: Im, val_r: Im) {
     }
 }
 
-fn solve_eq(eq: Equ, id: String) {}
+fn solve_eq(mut eq: Equ, id: String) {
+    let zero = Im::new(0.0, 0.0);
+    filter_eq(&mut eq);
+    if eq.len() > 0 {
+        for (pow, coef) in eq {
+            if coef != zero {
+                print!(" (+) {} * {} ^ {}", coef, id, pow);
+            }
+        }
+        println!("");
+    } else {
+        println!("0");
+    }
+}
 
 fn log_err(msg: &str) {
     eprintln!("{}{}.", LOG, msg);
+}
+
+pub fn filter_eq(eq: &mut Equ) {
+    let zero = Im::new(0.0, 0.0);
+    let mut dead_key: Vec<i32> = Vec::new();
+    for (pow, coef) in eq.iter() {
+        if *coef == zero {
+            dead_key.push(*pow);
+        }
+    }
+    for key in dead_key.iter() {
+        eq.remove(key);
+    }
 }
