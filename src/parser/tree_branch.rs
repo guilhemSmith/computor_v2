@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/12 16:45:47 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/16 11:41:33 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,19 @@ impl TreeBranch {
         nw_left.rot_right(box_tree);
     }
 
+    pub fn insert_default_left(&mut self, new: TTree) {
+        let op = new_operator('*').unwrap();
+        let mut new_tree = TreeBranch::new(op);
+        new_tree.branch_left = Some(new);
+        if !self.op_ref().is_prior(new_tree.op_ref()) {
+            new_tree.branch_right = self.branch_left.take();
+            self.branch_left = Some(Box::new(new_tree));
+        } else {
+            std::mem::swap(self, &mut new_tree);
+            self.branch_right = Some(Box::new(new_tree));
+        }
+    }
+
     pub fn rot_left(&mut self, mut new: TTree) {
         match new.as_any().downcast_mut::<TreeBranch>() {
             None => self.insert_leaf_left(new),
@@ -90,12 +103,12 @@ impl TreeBranch {
     pub fn insert_leaf_left(&mut self, new: TTree) {
         if let Some(node) = &mut self.branch_left {
             match node.as_any().downcast_mut::<TreeBranch>() {
-                None => TreeBranch::default_to_left(node, new),
+                None => self.insert_default_left(new),
                 Some(branch) => {
                     if !branch.was_expr {
                         branch.insert_leaf_left(new)
                     } else {
-                        TreeBranch::default_to_left(node, new)
+                        self.insert_default_left(new)
                     }
                 }
             };
@@ -113,7 +126,7 @@ impl TreeBranch {
                         n_branch.branch_right = self.branch_left.take();
                         self.branch_left = Some(new);
                     } else {
-                        TreeBranch::default_to_left(node, new);
+                        self.insert_default_left(new);
                     }
                 }
                 Some(branch) => {
@@ -131,7 +144,7 @@ impl TreeBranch {
                             self.branch_left = Some(new);
                         }
                         (false, true) => branch.insert_branch_left(new),
-                        (true, true) => TreeBranch::default_to_left(node, new),
+                        (true, true) => self.insert_default_left(new),
                     };
                 }
             };
@@ -140,15 +153,17 @@ impl TreeBranch {
         }
     }
 
-    pub fn default_to_right(leaf: &mut TTree, next: TTree) {
+    pub fn insert_default_right(&mut self, new: TTree) {
         let op = new_operator('*').unwrap();
         let mut new_tree = TreeBranch::new(op);
-        new_tree.rot_right(next);
-        let mut box_tree: TTree = Box::new(new_tree);
-        std::mem::swap(leaf, &mut box_tree);
-        let any = leaf.as_any();
-        let nw_left = any.downcast_mut::<TreeBranch>().unwrap();
-        nw_left.rot_left(box_tree);
+        new_tree.branch_right = Some(new);
+        if !self.op_ref().is_prior(new_tree.op_ref()) {
+            new_tree.branch_left = self.branch_right.take();
+            self.branch_right = Some(Box::new(new_tree));
+        } else {
+            std::mem::swap(self, &mut new_tree);
+            self.branch_left = Some(Box::new(new_tree));
+        }
     }
 
     pub fn rot_right(&mut self, mut new: TTree) {
@@ -168,12 +183,12 @@ impl TreeBranch {
     pub fn insert_leaf_right(&mut self, new: TTree) {
         if let Some(node) = &mut self.branch_right {
             match node.as_any().downcast_mut::<TreeBranch>() {
-                None => TreeBranch::default_to_right(node, new),
+                None => self.insert_default_right(new),
                 Some(branch) => {
                     if !branch.was_expr {
                         branch.insert_leaf_right(new)
                     } else {
-                        TreeBranch::default_to_right(node, new)
+                        self.insert_default_right(new)
                     }
                 }
             };
@@ -191,7 +206,7 @@ impl TreeBranch {
                         n_branch.branch_left = self.branch_right.take();
                         self.branch_right = Some(new);
                     } else {
-                        TreeBranch::default_to_right(node, new);
+                        self.insert_default_right(new);
                     }
                 }
                 Some(branch) => {
@@ -209,7 +224,7 @@ impl TreeBranch {
                             self.branch_right = Some(new);
                         }
                         (false, true) => branch.insert_branch_right(new),
-                        (true, true) => TreeBranch::default_to_right(node, new),
+                        (true, true) => self.insert_default_right(new),
                     };
                 }
             };
