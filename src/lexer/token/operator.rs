@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/16 13:58:31 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/16 15:12:50 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,7 @@ pub fn new_operator(symbol: char) -> Result<Box<dyn Token>, LexerError> {
         '-' => Ok(Box::new(OpSub::new())),
         '*' => Ok(Box::new(OpMul::new())),
         '/' => Ok(Box::new(OpDiv::new())),
+        '%' => Ok(Box::new(OpMod::new())),
         '^' => Ok(Box::new(OpPow::new())),
         _ => Err(LexerError::InvalidOp(symbol)),
     }
@@ -750,6 +751,112 @@ impl Operator for OpDiv {
             eq.insert(-1, val);
         }
         return CRes::Equ(var, eq);
+    }
+}
+
+struct OpMod {
+    priority: i32,
+}
+
+impl OpMod {
+    pub fn new() -> Self {
+        OpMod { priority: 2 }
+    }
+}
+
+impl fmt::Display for OpMod {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "%")
+    }
+}
+
+impl fmt::Debug for OpMod {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[op:%]")
+    }
+}
+
+impl Token for OpMod {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn as_op_ref(&self) -> Option<&dyn Operator> {
+        Some(self as &dyn Operator)
+    }
+
+    fn as_op_mut(&mut self) -> Option<&mut dyn Operator> {
+        Some(self as &mut dyn Operator)
+    }
+
+    fn get_result(&self, _mem: &Memory, _ext: Option<&mut Extension>) -> CRes {
+        CRes::Err(CErr::unparsed_token(self))
+    }
+}
+
+impl Operator for OpMod {
+    fn priority(&self) -> i32 {
+        self.priority
+    }
+
+    fn set_prior_as_exp(&mut self) {
+        self.priority = 4;
+    }
+
+    fn symbol(&self) -> char {
+        '%'
+    }
+
+    fn op(&self, val_a: Im, val_b: Im) -> CRes {
+        if val_b == Im::new(0.0, 0.0) {
+            return CRes::Err(CErr::div_by_zero());
+        } else if !val_b.is_real() || !val_a.is_real() {
+            return CRes::Err(CErr::mod_with_im());
+        }
+        // TODO: overflow protection here
+        CRes::Val(Im::new(
+            (val_a.get_real() % val_b.get_real()).get_val(),
+            0.0,
+        ))
+    }
+
+    fn dual_var(&self, var_a: String, var_b: String) -> CRes {
+        if var_a != var_b {
+            return CRes::Err(CErr::too_many_unknown());
+        }
+        return CRes::Val(Im::new(0.0, 0.0));
+    }
+
+    fn fus_eq(&self, id_a: String, id_b: String, _: Equ, _: Equ) -> CRes {
+        if id_a != id_b {
+            return CRes::Err(CErr::too_many_unknown());
+        }
+        return CRes::Err(CErr::mod_with_unk());
+    }
+
+    fn var_eq(&self, id_var: String, id_eq: String, _: Equ, _: bool) -> CRes {
+        if id_var != id_eq {
+            return CRes::Err(CErr::too_many_unknown());
+        }
+        return CRes::Err(CErr::mod_with_unk());
+    }
+
+    fn val_eq(&self, val: Im, _: String, _: Equ, eq_left: bool) -> CRes {
+        if eq_left && val == Im::new(0.0, 0.0) {
+            return CRes::Err(CErr::div_by_zero());
+        }
+        return CRes::Err(CErr::mod_with_unk());
+    }
+
+    fn new_eq(&self, _: String, val: Im, var_left: bool) -> CRes {
+        if var_left && val == Im::new(0.0, 0.0) {
+            return CRes::Err(CErr::div_by_zero());
+        }
+        return CRes::Err(CErr::mod_with_unk());
     }
 }
 

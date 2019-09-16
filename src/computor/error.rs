@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/16 14:46:04 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/16 15:05:10 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ pub enum ErrorKind {
     DivByZero,
     FunUndefinded,
     FunArgInv,
+    ModWithIm,
+    ModWithUnk,
     InvalidInput,
     IO,
     IOStop,
@@ -40,6 +42,8 @@ impl fmt::Display for ErrorKind {
             ErrorKind::DivByZero => write!(f, "math"),
             ErrorKind::FunUndefinded => write!(f, "function"),
             ErrorKind::FunArgInv => write!(f, "function"),
+            ErrorKind::ModWithIm => write!(f, "math"),
+            ErrorKind::ModWithUnk => write!(f, "instruction"),
             ErrorKind::InvalidInput => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
@@ -117,6 +121,20 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::FunArgInv,
             info: format!("'{}' did not received valid argument(s).", name),
+        }
+    }
+
+    pub fn mod_with_im() -> Self {
+        ComputorError {
+            kind: ErrorKind::ModWithIm,
+            info: String::from("Mod with Imaginary numbers, abort."),
+        }
+    }
+
+    pub fn mod_with_unk() -> Self {
+        ComputorError {
+            kind: ErrorKind::ModWithUnk,
+            info: String::from("Mod with unknown values, abort."),
         }
     }
 
