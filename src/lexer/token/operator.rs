@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/13 14:30:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/16 13:58:31 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -814,7 +814,7 @@ impl Operator for OpPow {
         if !val_b.is_real() || !val_b.is_int() {
             return CRes::Err(CErr::bad_pow());
         }
-        let res = val_a.pow(val_b.get_real().get_val() as u32);
+        let res = val_a.pow(val_b.get_real().get_val() as i32);
         return CRes::Val(res);
     }
 

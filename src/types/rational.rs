@@ -6,11 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 17:07:01 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/16 13:28:11 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use std::{cmp, fmt, ops};
+
+use std::i32::{MAX as I32_MAX, MIN as I32_MIN};
 
 const PRECISION: usize = 10;
 const EPSILON: f64 = 0.0000001;
@@ -51,23 +53,34 @@ impl Rational {
         }
     }
 
-    pub fn pow(&self, power: u32) -> Rational {
+    pub fn pow(&self, power: i32) -> Rational {
+        let mut num: u64;
+        let mut den: u64;
+        let pow: u32;
         match power {
-            0 => Rational {
-                positiv: true,
-                numerator: 1,
-                denominator: 1,
-            },
-            _ => {
-                let mut num = self.numerator.pow(power);
-                let mut den = self.denominator.pow(power);
-                simplify_gcd(&mut num, &mut den);
-                Rational {
-                    positiv: self.positiv || power % 2 == 0,
-                    numerator: self.numerator.pow(power),
-                    denominator: self.denominator.pow(power),
-                }
+            0 => {
+                return Rational {
+                    positiv: true,
+                    numerator: 1,
+                    denominator: 1,
+                };
             }
+            0..=I32_MAX => {
+                pow = power as u32;
+                num = self.numerator.pow(pow);
+                den = self.denominator.pow(pow);
+            }
+            I32_MIN..=0 => {
+                pow = -power as u32;
+                num = self.denominator.pow(pow);
+                den = self.numerator.pow(pow);
+            }
+        };
+        simplify_gcd(&mut num, &mut den);
+        Rational {
+            positiv: self.positiv || power % 2 == 0,
+            numerator: self.numerator.pow(pow),
+            denominator: self.denominator.pow(pow),
         }
     }
 

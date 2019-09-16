@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/13 11:48:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/16 14:46:04 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ impl ComputorError {
             kind: ErrorKind::BadPow,
             info: format!(
                 "Pow operator '^' only accept {} for the second argument.",
-                "positive integer value"
+                "integer value"
             ),
         }
     }

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/16 11:41:33 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/16 14:44:29 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ impl TreeBranch {
         nw_left.rot_right(box_tree);
     }
 
-    pub fn insert_default_left(&mut self, new: TTree) {
+    fn insert_default_left(&mut self, new: TTree) {
         let op = new_operator('*').unwrap();
         let mut new_tree = TreeBranch::new(op);
         new_tree.branch_left = Some(new);
@@ -118,8 +118,8 @@ impl TreeBranch {
     }
 
     fn insert_branch_left(&mut self, mut new: TTree) {
+        let n_branch = new.as_any().downcast_mut::<TreeBranch>().unwrap();
         if let Some(node) = &mut self.branch_left {
-            let n_branch = new.as_any().downcast_mut::<TreeBranch>().unwrap();
             match node.as_any().downcast_mut::<TreeBranch>() {
                 None => {
                     if !n_branch.was_expr {
@@ -149,11 +149,16 @@ impl TreeBranch {
                 }
             };
         } else {
-            self.branch_left = Some(new);
+            if n_branch.was_expr || n_branch.op_ref().symbol() != '^' {
+                self.branch_left = Some(new);
+            } else {
+                std::mem::swap(self, n_branch);
+                self.insert_branch_right(new);
+            }
         }
     }
 
-    pub fn insert_default_right(&mut self, new: TTree) {
+    fn insert_default_right(&mut self, new: TTree) {
         let op = new_operator('*').unwrap();
         let mut new_tree = TreeBranch::new(op);
         new_tree.branch_right = Some(new);
@@ -198,8 +203,8 @@ impl TreeBranch {
     }
 
     fn insert_branch_right(&mut self, mut new: TTree) {
+        let n_branch = new.as_any().downcast_mut::<TreeBranch>().unwrap();
         if let Some(node) = &mut self.branch_right {
-            let n_branch = new.as_any().downcast_mut::<TreeBranch>().unwrap();
             match node.as_any().downcast_mut::<TreeBranch>() {
                 None => {
                     if !n_branch.was_expr {
@@ -229,7 +234,12 @@ impl TreeBranch {
                 }
             };
         } else {
-            self.branch_right = Some(new);
+            if n_branch.was_expr || n_branch.op_ref().symbol() != '^' {
+                self.branch_right = Some(new);
+            } else {
+                std::mem::swap(self, n_branch);
+                self.insert_branch_left(new);
+            }
         }
     }
 }
