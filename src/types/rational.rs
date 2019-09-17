@@ -6,13 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/16 13:28:11 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/17 10:59:08 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use std::{cmp, fmt, ops};
 
 use std::i32::{MAX as I32_MAX, MIN as I32_MIN};
+use std::u64::MAX as U64_MAX;
 
 const PRECISION: usize = 10;
 const EPSILON: f64 = 0.0000001;
@@ -95,6 +96,35 @@ impl Rational {
 
     pub fn simplify(&mut self) {
         simplify_gcd(&mut self.numerator, &mut self.denominator)
+    }
+
+    pub fn overflow_mul(&self, other: &Rational) -> bool {
+        if self.numerator == 0 || other.numerator == 0 {
+            return false;
+        }
+        let limit_num = U64_MAX / self.numerator;
+        let limit_den = U64_MAX / self.denominator;
+        return limit_num / other.numerator < 1
+            || limit_den / other.denominator < 1;
+    }
+
+    pub fn overflow_div(&self, other: &Rational) -> bool {
+        if self.numerator == 0 || other.numerator == 0 {
+            return false;
+        }
+        let limit_num = U64_MAX / self.numerator;
+        let limit_den = U64_MAX / self.denominator;
+        return limit_num / other.denominator < 1
+            || limit_den / other.numerator < 1;
+    }
+
+    pub fn overflow_sum(&self, other: &Rational) -> bool {
+        if self.positiv && other.positiv || !(self.positiv || other.positiv) {
+            let limit = U64_MAX - self.numerator * other.denominator;
+            return limit < other.numerator * self.denominator;
+        } else {
+            return false;
+        }
     }
 }
 

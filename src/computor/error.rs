@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/16 15:05:10 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/17 10:47:23 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ pub enum ErrorKind {
     InvalidInput,
     IO,
     IOStop,
+    OverflowAbort,
     TooManyEqual,
     TooManyUnknown,
     UnparsedToken,
@@ -47,6 +48,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::InvalidInput => write!(f, "syntax"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
+            ErrorKind::OverflowAbort => write!(f, "limit"),
             ErrorKind::TooManyEqual => write!(f, "instruction"),
             ErrorKind::TooManyUnknown => write!(f, "instruction"),
             ErrorKind::UnparsedToken => write!(f, "parser"),
@@ -79,7 +81,7 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::BadResolve,
             info: String::from(
-                "Resolve symbol '?' must be at the end of the instruction.",
+                "Resolve symbol must be alone at the end of the instruction.",
             ),
         }
     }
@@ -160,6 +162,13 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::IOStop,
             info: String::from("Input interrupted."),
+        }
+    }
+
+    pub fn overflow_abort() -> Self {
+        ComputorError {
+            kind: ErrorKind::OverflowAbort,
+            info: String::from("Operation will overflow, aborting."),
         }
     }
 

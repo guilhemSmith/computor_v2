@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/16 13:58:17 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/17 11:30:00 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,37 @@ impl Imaginary {
 
     pub fn is_int(&self) -> bool {
         self.real.is_int() && self.irreal.is_int()
+    }
+
+    pub fn overflow_mul(&self, other: &Imaginary) -> bool {
+        if self.real.overflow_mul(&other.real)
+            || self.irreal.overflow_mul(&other.irreal)
+            || self.real.overflow_mul(&other.irreal)
+            || self.irreal.overflow_mul(&other.real)
+        {
+            return true;
+        }
+        let real_left = self.real * other.real;
+        let real_right = Rational::zero() - self.irreal * other.irreal;
+        let irreal_left = self.real * other.real;
+        let irreal_right = self.irreal * other.irreal;
+        return real_left.overflow_sum(&real_right)
+            || irreal_left.overflow_sum(&irreal_right);
+    }
+
+    pub fn overflow_div(&self, other: &Imaginary) -> bool {
+        true
+    }
+
+    pub fn overflow_add(&self, other: &Imaginary) -> bool {
+        self.real.overflow_sum(&other.real)
+            || self.irreal.overflow_sum(&other.irreal)
+    }
+
+    pub fn overflow_sub(&self, other: &Imaginary) -> bool {
+        let neg = Imaginary::new(0.0, 0.0) - *other;
+        self.real.overflow_sum(&neg.real)
+            || self.irreal.overflow_sum(&neg.irreal)
     }
 }
 

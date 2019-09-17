@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/16 15:12:50 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/17 11:27:01 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,7 +243,9 @@ impl Operator for OpMul {
     }
 
     fn op(&self, val_a: Im, val_b: Im) -> CRes {
-        // TODO: overflow protection here
+        if val_a.overflow_mul(&val_b) {
+            return CRes::Err(CErr::overflow_abort());
+        }
         CRes::Val(val_a * val_b)
     }
 
@@ -361,7 +363,9 @@ impl Operator for OpAdd {
     }
 
     fn op(&self, val_a: Im, val_b: Im) -> CRes {
-        // TODO: overflow protection here
+        if val_a.overflow_add(&val_b) {
+            return CRes::Err(CErr::overflow_abort());
+        }
         CRes::Val(val_a + val_b)
     }
 
@@ -494,7 +498,9 @@ impl Operator for OpSub {
     }
 
     fn op(&self, val_a: Im, val_b: Im) -> CRes {
-        // TODO: overflow protection here
+        if val_a.overflow_sub(&val_b) {
+            return CRes::Err(CErr::overflow_abort());
+        }
         CRes::Val(val_a - val_b)
     }
 
@@ -641,7 +647,9 @@ impl Operator for OpDiv {
         if val_b == Im::new(0.0, 0.0) {
             return CRes::Err(CErr::div_by_zero());
         }
-        // TODO: overflow protection here
+        if val_a.overflow_div(&val_b) {
+            return CRes::Err(CErr::overflow_abort());
+        }
         CRes::Val(val_a / val_b)
     }
 
@@ -817,7 +825,9 @@ impl Operator for OpMod {
         } else if !val_b.is_real() || !val_a.is_real() {
             return CRes::Err(CErr::mod_with_im());
         }
-        // TODO: overflow protection here
+        if val_a.overflow_div(&val_b) {
+            return CRes::Err(CErr::overflow_abort());
+        }
         CRes::Val(Im::new(
             (val_a.get_real() % val_b.get_real()).get_val(),
             0.0,
@@ -921,6 +931,7 @@ impl Operator for OpPow {
         if !val_b.is_real() || !val_b.is_int() {
             return CRes::Err(CErr::bad_pow());
         }
+        // TODO overflow protection here.
         let res = val_a.pow(val_b.get_real().get_val() as i32);
         return CRes::Val(res);
     }
