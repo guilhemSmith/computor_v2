@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/17 11:27:01 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/17 14:45:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -931,8 +931,11 @@ impl Operator for OpPow {
         if !val_b.is_real() || !val_b.is_int() {
             return CRes::Err(CErr::bad_pow());
         }
-        // TODO overflow protection here.
-        let res = val_a.pow(val_b.get_real().get_val() as i32);
+        let power = val_b.get_real().get_val() as i32;
+        if val_a.overflow_pow(power) {
+            return CRes::Err(CErr::overflow_abort());
+        }
+        let res = val_a.pow(power);
         return CRes::Val(res);
     }
 

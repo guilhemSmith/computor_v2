@@ -6,12 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/17 10:59:08 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/17 13:35:31 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use std::{cmp, fmt, ops};
 
+use std::f64::MAX as F64_MAX;
 use std::i32::{MAX as I32_MAX, MIN as I32_MIN};
 use std::u64::MAX as U64_MAX;
 
@@ -125,6 +126,25 @@ impl Rational {
         } else {
             return false;
         }
+    }
+
+    pub fn overflow_pow(&self, power: i32) -> bool {
+        if self.numerator == 0 || power == 0 {
+            return false;
+        }
+        if self.numerator > F64_MAX as u64 || self.denominator > F64_MAX as u64
+        {
+            return true;
+        }
+        let power = if power > 0 {
+            power as f64
+        } else {
+            -power as f64
+        };
+        let log_num = (self.numerator as f64).log10();
+        let log_den = (self.denominator as f64).log10();
+        let log_max = F64_MAX.log10();
+        return log_num > log_max / power || log_den > log_max / power;
     }
 }
 

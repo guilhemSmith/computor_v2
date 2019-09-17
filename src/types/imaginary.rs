@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/17 11:30:00 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/17 14:43:49 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,35 @@ impl Imaginary {
     }
 
     pub fn overflow_div(&self, other: &Imaginary) -> bool {
-        true
+        let real_s = self.real;
+        let irreal_s = self.irreal;
+        let real_o = other.real;
+        let irreal_o = other.irreal;
+        if real_o.overflow_pow(2)
+            || irreal_o.overflow_pow(2)
+            || real_s.overflow_mul(&real_o)
+            || irreal_s.overflow_mul(&irreal_o)
+            || real_s.overflow_mul(&irreal_o)
+            || irreal_s.overflow_mul(&real_o)
+        {
+            return true;
+        }
+        let o_real_square = real_o.pow(2);
+        let o_irreal_square = irreal_o.pow(2);
+        let real_mul = real_s * real_o;
+        let irreal_mul = irreal_s * irreal_o;
+        let real_x_irreal = real_s * irreal_o;
+        let irreal_x_real = Rational::zero() - real_o * irreal_s;
+        if o_real_square.overflow_sum(&o_irreal_square)
+            || real_mul.overflow_sum(&irreal_mul)
+            || real_x_irreal.overflow_sum(&irreal_x_real)
+        {
+            return true;
+        }
+        let den = o_real_square + o_irreal_square;
+        let real = real_mul + irreal_mul;
+        let irreal = real_x_irreal + irreal_x_real;
+        return real.overflow_div(&den) || irreal.overflow_div(&den);
     }
 
     pub fn overflow_add(&self, other: &Imaginary) -> bool {
@@ -100,6 +128,10 @@ impl Imaginary {
         let neg = Imaginary::new(0.0, 0.0) - *other;
         self.real.overflow_sum(&neg.real)
             || self.irreal.overflow_sum(&neg.irreal)
+    }
+
+    pub fn overflow_pow(&self, power: i32) -> bool {
+        self.real.overflow_pow(power) || self.irreal.overflow_pow(power)
     }
 }
 
