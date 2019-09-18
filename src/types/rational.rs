@@ -6,24 +6,25 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/17 13:35:31 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 14:05:33 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use std::{cmp, fmt, ops};
 
-use std::f64::MAX as F64_MAX;
 use std::i32::{MAX as I32_MAX, MIN as I32_MIN};
-use std::u64::MAX as U64_MAX;
+
+use crate::computor::ComputorError;
+use super::{read_overflow, OpResult};
 
 const PRECISION: usize = 10;
 const EPSILON: f64 = 0.0000001;
 
 #[derive(Eq, Ord, Copy, Clone, Debug)]
 pub struct Rational {
-    positiv: bool,
-    numerator: u64,
-    denominator: u64,
+    posit: bool,
+    num: u64,
+    den: u64,
 }
 
 impl Rational {
@@ -34,126 +35,161 @@ impl Rational {
 
             simplify_gcd(&mut num, &mut den);
             Rational {
-                positiv: param >= 0.0,
-                numerator: num,
-                denominator: den,
+                posit: param >= 0.0,
+                num,
+                den: den,
             }
         } else {
             Rational {
-                positiv: true,
-                numerator: 0,
-                denominator: 1,
+                posit: true,
+                num: 0,
+                den: 1,
             }
         }
     }
 
     pub fn zero() -> Self {
         Rational {
-            positiv: true,
-            numerator: 0,
-            denominator: 1,
+            posit: true,
+            num: 0,
+            den: 1,
         }
     }
 
-    pub fn pow(&self, power: i32) -> Rational {
+    pub fn is_int(&self) -> bool {
+        self.den == 1
+    }
+
+    pub fn get_val(&self) -> f64 {
+        self.num as f64 / self.den as f64 * if self.posit { 1.0 } else { -1.0 }
+    }
+
+    pub fn simplify(&mut self) {
+        simplify_gcd(&mut self.num, &mut self.den)
+    }
+
+    pub fn add(&self, other: &Rational) -> OpResult<Self> {
+        let sig;
+        let left = read_overflow(self.num.overflowing_mul(other.den))?;
+        let right = read_overflow(other.num.overflowing_mul(self.den))?;
+        let mut num =
+            if (self.posit && other.posit) || !(self.posit || other.posit) {
+                sig = self.posit && other.posit;
+                read_overflow(left.overflowing_add(right))?
+            } else {
+                let val_a = cmp::max(left, right);
+                let val_b = cmp::min(left, right);
+                sig = if val_a == left {
+                    self.posit
+                } else {
+                    other.posit
+                };
+                read_overflow(val_a.overflowing_sub(val_b))?
+            };
+        let mut den = read_overflow(self.den.overflowing_mul(other.den))?;
+
+        simplify_gcd(&mut num, &mut den);
+        Ok(Rational {
+            posit: sig || num == 0,
+            num,
+            den,
+        })
+    }
+
+    pub fn sub(&self, other: &Rational) -> OpResult<Self> {
+        let negated = -*other;
+        self.add(&negated)
+    }
+
+    pub fn mul(&self, other: &Rational) -> OpResult<Self> {
+        let mut num = read_overflow(self.num.overflowing_mul(other.num))?;
+        let mut den = read_overflow(self.den.overflowing_mul(other.den))?;
+
+        simplify_gcd(&mut num, &mut den);
+        Ok(Rational {
+            posit: num == 0
+                || (self.posit && other.posit)
+                || !(self.posit || other.posit),
+            num,
+            den,
+        })
+    }
+
+    pub fn div(&self, other: &Rational) -> OpResult<Self> {
+        if other.num == 0 {
+            return Err(ComputorError::div_by_zero());
+        }
+        let mut num = read_overflow(self.num.overflowing_mul(other.den))?;
+        let mut den = read_overflow(self.den.overflowing_mul(other.num))?;
+
+        simplify_gcd(&mut num, &mut den);
+        Ok(Rational {
+            posit: num == 0
+                || (self.posit && other.posit)
+                || !(self.posit || other.posit),
+            num,
+            den,
+        })
+    }
+
+    pub fn rem(&self, other: &Rational) -> OpResult<Self> {
+        if other.num == 0 {
+            return Err(ComputorError::div_by_zero());
+        }
+        if self < other {
+            Ok(*self)
+        } else {
+            let left = read_overflow(self.num.overflowing_mul(other.den))?;
+            let right = read_overflow(other.num.overflowing_mul(self.den))?;
+            let mut num = read_overflow(left.overflowing_rem(right))?;
+            let mut den = read_overflow(other.den.overflowing_mul(self.den))?;
+
+            simplify_gcd(&mut num, &mut den);
+            Ok(Rational {
+                posit: num == 0 || self.posit,
+                num,
+                den,
+            })
+        }
+    }
+
+    pub fn pow(&self, power: i32) -> OpResult<Self> {
         let mut num: u64;
         let mut den: u64;
         let pow: u32;
         match power {
             0 => {
-                return Rational {
-                    positiv: true,
-                    numerator: 1,
-                    denominator: 1,
-                };
+                return Ok(Rational {
+                    posit: true,
+                    num: 1,
+                    den: 1,
+                });
             }
             0..=I32_MAX => {
                 pow = power as u32;
-                num = self.numerator.pow(pow);
-                den = self.denominator.pow(pow);
+                num = read_overflow(self.num.overflowing_pow(pow))?;
+                den = read_overflow(self.den.overflowing_pow(pow))?;
             }
             I32_MIN..=0 => {
                 pow = -power as u32;
-                num = self.denominator.pow(pow);
-                den = self.numerator.pow(pow);
+                num = read_overflow(self.den.overflowing_pow(pow))?;
+                den = read_overflow(self.num.overflowing_pow(pow))?;
             }
         };
         simplify_gcd(&mut num, &mut den);
-        Rational {
-            positiv: self.positiv || power % 2 == 0,
-            numerator: self.numerator.pow(pow),
-            denominator: self.denominator.pow(pow),
-        }
-    }
-
-    pub fn is_int(&self) -> bool {
-        (self.numerator as f64 / self.denominator as f64).fract() == 0.0
-    }
-
-    pub fn get_val(&self) -> f64 {
-        self.numerator as f64 / self.denominator as f64
-            * if self.positiv { 1.0 } else { -1.0 }
-    }
-
-    pub fn simplify(&mut self) {
-        simplify_gcd(&mut self.numerator, &mut self.denominator)
-    }
-
-    pub fn overflow_mul(&self, other: &Rational) -> bool {
-        if self.numerator == 0 || other.numerator == 0 {
-            return false;
-        }
-        let limit_num = U64_MAX / self.numerator;
-        let limit_den = U64_MAX / self.denominator;
-        return limit_num / other.numerator < 1
-            || limit_den / other.denominator < 1;
-    }
-
-    pub fn overflow_div(&self, other: &Rational) -> bool {
-        if self.numerator == 0 || other.numerator == 0 {
-            return false;
-        }
-        let limit_num = U64_MAX / self.numerator;
-        let limit_den = U64_MAX / self.denominator;
-        return limit_num / other.denominator < 1
-            || limit_den / other.numerator < 1;
-    }
-
-    pub fn overflow_sum(&self, other: &Rational) -> bool {
-        if self.positiv && other.positiv || !(self.positiv || other.positiv) {
-            let limit = U64_MAX - self.numerator * other.denominator;
-            return limit < other.numerator * self.denominator;
-        } else {
-            return false;
-        }
-    }
-
-    pub fn overflow_pow(&self, power: i32) -> bool {
-        if self.numerator == 0 || power == 0 {
-            return false;
-        }
-        if self.numerator > F64_MAX as u64 || self.denominator > F64_MAX as u64
-        {
-            return true;
-        }
-        let power = if power > 0 {
-            power as f64
-        } else {
-            -power as f64
-        };
-        let log_num = (self.numerator as f64).log10();
-        let log_den = (self.denominator as f64).log10();
-        let log_max = F64_MAX.log10();
-        return log_num > log_max / power || log_den > log_max / power;
+        Ok(Rational {
+            posit: self.posit || pow % 2 == 0,
+            num,
+            den,
+        })
     }
 }
 
 impl fmt::Display for Rational {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let sign = if self.positiv { "" } else { "- " };
-        if self.denominator != 0 {
-            let float_value: f64 =
-                self.numerator as f64 / self.denominator as f64;
+        let sign = if self.posit { "" } else { "- " };
+        if self.den != 0 {
+            let float_value: f64 = self.num as f64 / self.den as f64;
             let fract_len = dec_len(float_value);
             if fract_len <= PRECISION {
                 write!(f, "{}{:.*}", sign, fract_len, float_value)
@@ -168,166 +204,36 @@ impl fmt::Display for Rational {
 
 impl cmp::PartialEq for Rational {
     fn eq(&self, rhs: &Self) -> bool {
-        self.positiv == rhs.positiv
-            && self.numerator == rhs.numerator
-            && self.denominator == rhs.denominator
+        self.posit == rhs.posit && self.num == rhs.num && self.den == rhs.den
     }
 }
 
 impl cmp::PartialOrd for Rational {
     fn partial_cmp(&self, rhs: &Self) -> Option<cmp::Ordering> {
-        match (self.positiv, rhs.positiv) {
+        match (self.posit, rhs.posit) {
             (left_sign, right_sign) if left_sign && !right_sign => {
                 Some(cmp::Ordering::Greater)
             }
             (left_sign, right_sign) if !left_sign && right_sign => {
                 Some(cmp::Ordering::Less)
             }
-            (left_sign, right_sign) if left_sign && right_sign => Some(
-                (self.numerator * rhs.denominator)
-                    .cmp(&(self.denominator * rhs.numerator)),
-            ),
-            (left_sign, right_sign) if !left_sign && !right_sign => Some(
-                (rhs.numerator * self.denominator)
-                    .cmp(&(rhs.denominator * self.numerator)),
-            ),
+            (left_sign, right_sign) if left_sign && right_sign => {
+                Some((self.num * rhs.den).cmp(&(self.den * rhs.num)))
+            }
+            (left_sign, right_sign) if !left_sign && !right_sign => {
+                Some((rhs.num * self.den).cmp(&(rhs.den * self.num)))
+            }
             _ => None,
         }
     }
 }
 
-impl ops::Add<Rational> for Rational {
+impl ops::Neg for Rational {
     type Output = Rational;
 
-    fn add(self, rhs: Rational) -> Rational {
-        let sign;
-        let mut num = if (self.positiv && rhs.positiv)
-            || !(self.positiv || rhs.positiv)
-        {
-            sign = self.positiv && rhs.positiv;
-            self.numerator * rhs.denominator + rhs.numerator * self.denominator
-        } else {
-            let val_a = cmp::max(
-                self.numerator * rhs.denominator,
-                rhs.numerator * self.denominator,
-            );
-            let val_b = cmp::min(
-                self.numerator * rhs.denominator,
-                rhs.numerator * self.denominator,
-            );
-            if val_a == self.numerator * rhs.denominator {
-                sign = self.positiv
-            } else {
-                sign = rhs.positiv
-            };
-            val_a - val_b
-        };
-        let mut den = self.denominator * rhs.denominator;
-
-        simplify_gcd(&mut num, &mut den);
-        Rational {
-            positiv: sign || num == 0,
-            numerator: num,
-            denominator: den,
-        }
-    }
-}
-
-impl ops::Sub<Rational> for Rational {
-    type Output = Rational;
-
-    fn sub(self, rhs: Rational) -> Rational {
-        let rhs_sig = if rhs.numerator != 0 {
-            !rhs.positiv
-        } else {
-            true
-        };
-        let sign;
-        let mut num = if (self.positiv && rhs_sig) || !(self.positiv || rhs_sig)
-        {
-            sign = self.positiv && rhs_sig;
-            self.numerator * rhs.denominator + rhs.numerator * self.denominator
-        } else {
-            let val_a = cmp::max(
-                self.numerator * rhs.denominator,
-                rhs.numerator * self.denominator,
-            );
-            let val_b = cmp::min(
-                self.numerator * rhs.denominator,
-                rhs.numerator * self.denominator,
-            );
-            if val_a == self.numerator * rhs.denominator {
-                sign = self.positiv
-            } else {
-                sign = rhs_sig
-            };
-            val_a - val_b
-        };
-        let mut den = self.denominator * rhs.denominator;
-
-        simplify_gcd(&mut num, &mut den);
-        Rational {
-            positiv: sign || num == 0,
-            numerator: num,
-            denominator: den,
-        }
-    }
-}
-
-impl ops::Mul<Rational> for Rational {
-    type Output = Rational;
-
-    fn mul(self, rhs: Rational) -> Rational {
-        let mut num = self.numerator * rhs.numerator;
-        let mut den = self.denominator * rhs.denominator;
-
-        simplify_gcd(&mut num, &mut den);
-        Rational {
-            positiv: num == 0
-                || (self.positiv && rhs.positiv)
-                || !(self.positiv || rhs.positiv),
-            numerator: num,
-            denominator: den,
-        }
-    }
-}
-
-impl ops::Div<Rational> for Rational {
-    type Output = Rational;
-
-    fn div(self, rhs: Rational) -> Rational {
-        let mut num = self.numerator * rhs.denominator;
-        let mut den = self.denominator * rhs.numerator;
-
-        simplify_gcd(&mut num, &mut den);
-        Rational {
-            positiv: num == 0
-                || (self.positiv && rhs.positiv)
-                || !(self.positiv || rhs.positiv),
-            numerator: num,
-            denominator: den,
-        }
-    }
-}
-
-impl ops::Rem<Rational> for Rational {
-    type Output = Rational;
-
-    fn rem(self, rhs: Rational) -> Rational {
-        if self < rhs {
-            self
-        } else {
-            let mut num = (self.numerator * rhs.denominator)
-                % (rhs.numerator * self.denominator);
-            let mut den = self.denominator * rhs.denominator;
-
-            simplify_gcd(&mut num, &mut den);
-            Rational {
-                positiv: num == 0 || self.positiv,
-                numerator: num,
-                denominator: den,
-            }
-        }
+    fn neg(mut self) -> Self::Output {
+        self.posit = !self.posit;
+        self
     }
 }
 
@@ -380,75 +286,72 @@ mod constructor {
     #[test]
     fn new_zero() {
         let zero = Rational::zero();
-        assert!(zero.positiv, "Zero is positive.");
-        assert_eq!(zero.numerator, 0, "Zero numerator is not null");
-        assert_eq!(
-            zero.denominator, 1,
-            "Zero denominator should never be null"
-        );
+        assert!(zero.posit, "Zero is posite.");
+        assert_eq!(zero.num, 0, "Zero numerator is not null");
+        assert_eq!(zero.den, 1, "Zero denominator should never be null");
     }
 
     #[test]
     fn new_float_0() {
         let value = Rational::new(0.0);
 
-        assert!(value.positiv, "Float invalid sign");
-        assert_eq!(value.numerator, 0, "Float invalid numerator");
-        assert_eq!(value.denominator, 1, "Float invalid denominator");
+        assert!(value.posit, "Float invalid sign");
+        assert_eq!(value.num, 0, "Float invalid numerator");
+        assert_eq!(value.den, 1, "Float invalid denominator");
     }
 
     #[test]
     fn new_float_1() {
         let value = Rational::new(-42.42);
 
-        assert!(!value.positiv, "Float invalid sign");
-        assert_eq!(value.numerator, 2121, "Float invalid numerator");
-        assert_eq!(value.denominator, 50, "Float invalid denominator");
+        assert!(!value.posit, "Float invalid sign");
+        assert_eq!(value.num, 2121, "Float invalid numerator");
+        assert_eq!(value.den, 50, "Float invalid denominator");
     }
 
     #[test]
     fn new_float_2() {
         let value = Rational::new(123.0);
 
-        assert!(value.positiv, "Float invalid sign");
-        assert_eq!(value.numerator, 123, "Float invalid numerator");
-        assert_eq!(value.denominator, 1, "Float invalid denominator");
+        assert!(value.posit, "Float invalid sign");
+        assert_eq!(value.num, 123, "Float invalid numerator");
+        assert_eq!(value.den, 1, "Float invalid denominator");
     }
 
     #[test]
     fn new_float_3() {
         let value = Rational::new(-99999999.9);
 
-        assert!(!value.positiv, "Float invalid sign");
-        assert_eq!(value.numerator, 999999999, "Float invalid numerator");
-        assert_eq!(value.denominator, 10, "Float invalid denominator");
+        assert!(!value.posit, "Float invalid sign");
+        assert_eq!(value.num, 999999999, "Float invalid numerator");
+        assert_eq!(value.den, 10, "Float invalid denominator");
     }
 
     #[test]
     fn new_float_4() {
         let value = Rational::new(111111111.1);
 
-        assert!(value.positiv, "Float invalid sign");
-        assert_eq!(value.numerator, 1111111111, "Float invalid numerator");
-        assert_eq!(value.denominator, 10, "Float invalid denominator");
+        assert!(value.posit, "Float invalid sign");
+        assert_eq!(value.num, 1111111111, "Float invalid numerator");
+        assert_eq!(value.den, 10, "Float invalid denominator");
     }
 
     #[test]
     fn new_float_5() {
         let value = Rational::new(-7.77777777);
 
-        assert!(!value.positiv, "Float invalid sign");
-        assert_eq!(value.numerator, 777777777, "Float invalid numerator");
-        assert_eq!(value.denominator, 100000000, "Float invalid denominator");
+        assert!(!value.posit, "Float invalid sign");
+        assert_eq!(value.num, 777777777, "Float invalid numerator");
+        assert_eq!(value.den, 100000000, "Float invalid den");
     }
 
     #[test]
     fn new_float_6() {
         let value = Rational::new(3.333333333);
 
-        assert!(value.positiv, "Float invalid sign");
-        assert_eq!(value.numerator, 3333333333, "Float invalid numerator");
-        assert_eq!(value.denominator, 1000000000, "Float invalid denominator");
+        assert!(value.posit, "Float invalid sign");
+        assert_eq!(value.num, 3333333333, "Float invalid numerator");
+        assert_eq!(value.den, 1000000000, "Float invalid den");
     }
 }
 
@@ -464,15 +367,27 @@ mod operator {
         let pos_big = Rational::new(12345678.254);
         let pos_small = Rational::new(0.85642);
 
-        assert_eq!(zero + pos_big, pos_big);
-        assert_eq!(pos_small + zero, pos_small);
-        assert_eq!(zero + neg_big, neg_big);
-        assert_eq!(neg_small + zero, neg_small);
+        assert_eq!(zero.add(&pos_big).unwrap(), pos_big);
+        assert_eq!(pos_small.add(&zero).unwrap(), pos_small);
+        assert_eq!(zero.add(&neg_big).unwrap(), neg_big);
+        assert_eq!(neg_small.add(&zero).unwrap(), neg_small);
 
-        assert_eq!(pos_small + pos_big, Rational::new(12345679.11042));
-        assert_eq!(neg_small + neg_big, Rational::new(-100042.8498));
-        assert_eq!(pos_small + neg_big, Rational::new(-100041.56778));
-        assert_eq!(neg_small + pos_big, Rational::new(12345677.8284));
+        assert_eq!(
+            pos_small.add(&pos_big).unwrap(),
+            Rational::new(12345679.11042)
+        );
+        assert_eq!(
+            neg_small.add(&neg_big).unwrap(),
+            Rational::new(-100042.8498)
+        );
+        assert_eq!(
+            pos_small.add(&neg_big).unwrap(),
+            Rational::new(-100041.56778)
+        );
+        assert_eq!(
+            neg_small.add(&pos_big).unwrap(),
+            Rational::new(12345677.8284)
+        );
     }
 
     #[test]
@@ -483,15 +398,27 @@ mod operator {
         let pos_big = Rational::new(12345678.254);
         let pos_small = Rational::new(0.85642);
 
-        assert_eq!(zero - pos_big, Rational::new(-12345678.254));
-        assert_eq!(pos_small - zero, pos_small);
-        assert_eq!(zero - neg_big, Rational::new(100042.4242));
-        assert_eq!(neg_small - zero, neg_small);
+        assert_eq!(zero.sub(&pos_big).unwrap(), Rational::new(-12345678.254));
+        assert_eq!(pos_small.sub(&zero).unwrap(), pos_small);
+        assert_eq!(zero.sub(&neg_big).unwrap(), Rational::new(100042.4242));
+        assert_eq!(neg_small.sub(&zero).unwrap(), neg_small);
 
-        assert_eq!(pos_small - pos_big, Rational::new(-12345677.39758));
-        assert_eq!(neg_small - neg_big, Rational::new(100041.9986));
-        assert_eq!(pos_small - neg_big, Rational::new(100043.28062));
-        assert_eq!(neg_small - pos_big, Rational::new(-12345678.6796));
+        assert_eq!(
+            pos_small.sub(&pos_big).unwrap(),
+            Rational::new(-12345677.39758)
+        );
+        assert_eq!(
+            neg_small.sub(&neg_big).unwrap(),
+            Rational::new(100041.9986)
+        );
+        assert_eq!(
+            pos_small.sub(&neg_big).unwrap(),
+            Rational::new(100043.28062)
+        );
+        assert_eq!(
+            neg_small.sub(&pos_big).unwrap(),
+            Rational::new(-12345678.6796)
+        );
     }
 
     #[test]
@@ -502,15 +429,27 @@ mod operator {
         let pos_big = Rational::new(12345678.254);
         let pos_small = Rational::new(0.85642);
 
-        assert_eq!(zero * pos_big, zero);
-        assert_eq!(pos_small * zero, zero);
-        assert_eq!(zero * neg_big, zero);
-        assert_eq!(neg_small * zero, zero);
+        assert_eq!(zero.mul(&pos_big).unwrap(), zero);
+        assert_eq!(pos_small.mul(&zero).unwrap(), zero);
+        assert_eq!(zero.mul(&neg_big).unwrap(), zero);
+        assert_eq!(neg_small.mul(&zero).unwrap(), zero);
 
-        assert_eq!(pos_small * pos_big, Rational::new(10573085.77029068));
-        assert_eq!(neg_small * neg_big, Rational::new(42578.05573952));
-        assert_eq!(pos_small * neg_big, Rational::new(-85678.332933364));
-        assert_eq!(neg_small * pos_big, Rational::new(-5254320.6649024));
+        assert_eq!(
+            pos_small.mul(&pos_big).unwrap(),
+            Rational::new(10573085.77029068)
+        );
+        assert_eq!(
+            neg_small.mul(&neg_big).unwrap(),
+            Rational::new(42578.05573952)
+        );
+        assert_eq!(
+            pos_small.mul(&neg_big).unwrap(),
+            Rational::new(-85678.332933364)
+        );
+        assert_eq!(
+            neg_small.mul(&pos_big).unwrap(),
+            Rational::new(-5254320.6649024)
+        );
     }
 
     #[test]
@@ -519,12 +458,12 @@ mod operator {
         let one = Rational::new(1.0);
         let three = Rational::new(3.0);
 
-        assert_eq!(zero / one, zero);
-        assert_eq!(zero / three, zero);
+        assert_eq!(zero.div(&one).unwrap(), zero);
+        assert_eq!(zero.div(&three).unwrap(), zero);
 
-        let third = one / three;
+        let third = one.div(&three).unwrap();
         assert_ne!(third, Rational::new(0.3333333333333333333));
-        assert_eq!(third * three, one);
+        assert_eq!(third.mul(&three).unwrap(), one);
     }
 
     #[test]
@@ -535,12 +474,12 @@ mod operator {
         let pos_big = Rational::new(123.123);
         let pos_small = Rational::new(2.222);
 
-        assert_eq!(pos_big % pos_big, zero);
-        assert_eq!(zero % pos_big, zero);
-        assert_eq!(zero % neg_big, zero);
+        assert_eq!(pos_big.rem(&pos_big).unwrap(), zero);
+        assert_eq!(zero.rem(&pos_big).unwrap(), zero);
+        assert_eq!(zero.rem(&neg_big).unwrap(), zero);
 
-        assert_eq!(pos_small % pos_big, Rational::new(2.222));
-        assert_eq!(neg_small % neg_big, Rational::new(-1.42));
+        assert_eq!(pos_small.rem(&pos_big).unwrap(), Rational::new(2.222));
+        assert_eq!(neg_small.rem(&neg_big).unwrap(), Rational::new(-1.42));
     }
 
     #[test]
@@ -611,11 +550,11 @@ mod pow {
         let pos_big = Rational::new(2345678.254);
         let pos_small = Rational::new(0.85642);
 
-        assert_eq!(zero.pow(2).get_val(), 0.0);
-        assert_eq!(neg_big.pow(2).get_val(), 10008486639.81274564);
-        assert_eq!(neg_small.pow(2).get_val(), 0.18113536);
-        assert_eq!(pos_big.pow(2).get_val(), 5502206471288.489);
-        assert_eq!(pos_small.pow(2).get_val(), 0.7334552164);
+        assert_eq!(zero.pow(2).unwrap().get_val(), 0.0);
+        assert_eq!(neg_big.pow(2).unwrap().get_val(), 10008486639.81274564);
+        assert_eq!(neg_small.pow(2).unwrap().get_val(), 0.18113536);
+        assert_eq!(pos_big.pow(2).unwrap().get_val(), 5502206471288.489);
+        assert_eq!(pos_small.pow(2).unwrap().get_val(), 0.7334552164);
     }
 
     #[test]
@@ -624,9 +563,9 @@ mod pow {
         let neg = Rational::new(-12.42);
         let pos = Rational::new(53.89);
 
-        assert_eq!(zero.pow(5).get_val(), 0.0);
-        assert_eq!(neg.pow(5).get_val(), -295534.3588067232);
-        assert_eq!(pos.pow(5).get_val(), 454507357.5715545949);
+        assert_eq!(zero.pow(5).unwrap().get_val(), 0.0);
+        assert_eq!(neg.pow(5).unwrap().get_val(), -295534.3588067232);
+        assert_eq!(pos.pow(5).unwrap().get_val(), 454507357.5715545949);
     }
 }
 
