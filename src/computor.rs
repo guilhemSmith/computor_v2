@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/13 15:45:08 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 17:29:33 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@ mod error;
 mod result;
 
 pub use error::{ComputorError, ErrorKind};
-pub use result::ComputorResult;
+pub use result::{Computed, ComputorResult, TreeResult};
 
 use crate::arg_parse::Param;
 use crate::lexer::token;
@@ -22,7 +22,7 @@ use crate::memory::Memory;
 use crate::parser::{TokenTree, TreeBranch};
 use crate::timer::Timer;
 use crate::types::{Imaginary, Rational};
-use ComputorResult as CRes;
+use Computed as Comp;
 
 use std::collections::HashMap;
 use std::i32::{MAX as I32_MAX, MIN as I32_MIN};
@@ -48,24 +48,24 @@ impl Computor {
         }
     }
 
-    pub fn read_tokens(&mut self, tree: TTree) {
+    pub fn read_tokens(&mut self, tree: TTree) -> ComputorResult {
         if self.verbose {
             println!("[v:Computor] -> tree received: {:?}", tree)
         }
         if !self.bench {
-            self.compute(tree);
+            self.compute(tree)
         } else {
             let display = format!("Computor({})", tree);
             let _timer = Timer::new(&display[..]);
-            self.compute(tree);
+            self.compute(tree)
         }
     }
 
-    fn compute(&mut self, mut tree: TTree) {
+    fn compute(&mut self, mut tree: TTree) -> ComputorResult {
         let n = tree.count(token::count_error);
         if n > 0 {
             eprintln!("{}{} invalid tokens. Abort.", LOG, n);
-            return;
+            return Ok(());
         }
 
         let left: Option<TTree>;
@@ -85,167 +85,167 @@ impl Computor {
             return self.dual_part(br_left, br_right);
         };
         eprintln!("{}", ComputorError::bad_use_op('='));
+        Ok(())
     }
 
-    fn single_part(&mut self, tree: TTree) {
-        match tree.compute(&mut self.memory, None) {
-            CRes::None => log_err("Empty instruction given"),
-            CRes::Res => self.mem_dump(),
-            CRes::Err(err) => self.print_err(err),
-            CRes::Val(val) => println!("{}", val),
-            CRes::VarCall(_, val) => println!("{}", val),
-            CRes::VarSet(v) => log_err(&format!("Unknown variable '{}'", v)),
-            CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
-            CRes::Equ(_, eq) => self.eq_one_sided(eq),
-        };
+    fn single_part(&mut self, tree: TTree) -> ComputorResult {
+        Ok(match tree.compute(&mut self.memory, None)? {
+            Comp::None => log_err("Empty instruction given"),
+            Comp::Res => self.mem_dump(),
+            Comp::Val(val) => println!("{}", val),
+            Comp::VarCall(_, val) => println!("{}", val),
+            Comp::VarSet(v) => log_err(&format!("Unknown variable '{}'", v)),
+            Comp::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            Comp::Equ(_, eq) => self.eq_one_sided(eq)?,
+        })
     }
 
-    fn dual_part(&mut self, left: TTree, right: TTree) {
-        match left.compute(&mut self.memory, None) {
-            CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
-            CRes::Res => eprintln!("{}", ComputorError::bad_resolve()),
-            CRes::Err(err) => self.print_err(err),
-            CRes::Val(val) => self.left_val(val, right),
-            CRes::VarCall(id, val) => self.call_var(id, val, right),
-            CRes::VarSet(id) => self.set_var(id, right),
-            CRes::FunSet(id, param) => self.set_fun(id, param, right),
-            CRes::Equ(id, eq) => self.eq_two_sided(id, eq, right),
-        }
+    fn dual_part(&mut self, left: TTree, right: TTree) -> ComputorResult {
+        Ok(match left.compute(&mut self.memory, None)? {
+            Comp::None => return Err(ComputorError::bad_use_op('=')),
+            Comp::Res => return Err(ComputorError::bad_resolve()),
+            Comp::Val(val) => self.left_val(val, right)?,
+            Comp::VarCall(id, val) => self.call_var(id, val, right)?,
+            Comp::VarSet(id) => self.set_var(id, right)?,
+            Comp::FunSet(id, param) => self.set_fun(id, param, right),
+            Comp::Equ(id, eq) => self.eq_two_sided(id, eq, right)?,
+        })
     }
 
-    fn eq_one_sided(&self, eq: Equ) {
+    fn eq_one_sided(&self, eq: Equ) -> ComputorResult {
         let zero: i32 = 0;
         for (pow, coef) in eq.iter() {
             if *pow > 0 && *coef != Im::new(0.0, 0.0) {
-                return log_err("Equation not complete");
+                return Err(ComputorError::uncomplete_eq());
             }
         }
         if let Some(coef) = eq.get(&zero) {
             println!("{}", *coef);
         } else {
-            log_err("Equation not complete");
+            return Err(ComputorError::uncomplete_eq());
         }
+        Ok(())
     }
 
-    fn eq_two_sided(&self, id: String, mut left: Equ, right: TTree) {
-        match right.compute(&self.memory, None) {
-            CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
-            CRes::Res => log_err("Equation not complete"),
-            CRes::Err(err) => self.print_err(err),
-            CRes::Val(val) => {
-                val_into_eq(&mut left, val);
-                self.solve_eq(left, id);
+    fn eq_two_sided(
+        &self,
+        id: String,
+        mut left: Equ,
+        right: TTree,
+    ) -> ComputorResult {
+        Ok(match right.compute(&self.memory, None)? {
+            Comp::None => return Err(ComputorError::bad_use_op('=')),
+            Comp::Res => return Err(ComputorError::uncomplete_eq()),
+            Comp::Val(val) => {
+                val_into_eq(&mut left, val)?;
+                self.solve_eq(left, id)?;
             }
-            CRes::VarCall(id_v, val) => {
-                var_into_eq(&mut left, &id, id_v, val);
-                self.solve_eq(left, id);
+            Comp::VarCall(id_v, val) => {
+                var_into_eq(&mut left, &id, id_v, val)?;
+                self.solve_eq(left, id)?;
             }
-            CRes::VarSet(v) => match unknow_into_eq(&mut left, &id, v) {
-                Err(err) => self.print_err(err),
-                Ok(()) => self.solve_eq(left, id),
-            },
-            CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
-            CRes::Equ(id_r, eq) => match fuse_eq(&mut left, &id, eq, id_r) {
-                Ok(()) => self.solve_eq(left, id),
-                Err(err) => self.print_err(err),
-            },
-        }
+            Comp::VarSet(v) => {
+                unknow_into_eq(&mut left, &id, v)?;
+                self.solve_eq(left, id)?;
+            }
+            Comp::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            Comp::Equ(id_r, eq) => {
+                fuse_eq(&mut left, &id, eq, id_r)?;
+                self.solve_eq(left, id)?;
+            }
+        })
     }
 
-    fn left_val(&self, val: Im, right: TTree) {
-        match right.compute(&self.memory, None) {
-            CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
-            CRes::Res => println!("{}", val),
-            CRes::Err(err) => self.print_err(err),
-            CRes::Val(r_val) => solve_two_val(val, r_val),
-            CRes::VarCall(_, r_val) => solve_two_val(val, r_val),
-            CRes::VarSet(v) => println!("{} = {} is a solution.", v, val),
-            CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
-            CRes::Equ(id, eq) => {
+    fn left_val(&self, val: Im, right: TTree) -> ComputorResult {
+        Ok(match right.compute(&self.memory, None)? {
+            Comp::None => eprintln!("{}", ComputorError::bad_use_op('=')),
+            Comp::Res => println!("{}", val),
+            Comp::Val(r_val) => solve_two_val(val, r_val),
+            Comp::VarCall(_, r_val) => solve_two_val(val, r_val),
+            Comp::VarSet(v) => println!("{} = {} is a solution.", v, val),
+            Comp::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            Comp::Equ(id, eq) => {
                 let mut eq = eq;
-                val_into_eq(&mut eq, val);
-                self.solve_eq(eq, id);
+                val_into_eq(&mut eq, val)?;
+                self.solve_eq(eq, id)?;
             }
-        };
+        })
     }
 
-    fn call_var(&mut self, var: String, val: Im, right: TTree) {
-        match right.compute(&self.memory, None) {
-            CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
-            CRes::Res => println!("{}", val),
-            CRes::Err(err) => self.print_err(err),
-            CRes::Val(nval) => {
+    fn call_var(
+        &mut self,
+        var: String,
+        val: Im,
+        right: TTree,
+    ) -> ComputorResult {
+        Ok(match right.compute(&self.memory, None)? {
+            Comp::None => eprintln!("{}", ComputorError::bad_use_op('=')),
+            Comp::Res => println!("{}", val),
+            Comp::Val(nval) => {
                 self.memory.set_var(var, Some(nval));
                 println!("{}", nval);
             }
-            CRes::VarCall(_, nval) => {
+            Comp::VarCall(_, nval) => {
                 self.memory.set_var(var, Some(nval));
                 println!("{}", nval);
             }
-            CRes::VarSet(v) => println!("{} = {} is a solution.", v, val),
-            CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
-            CRes::Equ(id, eq) => {
+            Comp::VarSet(v) => println!("{} = {} is a solution.", v, val),
+            Comp::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            Comp::Equ(id, eq) => {
                 let mut eq = eq;
-                var_into_eq(&mut eq, &id, var, val);
-                self.solve_eq(eq, id);
+                var_into_eq(&mut eq, &id, var, val)?;
+                self.solve_eq(eq, id)?;
             }
-        }
+        })
     }
 
-    fn set_var(&mut self, var: String, right: TTree) {
-        match right.compute(&self.memory, None) {
-            CRes::None => eprintln!("{}", ComputorError::bad_use_op('=')),
-            CRes::Res => log_err(&format!("Unknown variable '{}'", var)),
-            CRes::Err(err) => self.print_err(err),
-            CRes::Val(val) => {
+    fn set_var(&mut self, var: String, right: TTree) -> ComputorResult {
+        Ok(match right.compute(&self.memory, None)? {
+            Comp::None => eprintln!("{}", ComputorError::bad_use_op('=')),
+            Comp::Res => log_err(&format!("Unknown variable '{}'", var)),
+            Comp::Val(val) => {
                 self.memory.set_var(var, Some(val));
                 println!("{}", val);
             }
-            CRes::VarCall(_, val) => {
+            Comp::VarCall(_, val) => {
                 self.memory.set_var(var, Some(val));
                 println!("{}", val);
             }
-            CRes::VarSet(id) => {
+            Comp::VarSet(id) => {
                 if id != var {
                     log_err(&format!("Unknown variable '{}'", id))
                 } else {
                     println!("Any value for {} is a solution.", id);
                 }
             }
-            CRes::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
-            CRes::Equ(id, eq) => {
+            Comp::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            Comp::Equ(id, eq) => {
                 let mut eq = eq;
-                match unknow_into_eq(&mut eq, &id, var) {
-                    Err(err) => self.print_err(err),
-                    Ok(()) => self.solve_eq(eq, id),
-                }
+                unknow_into_eq(&mut eq, &id, var)?;
+                self.solve_eq(eq, id)?;
             }
-        };
+        })
     }
 
     fn set_fun(&mut self, id: String, param: Vec<String>, exp: TTree) {
         self.memory.set_fun(id, param, exp);
     }
 
-    fn print_err(&self, err: ComputorError) {
-        eprintln!("{}", err);
-    }
-
     fn mem_dump(&self) {
         println!("{}", self.memory);
     }
 
-    fn solve_eq(&self, mut eq: Equ, id: String) {
+    fn solve_eq(&self, mut eq: Equ, id: String) -> ComputorResult {
         filter_eq(&mut eq);
         if !valid_eq(&eq) {
-            return;
+            return Ok(());
         }
         match eq.keys().max() {
             None => println!("Any value for {} is a solution.", id),
             Some(max) => match *max {
                 0 => println!("False."),
-                1 => eq_degree_one(eq, id),
-                2 => eq_degree_two(eq, id),
+                1 => eq_degree_one(eq, id)?,
+                2 => eq_degree_two(eq, id)?,
                 2..=I32_MAX => {
                     println!("Can't solve equation with degree above 2.")
                 }
@@ -254,20 +254,27 @@ impl Computor {
                 }
             },
         };
+        Ok(())
     }
 }
 
-fn val_into_eq(eq: &mut Equ, val: Im) {
+fn val_into_eq(eq: &mut Equ, val: Im) -> ComputorResult {
     let zero: i32 = 0;
     match eq.get_mut(&zero) {
         None => {
-            eq.insert(zero, Im::new(0.0, 0.0) - val);
+            eq.insert(zero, -val);
         }
-        Some(coef) => *coef = *coef - val,
+        Some(coef) => *coef = coef.sub(&val)?,
     };
+    Ok(())
 }
 
-fn var_into_eq(eq: &mut Equ, id: &String, id_v: String, val: Im) {
+fn var_into_eq(
+    eq: &mut Equ,
+    id: &String,
+    id_v: String,
+    val: Im,
+) -> ComputorResult {
     let pow: i32;
     let n_coef: Im;
     if *id == id_v {
@@ -279,24 +286,22 @@ fn var_into_eq(eq: &mut Equ, id: &String, id_v: String, val: Im) {
     };
     match eq.get_mut(&pow) {
         None => {
-            eq.insert(pow, Im::new(0.0, 0.0) - n_coef);
+            eq.insert(pow, -n_coef);
         }
-        Some(coef) => *coef = *coef - n_coef,
+        Some(coef) => *coef = coef.sub(&n_coef)?,
     };
+    Ok(())
 }
 
-fn unknow_into_eq(
-    eq: &mut Equ,
-    id: &String,
-    unk: String,
-) -> Result<(), ComputorError> {
+fn unknow_into_eq(eq: &mut Equ, id: &String, unk: String) -> ComputorResult {
     if *id == unk {
         let one: i32 = 1;
+        let one_im = Im::new(1.0, 0.0);
         match eq.get_mut(&one) {
             None => {
-                eq.insert(one, Im::new(-1.0, 0.0));
+                eq.insert(one, -one_im);
             }
-            Some(coef) => *coef = *coef - Im::new(1.0, 0.0),
+            Some(coef) => *coef = coef.sub(&one_im)?,
         }
         Ok(())
     } else {
@@ -309,14 +314,14 @@ fn fuse_eq(
     id_l: &String,
     eq_r: Equ,
     id_r: String,
-) -> Result<(), ComputorError> {
+) -> ComputorResult {
     if *id_l == id_r {
         for (pow, val) in eq_r {
             match eq_l.get_mut(&pow) {
                 None => {
-                    eq_l.insert(pow, Im::new(0.0, 0.0) - val);
+                    eq_l.insert(pow, -val);
                 }
-                Some(coef) => *coef = *coef - val,
+                Some(coef) => *coef = coef.sub(&val)?,
             };
         }
         Ok(())
@@ -333,7 +338,7 @@ fn solve_two_val(val_l: Im, val_r: Im) {
     }
 }
 
-fn eq_degree_one(eq: Equ, id: String) {
+fn eq_degree_one(eq: Equ, id: String) -> ComputorResult {
     let mut index: i32 = 0;
     let zero = match eq.get(&index) {
         None => Im::new(0.0, 0.0),
@@ -342,45 +347,49 @@ fn eq_degree_one(eq: Equ, id: String) {
     index += 1;
     let one = *eq.get(&index).unwrap();
     print_eq(&eq, &id, 1);
-    println!("Solution: {} = {}", id, (Im::new(0.0, 0.0) - zero) / one);
+    println!("Solution: {} = {}", id, -zero.div(&one)?);
+    Ok(())
 }
 
-fn eq_degree_two(eq: Equ, id: String) {
+fn eq_degree_two(eq: Equ, id: String) -> ComputorResult {
     let mut index: i32 = 0;
     let deg_zero = match eq.get(&index) {
-        None => Rational::new(0.0),
-        Some(val) => (*val).get_real(),
+        None => Imaginary::new(0.0, 0.0),
+        Some(val) => *val,
     };
     index += 1;
     let deg_one = match eq.get(&index) {
-        None => Rational::new(0.0),
-        Some(val) => (*val).get_real(),
+        None => Imaginary::new(0.0, 0.0),
+        Some(val) => *val,
     };
     index += 1;
-    let deg_two = (*eq.get(&index).unwrap()).get_real();
+    let deg_two = *eq.get(&index).unwrap();
     print_eq(&eq, &id, 2);
-    let delta = deg_one.pow(2) - Rational::new(4.0) * deg_two * deg_zero;
-    let div = deg_two * Rational::new(2.0);
-    if delta > Rational::zero() {
-        let root = delta.get_val().sqrt();
-        let sol_a = (Rational::new(-root) - deg_one) / div;
-        let sol_b = (Rational::new(root) - deg_one) / div;
+    let right = Im::new(4.0, 0.0).mul(&deg_two)?.mul(&deg_zero)?;
+    let delta = deg_one.pow(2)?.sub(&right)?;
+    let two_re = Im::new(2.0, 0.0);
+    let div = deg_two.mul(&two_re)?;
+    if delta.get_real() > Rational::zero() {
+        let root = Im::new((-delta.get_real().get_val()).sqrt(), 0.0);
+        let sol_a = deg_one.add(&root)?.div(&div)?;
+        let sol_b = deg_one.sub(&root)?.div(&div)?;
         println!(
             "Delta is positive, 2 real solutions:\n{} = {}\n{} = {}",
             id, sol_a, id, sol_b
         );
-    } else if delta < Rational::zero() {
-        let root = (-delta.get_val()).sqrt();
-        let sol_a = Im::new((deg_one / div).get_val(), root / div.get_val());
-        let sol_b = Im::new((deg_one / div).get_val(), -root / div.get_val());
+    } else if delta.get_real() < Rational::zero() {
+        let root = Im::new(0.0, (-delta.get_real().get_val()).sqrt());
+        let sol_a = deg_one.add(&root)?.div(&div)?;
+        let sol_b = deg_one.sub(&root)?.div(&div)?;
         println!(
             "Delta is negative, 2 imaginary solutions:\n{} = {}\n{} = {}",
             id, sol_a, id, sol_b
         );
     } else {
-        let sol = (Rational::zero() - deg_one) / div;
+        let sol = -deg_one.div(&div)?;
         println!("Delta is null, 1 real solution:\n{} = {}", id, sol);
     }
+    Ok(())
 }
 
 fn log_err(msg: &str) {

@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 17:35:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 11:41:03 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 16:55:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Token;
-use crate::computor::ComputorResult;
+use crate::computor::{Computed, TreeResult};
 use crate::memory::{Extension, Memory};
 
 use std::any::Any;
@@ -44,7 +44,7 @@ impl Token for Resolve {
         &self,
         _mem: &Memory,
         _ext: Option<&mut Extension>,
-    ) -> ComputorResult {
-        ComputorResult::Res
+    ) -> TreeResult {
+        Ok(Computed::Res)
     }
 }

@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 11:59:32 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 17:10:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
-use crate::computor::{ComputorError as CError, ComputorResult as CResult};
+use crate::computor::{Computed as Comp, ComputorError as CError, TreeResult};
 use crate::memory::{Extension, Memory};
 use crate::parser::TokenTree;
 use crate::types::Imaginary;
@@ -70,8 +70,8 @@ impl Token for FunctionToken {
         &self,
         _mem: &Memory,
         _ext: Option<&mut Extension>,
-    ) -> CResult {
-        CResult::Err(CError::unparsed_token(self))
+    ) -> TreeResult {
+        Err(CError::unparsed_token(self))
     }
 }
 
@@ -98,25 +98,23 @@ impl FunctionTree {
         mut ext: Option<&mut Extension>,
         first: Imaginary,
         mut iter: Iter<Box<dyn TokenTree>>,
-    ) -> CResult {
+    ) -> TreeResult {
         let mut lst = vec![first];
 
         let mut loop_iter =
-            |extend: Option<&mut Extension>| -> Result<bool, CResult> {
+            |extend: Option<&mut Extension>| -> Result<bool, CError> {
                 match iter.next() {
-                    Some(tree) => match tree.compute(mem, extend) {
-                        CResult::Val(val) => {
+                    Some(tree) => match tree.compute(mem, extend)? {
+                        Comp::Val(val) => {
                             lst.push(val);
                             Ok(true)
                         }
-                        CResult::VarCall(_, val) => {
+                        Comp::VarCall(_, val) => {
                             lst.push(val);
                             Ok(true)
                         }
                         _ => {
-                            return Err(CResult::Err(CError::fun_arg_inv(
-                                &self.id,
-                            )))
+                            return Err(CError::fun_arg_inv(&self.id));
                         }
                     },
                     None => return Ok(false),
@@ -129,21 +127,21 @@ impl FunctionTree {
                 match loop_iter(Some(&mut ext_clone)) {
                     Ok(true) => continue,
                     Ok(false) => break,
-                    Err(error) => return error,
+                    Err(error) => return Err(error),
                 }
             },
             None => loop {
                 match loop_iter(None) {
                     Ok(true) => continue,
                     Ok(false) => break,
-                    Err(error) => return error,
+                    Err(error) => return Err(error),
                 }
             },
         }
         let fun_mem = mem.get_fun(&self.id);
         match fun_mem {
             Some(fun) => fun.compute(mem, lst),
-            None => CResult::Err(CError::fun_undef(&self.id)),
+            None => Err(CError::fun_undef(&self.id)),
         }
     }
 
@@ -153,22 +151,18 @@ impl FunctionTree {
         mut ext: Option<&mut Extension>,
         first: String,
         mut iter: Iter<Box<dyn TokenTree>>,
-    ) -> CResult {
+    ) -> TreeResult {
         let mut lst = vec![first];
 
         let mut loop_iter =
-            |extend: Option<&mut Extension>| -> Result<bool, CResult> {
+            |extend: Option<&mut Extension>| -> Result<bool, CError> {
                 match iter.next() {
-                    Some(tree) => match tree.compute(mem, extend) {
-                        CResult::VarSet(name) => {
+                    Some(tree) => match tree.compute(mem, extend)? {
+                        Comp::VarSet(name) => {
                             lst.push(name);
                             return Ok(true);
                         }
-                        _ => {
-                            return Err(CResult::Err(CError::fun_arg_inv(
-                                &self.id,
-                            )))
-                        }
+                        _ => return Err(CError::fun_arg_inv(&self.id)),
                     },
                     None => return Ok(false),
                 }
@@ -180,18 +174,18 @@ impl FunctionTree {
                 match loop_iter(Some(&mut ext_clone)) {
                     Ok(true) => continue,
                     Ok(false) => break,
-                    Err(error) => return error,
+                    Err(error) => return Err(error),
                 }
             },
             None => loop {
                 match loop_iter(None) {
                     Ok(true) => continue,
                     Ok(false) => break,
-                    Err(error) => return error,
+                    Err(error) => return Err(error),
                 }
             },
         }
-        CResult::FunSet(self.id.to_lowercase(), lst)
+        Ok(Comp::FunSet(self.id.to_lowercase(), lst))
     }
 }
 
@@ -208,27 +202,28 @@ impl Token for FunctionTree {
         &self,
         mem: &Memory,
         mut ext: Option<&mut Extension>,
-    ) -> CResult {
+    ) -> TreeResult {
         let mut iter_param = self.param.iter();
 
-        let check_first =
-            |extend: Option<&mut Extension>, clone: Option<&mut Extension>| {
-                match iter_param.next() {
-                    Some(param) => match param.compute(mem, clone) {
-                        CResult::Val(val) => {
-                            self.exec_fun(mem, extend, val, iter_param)
-                        }
-                        CResult::VarCall(_, val) => {
-                            self.exec_fun(mem, extend, val, iter_param)
-                        }
-                        CResult::VarSet(name) => {
-                            self.setup_fun(mem, extend, name, iter_param)
-                        }
-                        _ => CResult::Err(CError::fun_arg_inv(&self.id)),
-                    },
-                    None => CResult::Err(CError::fun_arg_inv(&self.id)),
-                }
-            };
+        let check_first = |extend: Option<&mut Extension>,
+                           clone: Option<&mut Extension>|
+         -> TreeResult {
+            match iter_param.next() {
+                Some(param) => match param.compute(mem, clone)? {
+                    Comp::Val(val) => {
+                        self.exec_fun(mem, extend, val, iter_param)
+                    }
+                    Comp::VarCall(_, val) => {
+                        self.exec_fun(mem, extend, val, iter_param)
+                    }
+                    Comp::VarSet(name) => {
+                        self.setup_fun(mem, extend, name, iter_param)
+                    }
+                    _ => Err(CError::fun_arg_inv(&self.id)),
+                },
+                None => Err(CError::fun_arg_inv(&self.id)),
+            }
+        };
 
         match &mut ext {
             Some(extend) => {

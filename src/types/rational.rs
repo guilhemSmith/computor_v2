@@ -14,8 +14,8 @@ use std::{cmp, fmt, ops};
 
 use std::i32::{MAX as I32_MAX, MIN as I32_MIN};
 
-use crate::computor::ComputorError;
 use super::{read_overflow, OpResult};
+use crate::computor::ComputorError;
 
 const PRECISION: usize = 10;
 const EPSILON: f64 = 0.0000001;

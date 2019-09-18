@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/21 11:40:44 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 16:56:35 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
-use crate::computor::ComputorResult;
+use crate::computor::{Computed, TreeResult};
 use crate::memory::{Extension, Memory};
 use crate::types::Imaginary;
 
@@ -74,7 +74,7 @@ impl Token for Value {
         &self,
         _mem: &Memory,
         _ext: Option<&mut Extension>,
-    ) -> ComputorResult {
-        ComputorResult::Val(self.value)
+    ) -> TreeResult {
+        Ok(Computed::Val(self.value))
     }
 }

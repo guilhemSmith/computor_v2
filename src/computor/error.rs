@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/17 10:47:23 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 16:04:28 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ pub enum ErrorKind {
     TooManyEqual,
     TooManyUnknown,
     UnparsedToken,
+    UncompleteEq,
 }
 
 impl fmt::Display for ErrorKind {
@@ -52,6 +53,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::TooManyEqual => write!(f, "instruction"),
             ErrorKind::TooManyUnknown => write!(f, "instruction"),
             ErrorKind::UnparsedToken => write!(f, "parser"),
+            ErrorKind::UncompleteEq => write!(f, "instruction"),
         }
     }
 }
@@ -190,6 +192,13 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::UnparsedToken,
             info: format!("Token left behind: {:?}.", token),
+        }
+    }
+
+    pub fn uncomplete_eq() -> Self {
+        ComputorError {
+            kind: ErrorKind::UncompleteEq,
+            info: format!("Equation not complete."),
         }
     }
 }

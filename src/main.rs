@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/30 10:40:59 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 15:28:50 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,11 @@ fn main_wrapped() -> i32 {
     loop {
         match lex.read_input() {
             Ok(tokens) => match pars.parse_tokens(tokens) {
-                Some(tree) => computor.read_tokens(tree),
+                Some(tree) => {
+                    if let Err(err) = computor.read_tokens(tree) {
+                        eprintln!("{}", err);
+                    }
+                }
                 None => {}
             },
             Err(err) => {

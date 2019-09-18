@@ -6,13 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/10 09:17:07 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 16:53:09 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{Extension, Memory};
 
-use crate::computor::{ComputorError, ComputorResult};
+use crate::computor::{ComputorError, TreeResult};
 use crate::parser::TokenTree;
 use crate::types::Imaginary;
 
@@ -45,9 +45,9 @@ impl Function {
         self.expr = Some(expr);
     }
 
-    pub fn compute(&self, mem: &Memory, arg: Vec<Imaginary>) -> ComputorResult {
+    pub fn compute(&self, mem: &Memory, arg: Vec<Imaginary>) -> TreeResult {
         if arg.len() != self.var.len() {
-            return ComputorResult::Err(ComputorError::fun_arg_inv(&self.name));
+            return Err(ComputorError::fun_arg_inv(&self.name));
         }
         let mut extended = Extension::new();
         for i in 0..arg.len() {
@@ -55,7 +55,7 @@ impl Function {
         }
         let res = match &self.expr {
             Some(tree) => tree.compute(mem, Some(&mut extended)),
-            None => ComputorResult::Err(ComputorError::fun_undef(&self.name)),
+            None => Err(ComputorError::fun_undef(&self.name)),
         };
         return res;
     }

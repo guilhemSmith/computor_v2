@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/10 17:34:53 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 16:36:16 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ pub use resolve::Resolve;
 pub use value::Value;
 pub use variable::Variable;
 
-use crate::computor::ComputorResult;
+use crate::computor::TreeResult;
 use crate::memory::{Extension, Memory};
 
 use std::any::Any;
@@ -47,7 +47,7 @@ pub trait Token: fmt::Display + fmt::Debug {
         &self,
         mem: &Memory,
         ext: Option<&mut Extension>,
-    ) -> ComputorResult;
+    ) -> TreeResult;
 }
 
 pub fn count_error(token: &Box<dyn Token>) -> i32 {
@@ -84,21 +84,3 @@ pub fn debug_token(tokens: &Vec<Box<dyn Token>>) -> String {
     }
     vec
 }
-
-// pub fn debug_token(tokens: &Vec<Box<dyn Token>>) -> String {
-//     let mut debug = String::new();
-
-//     for token in tokens {
-//         debug.push_str(&format!("{}{:?}", sep, token)[..]);
-//     }
-//     return String::from(debug.trim_start_matches(sep));
-// }
-
-// pub fn display_token(tokens: &Vec<Box<dyn Token>>, sep: &str) -> String {
-//     let mut display = String::new();
-
-//     for token in tokens {
-//         display.push_str(&format!("{}{}", sep, token)[..]);
-//     }
-//     return String::from(display.trim_start_matches(sep));
-// }

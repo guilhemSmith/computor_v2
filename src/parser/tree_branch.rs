@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/16 14:44:29 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 16:48:15 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::TokenTree;
-use crate::computor::ComputorResult;
+use crate::computor::{Computed, TreeResult};
 use crate::lexer::{
     token::{new_operator, Operator},
     Token,
@@ -294,25 +294,25 @@ impl TokenTree for TreeBranch {
         &self,
         mem: &Memory,
         mut ext: Option<&mut Extension>,
-    ) -> ComputorResult {
+    ) -> TreeResult {
         let orand_left = match &self.branch_left {
-            None => ComputorResult::None,
+            None => Computed::None,
             Some(tree) => match &mut ext {
                 Some(extend) => {
                     let mut ext_clone = extend.clone();
-                    tree.compute(mem, Some(&mut ext_clone))
+                    tree.compute(mem, Some(&mut ext_clone))?
                 }
-                None => tree.compute(mem, None),
+                None => tree.compute(mem, None)?,
             },
         };
         let orand_right = match &self.branch_right {
-            None => ComputorResult::None,
+            None => Computed::None,
             Some(tree) => match &mut ext {
                 Some(extend) => {
                     let mut ext_clone = extend.clone();
-                    tree.compute(mem, Some(&mut ext_clone))
+                    tree.compute(mem, Some(&mut ext_clone))?
                 }
-                None => tree.compute(mem, None),
+                None => tree.compute(mem, None)?,
             },
         };
         self.op_ref().exec(mem, orand_left, orand_right)

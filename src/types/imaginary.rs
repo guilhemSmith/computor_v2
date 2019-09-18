@@ -6,13 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 14:03:22 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 17:38:53 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use crate::computor::ComputorError;
 use super::rational::Rational;
 use super::OpResult;
+use crate::computor::ComputorError;
 use std::{cmp, fmt, ops};
 
 #[derive(Eq, Copy, Clone, Debug)]
@@ -57,7 +57,7 @@ impl Imaginary {
         let tmp_right = self.irreal.mul(&other.irreal)?;
         let real = tmp_left.sub(&tmp_right)?;
         let tmp_left = self.real.mul(&other.irreal)?;
-        let tmp_right = self.real.mul(&other.real)?;
+        let tmp_right = self.irreal.mul(&other.real)?;
         let irreal = tmp_left.add(&tmp_right)?;
         Ok(Imaginary { real, irreal })
     }
@@ -104,7 +104,6 @@ impl Imaginary {
         let mut i: u32 = 0;
 
         while pow >= i {
-            let sign = Rational::new(if i % 4 < 2 { 1.0 } else { -1.0 });
             let mut new_val = self.real.pow((pow - i) as i32)?;
             let tmp = self.irreal.pow(i as i32)?;
             new_val = new_val.mul(&tmp)?;
@@ -255,8 +254,8 @@ mod operator {
         let zero = Imaginary::new(0.0, 0.0);
         let complex_2 = Imaginary::new(2.0, 3.0);
         let complex_3 = Imaginary::new(3.0, 2.0);
-        let complex_3 = Imaginary::new(13.0, 0.0);
-        let complex_5 = Imaginary::new(12.0, 5.0).div(&complex_3).unwrap();
+        let complex_4 = Imaginary::new(13.0, 0.0);
+        let complex_5 = Imaginary::new(12.0, 5.0).div(&complex_4).unwrap();
 
         assert_eq!(zero.div(&complex_2).unwrap(), zero);
         assert_eq!(complex_2.div(&complex_3).unwrap(), complex_5);

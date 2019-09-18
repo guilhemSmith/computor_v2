@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:16:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/30 17:38:41 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/18 17:00:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
-use crate::computor::ComputorResult;
+use crate::computor::{Computed, TreeResult};
 use crate::memory::{Extension, Memory};
 use std::any::Any;
 use std::fmt;
@@ -62,17 +62,17 @@ impl Token for Variable {
         &self,
         mem: &Memory,
         ext: Option<&mut Extension>,
-    ) -> ComputorResult {
+    ) -> TreeResult {
         match ext {
             Some(extension) => match extension.get(&self.id) {
-                Some(val) => return ComputorResult::Val(val),
+                Some(val) => return Ok(Computed::Val(val)),
                 None => {}
             },
             None => {}
         }
         match mem.get_var_val(&self.id) {
-            Some(val) => ComputorResult::VarCall(self.id.clone(), val),
-            None => ComputorResult::VarSet(self.id.clone()),
+            Some(val) => Ok(Computed::VarCall(self.id.clone(), val)),
+            None => Ok(Computed::VarSet(self.id.clone())),
         }
     }
 }
