@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 15:18:25 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 15:49:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,7 +234,10 @@ impl TreeBranch {
                 }
             };
         } else {
-            if n_branch.was_expr || n_branch.op_ref().symbol() != '^' {
+            if self.op_ref().symbol() == '='
+                || n_branch.was_expr
+                || n_branch.op_ref().symbol() != '^'
+            {
                 self.branch_right = Some(new);
             } else {
                 std::mem::swap(self, n_branch);
