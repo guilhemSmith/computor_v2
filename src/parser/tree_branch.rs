@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 16:48:15 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 15:18:25 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -321,11 +321,20 @@ impl TokenTree for TreeBranch {
 
 impl fmt::Display for TreeBranch {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match (&self.branch_left, &self.branch_right) {
-            (Some(l), Some(r)) => write!(f, "{}{}{}", l, self.token, r),
-            (Some(left), None) => write!(f, "{}{}", left, self.token),
-            (None, Some(right)) => write!(f, "{}{}", self.token, right),
-            (None, None) => write!(f, "{}", self.token),
+        if !self.was_expr {
+            match (&self.branch_left, &self.branch_right) {
+                (Some(l), Some(r)) => write!(f, "{}{}{}", l, self.token, r),
+                (Some(left), None) => write!(f, "{}{}", left, self.token),
+                (None, Some(right)) => write!(f, "{}{}", self.token, right),
+                (None, None) => write!(f, "{}", self.token),
+            }
+        } else {
+            match (&self.branch_left, &self.branch_right) {
+                (Some(l), Some(r)) => write!(f, "({}{}{})", l, self.token, r),
+                (Some(left), None) => write!(f, "({}{})", left, self.token),
+                (None, Some(right)) => write!(f, "({}{})", self.token, right),
+                (None, None) => write!(f, "({})", self.token),
+            }
         }
     }
 }

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 17:38:53 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 15:10:29 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,38 +90,20 @@ impl Imaginary {
     }
 
     pub fn pow(&self, power: i32) -> OpResult<Self> {
-        if power == 0 {
-            return Ok(Imaginary::new(1.0, 0.0));
-        }
         if power < 0 {
             return (Imaginary::new(1.0, 0.0).div(self)?).pow(-power);
         }
-
-        let mut real = Rational::zero();
-        let mut irreal = Rational::zero();
-
+        let mut res = Imaginary::new(1.0, 0.0);
         let pow: u32 = power as u32;
         let mut i: u32 = 0;
 
-        while pow >= i {
-            let mut new_val = self.real.pow((pow - i) as i32)?;
-            let tmp = self.irreal.pow(i as i32)?;
-            new_val = new_val.mul(&tmp)?;
-            if i % 4 >= 2 {
-                new_val = -new_val;
-            }
-            let new_coef = Rational::new(pascal_num(pow, i) as f64);
-            let to_add = new_coef.mul(&new_val)?;
-            if i % 2 == 0 {
-                real = real.add(&to_add)?;
-            } else {
-                irreal = irreal.add(&to_add)?;
-            }
+        while pow > i {
             i += 1;
+            res = res.mul(self)?;
         }
-        real.simplify();
-        irreal.simplify();
-        return Ok(Imaginary { real, irreal });
+        res.real.simplify();
+        res.irreal.simplify();
+        return Ok(res);
     }
 }
 
