@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:07:44 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:52:45 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,14 +49,19 @@ fn main_wrapped() -> i32 {
 
     loop {
         match lex.read_input() {
-            Ok(tokens) => match pars.parse_tokens(tokens) {
-                Some(tree) => {
-                    if let Err(err) = computor.read_tokens(tree) {
-                        eprintln!("{}", err.to_string().red());
+            Ok(tokens) => {
+                if tokens.len() != 0 {
+                    let tree = pars.parse_tokens(tokens);
+                    if let Some(root) = tree {
+                        if let Err(err) = computor.read_tokens(root) {
+                            eprintln!("{}", err.to_string().red());
+                        }
                     }
+                } else {
+                    pars.update_param(lex.verbose(), lex.benchmark());
+                    computor.update_param(lex.verbose(), lex.benchmark());
                 }
-                None => {}
-            },
+            }
             Err(err) => {
                 if *err.kind() == ErrorKind::IOStop {
                     println!("{}", err.to_string());

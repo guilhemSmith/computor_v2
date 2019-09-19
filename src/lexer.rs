@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:25:53 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:51:09 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ extern crate colored;
 use colored::Colorize;
 
 const PROMPT: &str = "> ";
+const KEY_VERB: &str = "verbose";
+const KEY_BENCH: &str = "benchmark";
 
 pub struct Lexer {
     verbose: bool,
@@ -52,6 +54,14 @@ impl Lexer {
             last_ch: None,
             depth: 0,
         }
+    }
+
+    pub fn verbose(&self) -> bool {
+        self.verbose
+    }
+
+    pub fn benchmark(&self) -> bool {
+        self.bench
     }
 
     pub fn read_input(&mut self) -> Result<Vec<Box<dyn Token>>, ComputorError> {
@@ -83,10 +93,25 @@ impl Lexer {
         }
     }
 
+    fn check_keyword(&mut self, word: &String) -> bool {
+        if *word == KEY_VERB {
+            self.verbose = !self.verbose;
+            true
+        } else if *word == KEY_BENCH {
+            self.bench = !self.bench;
+            true
+        } else {
+            false
+        }
+    }
+
     fn lexe(
         &mut self,
         l: String,
     ) -> Result<Vec<Box<dyn Token>>, ComputorError> {
+        if self.check_keyword(&l) {
+            return Ok(Vec::new());
+        }
         let cleared = self.clear_input(l);
         let mut iter = cleared.chars();
         let tokens;

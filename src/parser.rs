@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:06:33 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:51:20 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,11 @@ impl Parser {
             verbose: param.verbose(),
             bench: param.bench(),
         }
+    }
+
+    pub fn update_param(&mut self, verbose: bool, benchmark: bool) {
+        self.verbose = verbose;
+        self.bench = benchmark;
     }
 
     pub fn parse_tokens(

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:09:20 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:51:31 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,11 @@ impl Computor {
             bench: param.bench(),
             memory: Memory::new(),
         }
+    }
+
+    pub fn update_param(&mut self, verbose: bool, benchmark: bool) {
+        self.verbose = verbose;
+        self.bench = benchmark;
     }
 
     pub fn read_tokens(&mut self, tree: TTree) -> ComputorResult {
