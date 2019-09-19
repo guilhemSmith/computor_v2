@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 15:28:50 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:07:44 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,9 @@ use crate::parser::Parser;
 use crate::timer::Timer;
 use std::{env, process};
 
+extern crate colored;
+use colored::Colorize;
+
 fn main() {
     let exit_code = main_wrapped();
     process::exit(exit_code);
@@ -41,7 +44,7 @@ fn main_wrapped() -> i32 {
         return 0;
     }
     let mut lex = Lexer::new(&param);
-    let pars = Parser::new(&param);
+    let mut pars = Parser::new(&param);
     let mut computor = Computor::new(&param);
 
     loop {
@@ -49,17 +52,17 @@ fn main_wrapped() -> i32 {
             Ok(tokens) => match pars.parse_tokens(tokens) {
                 Some(tree) => {
                     if let Err(err) = computor.read_tokens(tree) {
-                        eprintln!("{}", err);
+                        eprintln!("{}", err.to_string().red());
                     }
                 }
                 None => {}
             },
             Err(err) => {
                 if *err.kind() == ErrorKind::IOStop {
-                    println!("{}", err);
+                    println!("{}", err.to_string());
                     break;
                 } else {
-                    eprintln!("{}", err);
+                    eprintln!("{}", err.to_string().red().bold());
                 }
             }
         }

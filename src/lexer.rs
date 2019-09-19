@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/10 17:23:49 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:06:48 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,9 @@ use crate::computor::ComputorError;
 use crate::Timer;
 
 use std::str::Chars;
+
+extern crate colored;
+use colored::Colorize;
 
 const PROMPT: &str = "> ";
 
@@ -57,7 +60,15 @@ impl Lexer {
             Ok(line) => {
                 self.line.add_history_entry(line.as_str());
                 if self.verbose {
-                    println!("[v:Lexer] - input read: '{}'", line);
+                    println!(
+                        "{}",
+                        format!(
+                            "{} - input read: {}",
+                            "[v:Lexer]".cyan().bold(),
+                            line
+                        )
+                        .dimmed()
+                    );
                 }
                 if !self.bench {
                     self.lexe(line)
@@ -225,7 +236,15 @@ impl Lexer {
                 Some(word) => cleared.push_str(word),
                 None => {
                     if self.verbose {
-                        println!("[v:Lexer] - input cleared: '{}'", cleared);
+                        println!(
+                            "{}",
+                            format!(
+                                "{} - input cleared: {}",
+                                "[v:Lexer]".cyan().bold(),
+                                cleared
+                            )
+                            .dimmed()
+                        );
                     }
                     return cleared;
                 }

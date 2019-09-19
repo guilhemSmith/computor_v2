@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/12 16:43:05 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:06:33 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,9 @@ use crate::lexer::token::{
 use crate::arg_parse::Param;
 use crate::lexer::Token;
 use crate::timer::Timer;
+
+extern crate colored;
+use colored::Colorize;
 
 pub struct Parser {
     verbose: bool,
@@ -45,8 +48,13 @@ impl Parser {
     ) -> Option<Box<dyn TokenTree>> {
         if self.verbose {
             println!(
-                "[v:Parser] - token stack received : {}",
-                token::debug_token(&tokens)
+                "{}",
+                format!(
+                    "{} - token stack received: {}",
+                    "[v:Parser]".blue().bold(),
+                    token::debug_token(&tokens)
+                )
+                .dimmed()
             );
         }
         if !self.bench {

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 16:56:26 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:09:20 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,9 @@ use Computed as Comp;
 
 use std::collections::HashMap;
 use std::i32::{MAX as I32_MAX, MIN as I32_MIN};
+
+extern crate colored;
+use colored::Colorize;
 
 const LOG: &str = "[err:Computor] -> ";
 
@@ -50,7 +53,15 @@ impl Computor {
 
     pub fn read_tokens(&mut self, tree: TTree) -> ComputorResult {
         if self.verbose {
-            println!("[v:Computor] -> tree received: {:?}", tree)
+            println!(
+                "{}",
+                format!(
+                    "{} - tree received: {:?}",
+                    "[v:Computor]".purple().bold(),
+                    tree
+                )
+                .dimmed()
+            )
         }
         if !self.bench {
             self.compute(tree)
@@ -368,7 +379,15 @@ fn eq_degree_two(eq: Equ, id: String, verb: bool) -> ComputorResult {
     let right = Im::new(4.0, 0.0).mul(&deg_two)?.mul(&deg_zero)?;
     let delta = deg_one.pow(2)?.sub(&right)?;
     if verb {
-        println!("[v:Computor] -> Delta = {}", delta);
+        println!(
+            "{}",
+            format!(
+                "{} - Delta = {}",
+                "[v:Computor]".purple().bold(),
+                delta.to_string()
+            )
+            .dimmed()
+        );
     }
     let two_re = Im::new(2.0, 0.0);
     let div = deg_two.mul(&two_re)?;
