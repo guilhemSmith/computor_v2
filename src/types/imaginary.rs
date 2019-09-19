@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 15:10:29 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 16:54:15 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,10 @@ impl Imaginary {
     pub fn add(&self, other: &Imaginary) -> OpResult<Self> {
         let real = self.real.add(&other.real)?;
         let irreal = self.irreal.add(&other.irreal)?;
-        Ok(Imaginary { real, irreal })
+        let mut res = Imaginary { real, irreal };
+        res.real.simplify();
+        res.irreal.simplify();
+        Ok(res)
     }
 
     pub fn sub(&self, other: &Imaginary) -> OpResult<Self> {
@@ -59,7 +62,10 @@ impl Imaginary {
         let tmp_left = self.real.mul(&other.irreal)?;
         let tmp_right = self.irreal.mul(&other.real)?;
         let irreal = tmp_left.add(&tmp_right)?;
-        Ok(Imaginary { real, irreal })
+        let mut res = Imaginary { real, irreal };
+        res.real.simplify();
+        res.irreal.simplify();
+        Ok(res)
     }
 
     pub fn div(&self, other: &Imaginary) -> OpResult<Self> {
@@ -72,18 +78,24 @@ impl Imaginary {
         let other_real_square = other.real.pow(2)?;
         let other_irreal_square = other.irreal.pow(2)?;
         let den = other_real_square.add(&other_irreal_square)?;
-        Ok(Imaginary {
+        let mut res = Imaginary {
             real: real_num.div(&den)?,
             irreal: irreal_num.div(&den)?,
-        })
+        };
+        res.real.simplify();
+        res.irreal.simplify();
+        Ok(res)
     }
 
     pub fn rem(&self, other: &Imaginary) -> OpResult<Self> {
         if self.is_real() && other.is_real() {
-            Ok(Imaginary {
+            let mut res = Imaginary {
                 real: self.get_real().rem(&other.get_real())?,
                 irreal: Rational::zero(),
-            })
+            };
+            res.real.simplify();
+            res.irreal.simplify();
+            Ok(res)
         } else {
             Err(ComputorError::mod_with_im())
         }

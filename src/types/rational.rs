@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:47:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 14:05:33 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 16:56:12 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,10 @@ impl Rational {
     }
 
     pub fn simplify(&mut self) {
-        simplify_gcd(&mut self.num, &mut self.den)
+        simplify_gcd(&mut self.num, &mut self.den);
+        if self.num == 0 {
+            self.posit = true
+        }
     }
 
     pub fn add(&self, other: &Rational) -> OpResult<Self> {
@@ -232,7 +235,7 @@ impl ops::Neg for Rational {
     type Output = Rational;
 
     fn neg(mut self) -> Self::Output {
-        self.posit = !self.posit;
+        self.posit = self.num == 0 || !self.posit;
         self
     }
 }

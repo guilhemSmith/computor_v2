@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 17:29:33 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 16:56:26 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -245,7 +245,7 @@ impl Computor {
             Some(max) => match *max {
                 0 => println!("False."),
                 1 => eq_degree_one(eq, id)?,
-                2 => eq_degree_two(eq, id)?,
+                2 => eq_degree_two(eq, id, self.verbose)?,
                 2..=I32_MAX => {
                     println!("Can't solve equation with degree above 2.")
                 }
@@ -351,7 +351,7 @@ fn eq_degree_one(eq: Equ, id: String) -> ComputorResult {
     Ok(())
 }
 
-fn eq_degree_two(eq: Equ, id: String) -> ComputorResult {
+fn eq_degree_two(eq: Equ, id: String, verb: bool) -> ComputorResult {
     let mut index: i32 = 0;
     let deg_zero = match eq.get(&index) {
         None => Imaginary::new(0.0, 0.0),
@@ -367,6 +367,9 @@ fn eq_degree_two(eq: Equ, id: String) -> ComputorResult {
     print_eq(&eq, &id, 2);
     let right = Im::new(4.0, 0.0).mul(&deg_two)?.mul(&deg_zero)?;
     let delta = deg_one.pow(2)?.sub(&right)?;
+    if verb {
+        println!("[v:Computor] -> Delta = {}", delta);
+    }
     let two_re = Im::new(2.0, 0.0);
     let div = deg_two.mul(&two_re)?;
     if delta.get_real() > Rational::zero() {
