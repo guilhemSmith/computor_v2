@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 17:10:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:31:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,7 +185,7 @@ impl FunctionTree {
                 }
             },
         }
-        Ok(Comp::FunSet(self.id.to_lowercase(), lst))
+        Ok(Comp::FunSet(self.id.clone(), lst))
     }
 }
 

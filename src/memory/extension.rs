@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/21 10:31:53 by gsmith            #+#    #+#             */
-/*   Updated: 2019/08/30 17:14:06 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:31:00 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,15 +29,13 @@ impl Extension {
     }
 
     pub fn add(&mut self, name: &String, val: Imaginary) {
-        let lowercase = name.to_lowercase();
         let mut new_tmp = Variable::new(name.clone());
         new_tmp.set(Some(val));
-        self.tmp_var.insert(lowercase, new_tmp);
+        self.tmp_var.insert(name.clone(), new_tmp);
     }
 
     pub fn get(&self, name: &String) -> Option<Imaginary> {
-        let lowercase = name.to_lowercase();
-        match self.tmp_var.get(&lowercase) {
+        match self.tmp_var.get(name) {
             None => None,
             Some(var) => var.get(),
         }

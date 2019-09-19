@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:06:48 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:25:53 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,6 +235,7 @@ impl Lexer {
             match iter.next() {
                 Some(word) => cleared.push_str(word),
                 None => {
+                    cleared = cleared.to_lowercase();
                     if self.verbose {
                         println!(
                             "{}",

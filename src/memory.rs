@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/09 12:00:07 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/19 18:32:42 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ impl Memory {
         match self.var.get_mut(&name) {
             Some(var) => var.set(val),
             None => {
-                let mut var = Variable::new(name.to_lowercase());
+                let mut var = Variable::new(name.clone());
                 var.set(val);
                 self.var.insert(name, var);
             }
@@ -62,20 +62,18 @@ impl Memory {
         var: Vec<String>,
         exp: Box<dyn TokenTree>,
     ) {
-        let case = name.to_lowercase();
-
-        match self.fun.get_mut(&case) {
+        match self.fun.get_mut(&name) {
             Some(fun) => fun.set(var, exp),
             None => {
-                let mut fun = Function::new(name);
+                let mut fun = Function::new(name.clone());
                 fun.set(var, exp);
-                self.fun.insert(case, fun);
+                self.fun.insert(name, fun);
             }
         };
     }
 
     pub fn get_fun(&self, name: &String) -> Option<&Function> {
-        self.fun.get(&name.to_lowercase())
+        self.fun.get(name)
     }
 
     fn var_to_string(&self) -> String {
