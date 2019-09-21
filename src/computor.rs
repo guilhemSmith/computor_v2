@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:51:31 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/21 15:47:28 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -382,7 +382,7 @@ fn eq_degree_two(eq: Equ, id: String, verb: bool) -> ComputorResult {
     let deg_two = *eq.get(&index).unwrap();
     print_eq(&eq, &id, 2);
     let right = Im::new(4.0, 0.0).mul(&deg_two)?.mul(&deg_zero)?;
-    let delta = deg_one.pow(2)?.sub(&right)?;
+    let delta = deg_one.pow(2)?.sub(&right)?.get_real();
     if verb {
         println!(
             "{}",
@@ -396,18 +396,18 @@ fn eq_degree_two(eq: Equ, id: String, verb: bool) -> ComputorResult {
     }
     let two_re = Im::new(2.0, 0.0);
     let div = deg_two.mul(&two_re)?;
-    if delta.get_real() > Rational::zero() {
-        let root = Im::new((-delta.get_real().get_val()).sqrt(), 0.0);
-        let sol_a = deg_one.add(&root)?.div(&div)?;
-        let sol_b = deg_one.sub(&root)?.div(&div)?;
+    if delta > Rational::zero() {
+        let root = Im::new((delta.get_val()).sqrt(), 0.0);
+        let sol_a = (-deg_one).add(&root)?.div(&div)?;
+        let sol_b = (-deg_one).sub(&root)?.div(&div)?;
         println!(
             "Delta is positive, 2 real solutions:\n{} = {}\n{} = {}",
             id, sol_a, id, sol_b
         );
-    } else if delta.get_real() < Rational::zero() {
-        let root = Im::new(0.0, (-delta.get_real().get_val()).sqrt());
-        let sol_a = deg_one.add(&root)?.div(&div)?;
-        let sol_b = deg_one.sub(&root)?.div(&div)?;
+    } else if delta < Rational::zero() {
+        let root = Im::new(0.0, (-delta.get_val()).sqrt());
+        let sol_a = (-deg_one).add(&root)?.div(&div)?;
+        let sol_b = (-deg_one).sub(&root)?.div(&div)?;
         println!(
             "Delta is negative, 2 imaginary solutions:\n{} = {}\n{} = {}",
             id, sol_a, id, sol_b

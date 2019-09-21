@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 16:54:15 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/21 15:44:29 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,13 +117,6 @@ impl Imaginary {
         res.irreal.simplify();
         return Ok(res);
     }
-}
-
-fn pascal_num(p: u32, n: u32) -> u32 {
-    if p == 0 || n == 0 || n == p {
-        return 1;
-    }
-    pascal_num(p - 1, n) + pascal_num(p - 1, n - 1)
 }
 
 impl fmt::Display for Imaginary {
@@ -258,7 +251,6 @@ mod operator {
 
 #[cfg(test)]
 mod pow {
-    use super::pascal_num;
     use super::Imaginary;
 
     #[test]
@@ -279,24 +271,5 @@ mod pow {
 
         assert_eq!(zero.pow(3).unwrap(), zero);
         assert_eq!(raw.pow(3).unwrap(), res);
-    }
-
-    #[test]
-    fn pascal() {
-        assert_eq!(pascal_num(0, 0), 1);
-        assert_eq!(pascal_num(1, 0), 1);
-        assert_eq!(pascal_num(1, 1), 1);
-        assert_eq!(pascal_num(2, 0), 1);
-        assert_eq!(pascal_num(2, 1), 2);
-        assert_eq!(pascal_num(2, 2), 1);
-        assert_eq!(pascal_num(3, 0), 1);
-        assert_eq!(pascal_num(3, 1), 3);
-        assert_eq!(pascal_num(3, 2), 3);
-        assert_eq!(pascal_num(3, 3), 1);
-        assert_eq!(pascal_num(4, 0), 1);
-        assert_eq!(pascal_num(4, 1), 4);
-        assert_eq!(pascal_num(4, 2), 6);
-        assert_eq!(pascal_num(4, 3), 4);
-        assert_eq!(pascal_num(4, 4), 1);
     }
 }
