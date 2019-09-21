@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/21 15:47:28 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/21 16:19:50 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,10 @@ use std::i32::{MAX as I32_MAX, MIN as I32_MIN};
 extern crate colored;
 use colored::Colorize;
 
-const LOG: &str = "[err:Computor] -> ";
-
 type TTree = Box<dyn TokenTree>;
 type Equ = HashMap<i32, Im>;
 type Im = Imaginary;
+type CErr = ComputorError;
 
 pub struct Computor {
     verbose: bool,
@@ -80,8 +79,7 @@ impl Computor {
     fn compute(&mut self, mut tree: TTree) -> ComputorResult {
         let n = tree.count(token::count_error);
         if n > 0 {
-            eprintln!("{}{} invalid tokens. Abort.", LOG, n);
-            return Ok(());
+            return Err(CErr::invalid_tokens(n));
         }
 
         let left: Option<TTree>;
@@ -100,26 +98,25 @@ impl Computor {
         if let (Some(br_left), Some(br_right)) = (left, right) {
             return self.dual_part(br_left, br_right);
         };
-        eprintln!("{}", ComputorError::bad_use_op('='));
-        Ok(())
+        return Err(CErr::bad_use_op('='));
     }
 
     fn single_part(&mut self, tree: TTree) -> ComputorResult {
         Ok(match tree.compute(&mut self.memory, None)? {
-            Comp::None => log_err("Empty instruction given"),
+            Comp::None => return Err(CErr::empty_instr()),
             Comp::Res => self.mem_dump(),
             Comp::Val(val) => println!("{}", val),
             Comp::VarCall(_, val) => println!("{}", val),
-            Comp::VarSet(v) => log_err(&format!("Unknown variable '{}'", v)),
-            Comp::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            Comp::VarSet(v) => return Err(CErr::unknown_id(v, true)),
+            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
             Comp::Equ(_, eq) => self.eq_one_sided(eq)?,
         })
     }
 
     fn dual_part(&mut self, left: TTree, right: TTree) -> ComputorResult {
         Ok(match left.compute(&mut self.memory, None)? {
-            Comp::None => return Err(ComputorError::bad_use_op('=')),
-            Comp::Res => return Err(ComputorError::bad_resolve()),
+            Comp::None => return Err(CErr::bad_use_op('=')),
+            Comp::Res => return Err(CErr::bad_resolve()),
             Comp::Val(val) => self.left_val(val, right)?,
             Comp::VarCall(id, val) => self.call_var(id, val, right)?,
             Comp::VarSet(id) => self.set_var(id, right)?,
@@ -132,13 +129,13 @@ impl Computor {
         let zero: i32 = 0;
         for (pow, coef) in eq.iter() {
             if *pow > 0 && *coef != Im::new(0.0, 0.0) {
-                return Err(ComputorError::uncomplete_eq());
+                return Err(CErr::uncomplete_eq());
             }
         }
         if let Some(coef) = eq.get(&zero) {
             println!("{}", *coef);
         } else {
-            return Err(ComputorError::uncomplete_eq());
+            return Err(CErr::uncomplete_eq());
         }
         Ok(())
     }
@@ -150,8 +147,8 @@ impl Computor {
         right: TTree,
     ) -> ComputorResult {
         Ok(match right.compute(&self.memory, None)? {
-            Comp::None => return Err(ComputorError::bad_use_op('=')),
-            Comp::Res => return Err(ComputorError::uncomplete_eq()),
+            Comp::None => return Err(CErr::bad_use_op('=')),
+            Comp::Res => return Err(CErr::uncomplete_eq()),
             Comp::Val(val) => {
                 val_into_eq(&mut left, val)?;
                 self.solve_eq(left, id)?;
@@ -164,7 +161,7 @@ impl Computor {
                 unknow_into_eq(&mut left, &id, v)?;
                 self.solve_eq(left, id)?;
             }
-            Comp::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
             Comp::Equ(id_r, eq) => {
                 fuse_eq(&mut left, &id, eq, id_r)?;
                 self.solve_eq(left, id)?;
@@ -174,12 +171,12 @@ impl Computor {
 
     fn left_val(&self, val: Im, right: TTree) -> ComputorResult {
         Ok(match right.compute(&self.memory, None)? {
-            Comp::None => eprintln!("{}", ComputorError::bad_use_op('=')),
+            Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => println!("{}", val),
             Comp::Val(r_val) => solve_two_val(val, r_val),
             Comp::VarCall(_, r_val) => solve_two_val(val, r_val),
             Comp::VarSet(v) => println!("{} = {} is a solution.", v, val),
-            Comp::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
             Comp::Equ(id, eq) => {
                 let mut eq = eq;
                 val_into_eq(&mut eq, val)?;
@@ -195,7 +192,7 @@ impl Computor {
         right: TTree,
     ) -> ComputorResult {
         Ok(match right.compute(&self.memory, None)? {
-            Comp::None => eprintln!("{}", ComputorError::bad_use_op('=')),
+            Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => println!("{}", val),
             Comp::Val(nval) => {
                 self.memory.set_var(var, Some(nval));
@@ -206,7 +203,7 @@ impl Computor {
                 println!("{}", nval);
             }
             Comp::VarSet(v) => println!("{} = {} is a solution.", v, val),
-            Comp::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
             Comp::Equ(id, eq) => {
                 let mut eq = eq;
                 var_into_eq(&mut eq, &id, var, val)?;
@@ -217,8 +214,8 @@ impl Computor {
 
     fn set_var(&mut self, var: String, right: TTree) -> ComputorResult {
         Ok(match right.compute(&self.memory, None)? {
-            Comp::None => eprintln!("{}", ComputorError::bad_use_op('=')),
-            Comp::Res => log_err(&format!("Unknown variable '{}'", var)),
+            Comp::None => return Err(CErr::bad_use_op('=')),
+            Comp::Res => return Err(CErr::unknown_id(var, true)),
             Comp::Val(val) => {
                 self.memory.set_var(var, Some(val));
                 println!("{}", val);
@@ -229,12 +226,12 @@ impl Computor {
             }
             Comp::VarSet(id) => {
                 if id != var {
-                    log_err(&format!("Unknown variable '{}'", id))
+                    return Err(CErr::unknown_id(id, true));
                 } else {
                     println!("Any value for {} is a solution.", id);
                 }
             }
-            Comp::FunSet(f, _) => log_err(&format!("Unknown function '{}'", f)),
+            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
             Comp::Equ(id, eq) => {
                 let mut eq = eq;
                 unknow_into_eq(&mut eq, &id, var)?;
@@ -321,7 +318,7 @@ fn unknow_into_eq(eq: &mut Equ, id: &String, unk: String) -> ComputorResult {
         }
         Ok(())
     } else {
-        Err(ComputorError::too_many_unknown())
+        Err(CErr::too_many_unknown())
     }
 }
 
@@ -342,7 +339,7 @@ fn fuse_eq(
         }
         Ok(())
     } else {
-        Err(ComputorError::too_many_unknown())
+        Err(CErr::too_many_unknown())
     }
 }
 
@@ -417,10 +414,6 @@ fn eq_degree_two(eq: Equ, id: String, verb: bool) -> ComputorResult {
         println!("Delta is null, 1 real solution:\n{} = {}", id, sol);
     }
     Ok(())
-}
-
-fn log_err(msg: &str) {
-    eprintln!("{}{}.", LOG, msg);
 }
 
 pub fn filter_eq(eq: &mut Equ) {

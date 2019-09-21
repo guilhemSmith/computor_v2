@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 16:36:16 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/21 16:26:10 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,9 @@ use crate::memory::{Extension, Memory};
 
 use std::any::Any;
 use std::fmt;
+
+extern crate colored;
+use colored::Colorize;
 
 pub trait Token: fmt::Display + fmt::Debug {
     fn as_any(&self) -> &dyn Any;
@@ -63,7 +66,7 @@ pub fn count_error(token: &Box<dyn Token>) -> i32 {
             }
         },
         Some(err) => {
-            eprintln!("[err:Token] -> {}", err);
+            eprintln!("{} - {}", String::from("[err:token]").red(), err);
             1
         }
     }

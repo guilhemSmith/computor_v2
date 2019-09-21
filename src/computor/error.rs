@@ -6,12 +6,15 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 16:04:28 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/21 16:23:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use crate::lexer::Token;
 use std::{error::Error, fmt};
+
+extern crate colored;
+use colored::Colorize;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ErrorKind {
@@ -20,11 +23,13 @@ pub enum ErrorKind {
     BadUseOperator,
     DivByEq,
     DivByZero,
+    EmptyInstr,
     FunUndefinded,
     FunArgInv,
     ModWithIm,
     ModWithUnk,
     InvalidInput,
+    InvalidTokens,
     IO,
     IOStop,
     OverflowAbort,
@@ -32,6 +37,7 @@ pub enum ErrorKind {
     TooManyUnknown,
     UnparsedToken,
     UncompleteEq,
+    UnknownId,
 }
 
 impl fmt::Display for ErrorKind {
@@ -42,18 +48,21 @@ impl fmt::Display for ErrorKind {
             ErrorKind::BadUseOperator => write!(f, "bad use"),
             ErrorKind::DivByEq => write!(f, "math"),
             ErrorKind::DivByZero => write!(f, "math"),
+            ErrorKind::EmptyInstr => write!(f, "parser"),
             ErrorKind::FunUndefinded => write!(f, "function"),
             ErrorKind::FunArgInv => write!(f, "function"),
             ErrorKind::ModWithIm => write!(f, "math"),
-            ErrorKind::ModWithUnk => write!(f, "instruction"),
+            ErrorKind::ModWithUnk => write!(f, "parser"),
             ErrorKind::InvalidInput => write!(f, "syntax"),
+            ErrorKind::InvalidTokens => write!(f, "lexer"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
             ErrorKind::OverflowAbort => write!(f, "limit"),
-            ErrorKind::TooManyEqual => write!(f, "instruction"),
+            ErrorKind::TooManyEqual => write!(f, "parser"),
             ErrorKind::TooManyUnknown => write!(f, "instruction"),
             ErrorKind::UnparsedToken => write!(f, "parser"),
-            ErrorKind::UncompleteEq => write!(f, "instruction"),
+            ErrorKind::UncompleteEq => write!(f, "parser"),
+            ErrorKind::UnknownId => write!(f, "parser"),
         }
     }
 }
@@ -114,6 +123,13 @@ impl ComputorError {
         }
     }
 
+    pub fn empty_instr() -> Self {
+        ComputorError {
+            kind: ErrorKind::EmptyInstr,
+            info: String::from("Empty instruction given."),
+        }
+    }
+
     pub fn fun_undef(name: &String) -> Self {
         ComputorError {
             kind: ErrorKind::FunUndefinded,
@@ -153,6 +169,13 @@ impl ComputorError {
         }
     }
 
+    pub fn invalid_tokens(nb: i32) -> Self {
+        ComputorError {
+            kind: ErrorKind::InvalidTokens,
+            info: format!("{} invalid tokens. Abort.", nb),
+        }
+    }
+
     pub fn io(cut: &str) -> Self {
         ComputorError {
             kind: ErrorKind::IO,
@@ -184,7 +207,7 @@ impl ComputorError {
     pub fn too_many_unknown() -> Self {
         ComputorError {
             kind: ErrorKind::TooManyUnknown,
-            info: String::from("Too many unknown variable given."),
+            info: String::from("Too many unknown variables given."),
         }
     }
 
@@ -201,6 +224,17 @@ impl ComputorError {
             info: format!("Equation not complete."),
         }
     }
+
+    pub fn unknown_id(id: String, is_var: bool) -> Self {
+        ComputorError {
+            kind: ErrorKind::UnknownId,
+            info: format!(
+                "Unknown {} '{}'",
+                if is_var { "variable" } else { "function" },
+                id
+            ),
+        }
+    }
 }
 
 impl Error for ComputorError {}
@@ -209,7 +243,12 @@ impl fmt::Display for ComputorError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.kind {
             ErrorKind::IOStop => write!(f, "{}", self.info),
-            _ => write!(f, "[err:{}] -> {}", self.kind, self.info),
+            _ => write!(
+                f,
+                "{} - {}",
+                format!("[err:{}]", self.kind).red(),
+                self.info
+            ),
         }
     }
 }

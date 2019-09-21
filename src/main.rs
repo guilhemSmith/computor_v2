@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:52:45 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/21 16:23:24 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ fn main_wrapped() -> i32 {
                     let tree = pars.parse_tokens(tokens);
                     if let Some(root) = tree {
                         if let Err(err) = computor.read_tokens(root) {
-                            eprintln!("{}", err.to_string().red());
+                            eprintln!("{}", err);
                         }
                     }
                 } else {
@@ -64,7 +64,7 @@ fn main_wrapped() -> i32 {
             }
             Err(err) => {
                 if *err.kind() == ErrorKind::IOStop {
-                    println!("{}", err.to_string());
+                    println!("{}", err);
                     break;
                 } else {
                     eprintln!("{}", err.to_string().red().bold());
