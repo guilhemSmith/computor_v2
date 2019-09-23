@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:52:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/23 10:30:21 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 17:14:13 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@ mod matrix;
 mod rational;
 
 pub use imaginary::Imaginary;
+pub use matrix::{Matrix, MatrixError};
 pub use rational::Rational;
 
 use crate::computor::ComputorError;

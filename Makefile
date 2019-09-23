@@ -6,7 +6,7 @@
 #    By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/06/26 17:36:42 by gsmith            #+#    #+#              #
-#    Updated: 2019/09/23 10:31:29 by gsmith           ###   ########.fr        #
+#    Updated: 2019/09/23 13:51:33 by gsmith           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,6 +34,7 @@ SRC			= $(addprefix src/, \
 					token/function.rs \
 					token/operator.rs \
 					token/lexer_error.rs \
+					token/matrix.rs \
 					token/resolve.rs \
 					token/value.rs \
 					token/variable.rs) \

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 10:31:02 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/23 13:07:55 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 14:16:48 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ impl fmt::Display for MatrixError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Matrix {
     width: u32,
     height: u32,

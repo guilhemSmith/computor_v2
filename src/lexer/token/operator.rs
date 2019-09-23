@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 17:28:41 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 15:52:56 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@ use crate::computor::{
     filter_eq, Computed as Comp, ComputorError as CErr, TreeResult,
 };
 use crate::memory::{Extension, Memory};
-use crate::types::Imaginary as Im;
+use crate::types::{Imaginary as Im, Matrix};
 
 use std::any::Any;
 use std::collections::HashMap;
@@ -31,8 +31,10 @@ pub trait Operator: Token + fmt::Display {
     fn set_prior_as_exp(&mut self);
     fn symbol(&self) -> char;
     fn dual_var(&self, var_a: String, var_b: String) -> TreeResult;
+    fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult;
     fn new_eq(&self, var: String, val: Im, var_left: bool) -> TreeResult;
     fn op(&self, val_a: Im, val_b: Im) -> TreeResult;
+    fn op_mat(&self, mat: Matrix, val: Im, mat_on_left: bool) -> TreeResult;
     fn fus_eq(
         &self,
         id_a: String,
@@ -57,6 +59,27 @@ pub trait Operator: Token + fmt::Display {
             (_, Comp::FunSet(id, _)) => Err(CErr::fun_undef(&id)),
             (Comp::None, right) => none_on_left(right, self.symbol()),
             (_, Comp::None) => Err(CErr::bad_use_op(self.symbol())),
+            (Comp::Mat(mat_a), Comp::Mat(mat_b)) => self.dual_mat(mat_a, mat_b),
+            (Comp::Val(val), Comp::Mat(mat)) => self.op_mat(mat, val, true),
+            (Comp::VarCall(_, val), Comp::Mat(mat)) => {
+                self.op_mat(mat, val, true)
+            }
+            (Comp::Mat(mat), Comp::Val(val)) => self.op_mat(mat, val, false),
+            (Comp::Mat(mat), Comp::VarCall(_, val)) => {
+                self.op_mat(mat, val, false)
+            }
+            (Comp::Mat(_), Comp::VarSet(_)) => {
+                Err(CErr::bad_use_op(self.symbol()))
+            }
+            (Comp::VarSet(_), Comp::Mat(_)) => {
+                Err(CErr::bad_use_op(self.symbol()))
+            }
+            (Comp::Mat(_), Comp::Equ(_, _)) => {
+                Err(CErr::bad_use_op(self.symbol()))
+            }
+            (Comp::Equ(_, _), Comp::Mat(_)) => {
+                Err(CErr::bad_use_op(self.symbol()))
+            }
             (Comp::VarSet(v_a), Comp::VarSet(v_b)) => self.dual_var(v_a, v_b),
             (Comp::VarSet(var), Comp::VarCall(_, val)) => {
                 self.new_eq(var, val, true)
@@ -173,6 +196,14 @@ impl Operator for OpEqual {
         Err(CErr::too_many_equal())
     }
 
+    fn dual_mat(&self, _: Matrix, _: Matrix) -> TreeResult {
+        Err(CErr::too_many_equal())
+    }
+
+    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+        Err(CErr::too_many_equal())
+    }
+
     fn fus_eq(&self, _: String, _: String, _: Equ, _: Equ) -> TreeResult {
         Err(CErr::too_many_equal())
     }
@@ -269,6 +300,14 @@ impl Operator for OpMul {
         let mut eq: Equ = HashMap::new();
         eq.insert(2, Im::new(1.0, 0.0));
         return Ok(Comp::Equ(var_a, eq));
+    }
+
+    fn dual_mat(&self, _: Matrix, _: Matrix) -> TreeResult {
+        Err(CErr::op_matrix('*'))
+    }
+
+    fn op_mat(&self, mat: Matrix, val: Im, mat_on_left: bool) -> TreeResult {
+        Err(CErr::op_matrix('*'))
     }
 
     fn fus_eq(
@@ -407,6 +446,14 @@ impl Operator for OpAdd {
         return Ok(Comp::Equ(var_a, eq));
     }
 
+    fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult {
+        Err(CErr::op_matrix('+'))
+    }
+
+    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+        Err(CErr::op_matrix('+'))
+    }
+
     fn fus_eq(
         &self,
         id_a: String,
@@ -536,6 +583,14 @@ impl Operator for OpSub {
             Ok(res) => Ok(Comp::Val(res)),
             Err(err) => Err(err),
         }
+    }
+
+    fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult {
+        Err(CErr::op_matrix('-'))
+    }
+
+    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+        Err(CErr::op_matrix('-'))
     }
 
     fn dual_var(&self, var_a: String, var_b: String) -> TreeResult {
@@ -707,6 +762,14 @@ impl Operator for OpDiv {
             return Err(CErr::too_many_unknown());
         }
         return Ok(Comp::Val(Im::new(1.0, 0.0)));
+    }
+
+    fn dual_mat(&self, _: Matrix, _: Matrix) -> TreeResult {
+        Err(CErr::op_matrix('/'))
+    }
+
+    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+        Err(CErr::op_matrix('/'))
     }
 
     fn fus_eq(
@@ -895,6 +958,14 @@ impl Operator for OpMod {
         return Ok(Comp::Val(Im::new(0.0, 0.0)));
     }
 
+    fn dual_mat(&self, _: Matrix, _: Matrix) -> TreeResult {
+        Err(CErr::op_matrix('%'))
+    }
+
+    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+        Err(CErr::op_matrix('%'))
+    }
+
     fn fus_eq(&self, id_a: String, id_b: String, _: Equ, _: Equ) -> TreeResult {
         if id_a != id_b {
             return Err(CErr::too_many_unknown());
@@ -1004,6 +1075,14 @@ impl Operator for OpPow {
 
     fn dual_var(&self, _: String, _: String) -> TreeResult {
         Err(CErr::bad_pow())
+    }
+
+    fn dual_mat(&self, _: Matrix, _: Matrix) -> TreeResult {
+        Err(CErr::op_matrix('^'))
+    }
+
+    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+        Err(CErr::op_matrix('^'))
     }
 
     fn fus_eq(&self, id_a: String, id_b: String, _: Equ, _: Equ) -> TreeResult {

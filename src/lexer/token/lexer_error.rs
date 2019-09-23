@@ -6,19 +6,21 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 15:47:12 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 16:55:01 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 17:21:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::Token;
 use crate::computor::{ComputorError, TreeResult};
 use crate::memory::{Extension, Memory};
+use crate::types::MatrixError;
 
 use std::any::Any;
 use std::{error::Error, fmt};
 
 pub enum LexerError {
     InvalidOp(char),
+    InvalidMat(MatrixError),
     InvalidVal(String),
     InvalidVar(String),
     InvalidPar(String),
@@ -31,6 +33,7 @@ impl fmt::Debug for LexerError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             LexerError::InvalidOp(ch) => write!(f, "!{{{}}}", ch),
+            LexerError::InvalidMat(err) => write!(f, "!{{{}}}", err),
             LexerError::InvalidVal(word) => write!(f, "!{{{}}}", word),
             LexerError::InvalidVar(word) => write!(f, "!{{{}}}", word),
             LexerError::InvalidPar(word) => write!(f, "!{{{}}}", word),
@@ -41,18 +44,25 @@ impl fmt::Debug for LexerError {
 
 impl fmt::Display for LexerError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let info: (String, &str) = match self {
+        let txt = match self {
             LexerError::InvalidOp(ch) => {
-                let mut symbol = String::new();
-                symbol.push(*ch);
-                (symbol, "operator")
+                format!("'{}' isn't a valid operator.", ch)
             }
-            LexerError::InvalidVal(word) => (word.clone(), "value"),
-            LexerError::InvalidVar(word) => (word.clone(), "variable name"),
-            LexerError::InvalidPar(w) => (w.clone(), "function parameter"),
-            LexerError::InvalidFun(word, _) => (word.clone(), "function name"),
+            LexerError::InvalidMat(err) => format!("{}", err),
+            LexerError::InvalidVal(word) => {
+                format!("'{}' isn't a valid value.", word)
+            }
+            LexerError::InvalidVar(word) => {
+                format!("'{}' isn't a valid variable name.", word)
+            }
+            LexerError::InvalidPar(word) => {
+                format!("'{}' isn't a valid function parameter.", word)
+            }
+            LexerError::InvalidFun(word, _) => {
+                format!("'{}' isn't a valid function name.", word)
+            }
         };
-        write!(f, "'{}' isn't a valid {}.", info.0, info.1)
+        write!(f, "{}", txt)
     }
 }
 

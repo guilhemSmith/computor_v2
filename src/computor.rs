@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/21 16:19:50 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 15:53:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,7 @@ impl Computor {
         Ok(match tree.compute(&mut self.memory, None)? {
             Comp::None => return Err(CErr::empty_instr()),
             Comp::Res => self.mem_dump(),
+            Comp::Mat(mat) => println!("{}", mat),
             Comp::Val(val) => println!("{}", val),
             Comp::VarCall(_, val) => println!("{}", val),
             Comp::VarSet(v) => return Err(CErr::unknown_id(v, true)),
@@ -117,6 +118,7 @@ impl Computor {
         Ok(match left.compute(&mut self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => return Err(CErr::bad_resolve()),
+            Comp::Mat(mat) => println!("Matrix should be used in equality."),
             Comp::Val(val) => self.left_val(val, right)?,
             Comp::VarCall(id, val) => self.call_var(id, val, right)?,
             Comp::VarSet(id) => self.set_var(id, right)?,
@@ -149,6 +151,7 @@ impl Computor {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => return Err(CErr::uncomplete_eq()),
+            Comp::Mat(_) => return Err(CErr::matrix_in_eq()),
             Comp::Val(val) => {
                 val_into_eq(&mut left, val)?;
                 self.solve_eq(left, id)?;
@@ -173,6 +176,7 @@ impl Computor {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => println!("{}", val),
+            Comp::Mat(_) => println!("false"),
             Comp::Val(r_val) => solve_two_val(val, r_val),
             Comp::VarCall(_, r_val) => solve_two_val(val, r_val),
             Comp::VarSet(v) => println!("{} = {} is a solution.", v, val),
@@ -194,6 +198,7 @@ impl Computor {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => println!("{}", val),
+            Comp::Mat(mat) => println!("Matrix should be set in memory."),
             Comp::Val(nval) => {
                 self.memory.set_var(var, Some(nval));
                 println!("{}", nval);
@@ -216,6 +221,7 @@ impl Computor {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => return Err(CErr::unknown_id(var, true)),
+            Comp::Mat(mat) => println!("Matrix should be set in memory."),
             Comp::Val(val) => {
                 self.memory.set_var(var, Some(val));
                 println!("{}", val);

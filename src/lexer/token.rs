@@ -6,13 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/21 16:26:10 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 14:03:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod expression;
 mod function;
 mod lexer_error;
+mod matrix;
 mod operator;
 mod resolve;
 mod value;
@@ -22,6 +23,7 @@ pub use expression::Expression;
 pub use function::FunctionToken;
 pub use function::FunctionTree;
 pub use lexer_error::LexerError;
+pub use matrix::Matrix;
 pub use operator::new_operator;
 pub use operator::Operator;
 pub use resolve::Resolve;

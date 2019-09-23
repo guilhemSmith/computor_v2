@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:51:09 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 17:23:48 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@ pub use token::Token;
 use token::new_operator;
 use token::Expression;
 use token::FunctionToken;
+use token::LexerError;
+use token::Matrix;
 use token::Resolve;
 use token::Value;
 use token::Variable;
@@ -146,6 +148,9 @@ impl Lexer {
                         tokens.push(Box::new(expr));
                     }
                 }
+                Some(ch) if ch == '[' => {
+                    tokens.push(self.read_matrix(chars));
+                }
                 Some(ch) if ch == ')' => {
                     if fun {
                         self.last_ch = None;
@@ -171,6 +176,31 @@ impl Lexer {
             }
         }
         return tokens;
+    }
+
+    fn read_matrix(&mut self, chars: &mut Chars) -> Box<dyn Token> {
+        let mut raw = String::from("[");
+        let mut depth = 1;
+        loop {
+            match chars.next() {
+                None => return Box::new(LexerError::InvalidVal(raw)),
+                Some(ch) if ch == '[' => {
+                    depth += 1;
+                    raw.push('[');
+                }
+                Some(ch) if ch == ']' => {
+                    depth -= 1;
+                    raw.push(']');
+                    if depth == 0 {
+                        return match Matrix::new(raw) {
+                            Ok(mat) => Box::new(mat),
+                            Err(err) => Box::new(err),
+                        };
+                    }
+                }
+                Some(ch) => raw.push(ch),
+            };
+        }
     }
 
     fn read_operand(&mut self, chars: &mut Chars) -> Box<dyn Token> {

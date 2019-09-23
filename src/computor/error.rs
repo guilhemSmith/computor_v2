@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/21 16:23:05 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 15:35:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,14 @@ pub enum ErrorKind {
     EmptyInstr,
     FunUndefinded,
     FunArgInv,
+    MatrixInEq,
     ModWithIm,
     ModWithUnk,
     InvalidInput,
     InvalidTokens,
     IO,
     IOStop,
+    OpMatrix,
     OverflowAbort,
     TooManyEqual,
     TooManyUnknown,
@@ -51,12 +53,14 @@ impl fmt::Display for ErrorKind {
             ErrorKind::EmptyInstr => write!(f, "parser"),
             ErrorKind::FunUndefinded => write!(f, "function"),
             ErrorKind::FunArgInv => write!(f, "function"),
+            ErrorKind::MatrixInEq => write!(f, "parser"),
             ErrorKind::ModWithIm => write!(f, "math"),
             ErrorKind::ModWithUnk => write!(f, "parser"),
             ErrorKind::InvalidInput => write!(f, "syntax"),
             ErrorKind::InvalidTokens => write!(f, "lexer"),
             ErrorKind::IO => write!(f, "input"),
             ErrorKind::IOStop => write!(f, "input"),
+            ErrorKind::OpMatrix => write!(f, "matrix"),
             ErrorKind::OverflowAbort => write!(f, "limit"),
             ErrorKind::TooManyEqual => write!(f, "parser"),
             ErrorKind::TooManyUnknown => write!(f, "instruction"),
@@ -151,6 +155,13 @@ impl ComputorError {
         }
     }
 
+    pub fn matrix_in_eq() -> Self {
+        ComputorError {
+            kind: ErrorKind::MatrixInEq,
+            info: String::from("Can't solve equation with matrix."),
+        }
+    }
+
     pub fn mod_with_unk() -> Self {
         ComputorError {
             kind: ErrorKind::ModWithUnk,
@@ -187,6 +198,13 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::IOStop,
             info: String::from("Input interrupted."),
+        }
+    }
+
+    pub fn op_matrix(op: char) -> Self {
+        ComputorError {
+            kind: ErrorKind::OpMatrix,
+            info: format!("'{}' can't be used with matrix.", op),
         }
     }
 
