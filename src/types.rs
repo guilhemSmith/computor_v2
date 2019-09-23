@@ -6,11 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:52:05 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 11:14:07 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 10:30:21 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 mod imaginary;
+mod matrix;
 mod rational;
 
 pub use imaginary::Imaginary;

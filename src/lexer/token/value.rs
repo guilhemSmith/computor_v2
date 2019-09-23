@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/21 17:15:12 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 11:40:43 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,30 +37,9 @@ impl fmt::Debug for Value {
 
 impl Value {
     pub fn new(raw: String) -> Result<Value, LexerError> {
-        let len = raw.len();
-        if len > 13 {
-            return Err(LexerError::InvalidVal(raw));
-        }
-        if raw.ends_with('i') {
-            if len > 1 {
-                match raw[..len - 1].parse::<f64>() {
-                    Ok(val) => Ok(Value {
-                        value: Imaginary::new(0.0, val),
-                    }),
-                    Err(_err) => Err(LexerError::InvalidVal(raw)),
-                }
-            } else {
-                Ok(Value {
-                    value: Imaginary::new(0.0, 1.0),
-                })
-            }
-        } else {
-            match raw.parse::<f64>() {
-                Ok(val) => Ok(Value {
-                    value: Imaginary::new(val, 0.0),
-                }),
-                Err(_err) => Err(LexerError::InvalidVal(raw)),
-            }
+        match Imaginary::parse(&raw) {
+            None => Err(LexerError::InvalidVal(raw)),
+            Some(val) => Ok(Value { value: val }),
         }
     }
 }

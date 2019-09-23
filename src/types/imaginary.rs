@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:46:59 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/21 15:44:29 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/23 11:39:32 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,28 @@ impl Imaginary {
         Imaginary {
             real: Rational::new(real),
             irreal: Rational::new(irreal),
+        }
+    }
+
+    pub fn parse(raw: &str) -> Option<Self> {
+        let len = raw.len();
+        if len > 13 {
+            return None;
+        }
+        if raw.ends_with('i') {
+            if len > 1 {
+                match raw[..len - 1].parse::<f64>() {
+                    Ok(val) => Some(Imaginary::new(0.0, val)),
+                    Err(_err) => None,
+                }
+            } else {
+                Some(Imaginary::new(0.0, 1.0))
+            }
+        } else {
+            match raw.parse::<f64>() {
+                Ok(val) => Some(Imaginary::new(val, 0.0)),
+                Err(_err) => None,
+            }
         }
     }
 
