@@ -6,15 +6,15 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 13:51:19 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 15:54:54 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/24 16:43:58 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{super::Lexer, LexerError, Token};
-use crate::computor::{ComputorError, TreeResult};
+use crate::computor::{Computed, ComputorError, TreeResult};
 use crate::memory::{Extension, Memory};
 use crate::parser::{Parser, TokenTree};
-use crate::types::MatrixError;
+use crate::types::{Matrix, MatrixError};
 
 use std::any::Any;
 use std::fmt;
@@ -253,6 +253,27 @@ impl Token for MatrixTree {
         mem: &Memory,
         ext: Option<&mut Extension>,
     ) -> TreeResult {
-        Err(ComputorError::unparsed_token(self))
+        let mut mat = Matrix::new(self.width, self.height);
+        match ext {
+            None => {
+                for cell in self.trees.iter() {
+                    match cell.compute(mem, None)? {
+                        Computed::Val(val) => mat.push(val),
+                        Computed::VarCall(_, val) => mat.push(val),
+                        _ => return Err(ComputorError::matrix_val()),
+                    };
+                }
+            }
+            Some(extend) => {
+                for cell in self.trees.iter() {
+                    match cell.compute(mem, Some(&mut extend.clone()))? {
+                        Computed::Val(val) => mat.push(val),
+                        Computed::VarCall(_, val) => mat.push(val),
+                        _ => return Err(ComputorError::matrix_val()),
+                    };
+                }
+            }
+        };
+        return Ok(Computed::Mat(mat));
     }
 }

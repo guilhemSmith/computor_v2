@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/23 15:35:05 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/24 16:23:25 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ pub enum ErrorKind {
     FunUndefinded,
     FunArgInv,
     MatrixInEq,
+    MatrixVal,
     ModWithIm,
     ModWithUnk,
     InvalidInput,
@@ -54,6 +55,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::FunUndefinded => write!(f, "function"),
             ErrorKind::FunArgInv => write!(f, "function"),
             ErrorKind::MatrixInEq => write!(f, "parser"),
+            ErrorKind::MatrixVal => write!(f, "parser"),
             ErrorKind::ModWithIm => write!(f, "math"),
             ErrorKind::ModWithUnk => write!(f, "parser"),
             ErrorKind::InvalidInput => write!(f, "syntax"),
@@ -159,6 +161,13 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::MatrixInEq,
             info: String::from("Can't solve equation with matrix."),
+        }
+    }
+
+    pub fn matrix_val() -> Self {
+        ComputorError {
+            kind: ErrorKind::MatrixVal,
+            info: String::from("Matrix can only contain imaginary value."),
         }
     }
 

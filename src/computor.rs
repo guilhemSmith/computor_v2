@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/23 15:53:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/24 16:45:57 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,9 @@ impl Computor {
         Ok(match tree.compute(&mut self.memory, None)? {
             Comp::None => return Err(CErr::empty_instr()),
             Comp::Res => self.mem_dump(),
-            Comp::Mat(mat) => println!("{}", mat),
+            Comp::Mat(mat) => {
+                println!("{}", mat.to_string().replace(" ; ", "\n"))
+            }
             Comp::Val(val) => println!("{}", val),
             Comp::VarCall(_, val) => println!("{}", val),
             Comp::VarSet(v) => return Err(CErr::unknown_id(v, true)),
