@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 14:01:22 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/24 15:34:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@ pub use tree_branch::TreeBranch;
 pub use tree_leaf::TreeLeaf;
 
 use crate::lexer::token::{
-    self, Expression, FunctionToken, FunctionTree, LexerError, MatrixUnparsed,
+    self, Expression, FunctionToken, FunctionTree, LexerError, MatrixToken,
+    MatrixTree,
 };
 
 use crate::arg_parse::Param;
@@ -109,7 +110,7 @@ impl Parser {
             None => match op.as_any_mut().downcast_mut::<Expression>() {
                 None => match op.as_any_mut().downcast_mut::<FunctionToken>() {
                     None => {
-                        match op.as_any_mut().downcast_mut::<MatrixUnparsed>() {
+                        match op.as_any_mut().downcast_mut::<MatrixToken>() {
                             None => Some(Box::new(TreeLeaf::new(token))),
                             Some(mat) => self.mat_to_node(mat),
                         }
@@ -151,10 +152,15 @@ impl Parser {
         return Some(Box::new(TreeLeaf::new(token)));
     }
 
-    fn mat_to_node(
-        &self,
-        mat: &mut MatrixUnparsed,
-    ) -> Option<Box<dyn TokenTree>> {
-        None
+    fn mat_to_node(&self, mat: &mut MatrixToken) -> Option<Box<dyn TokenTree>> {
+        match MatrixTree::new(
+            self,
+            mat.width(),
+            mat.height(),
+            mat.consume_tokens(),
+        ) {
+            Ok(mat_tree) => Some(Box::new(TreeLeaf::new(Box::new(mat_tree)))),
+            Err(err) => Some(Box::new(TreeLeaf::new(Box::new(err)))),
+        }
     }
 }

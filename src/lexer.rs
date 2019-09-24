@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 13:06:22 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/24 14:26:12 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ use token::new_operator;
 use token::Expression;
 use token::FunctionToken;
 use token::LexerError;
-use token::MatrixUnparsed;
+use token::MatrixToken;
 use token::Resolve;
 use token::Value;
 use token::Variable;
@@ -200,7 +200,7 @@ impl Lexer {
                     depth -= 1;
                     raw.push(']');
                     if depth == 0 {
-                        return match MatrixUnparsed::new(self, raw) {
+                        return match MatrixToken::new(self, raw) {
                             Ok(mat) => Box::new(mat),
                             Err(err) => Box::new(err),
                         };

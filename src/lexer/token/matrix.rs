@@ -6,13 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 13:51:19 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 14:19:07 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/24 15:54:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{super::Lexer, LexerError, Token};
 use crate::computor::{ComputorError, TreeResult};
 use crate::memory::{Extension, Memory};
+use crate::parser::{Parser, TokenTree};
 use crate::types::MatrixError;
 
 use std::any::Any;
@@ -20,17 +21,17 @@ use std::fmt;
 
 type Tokenized = Vec<Box<dyn Token>>;
 
-pub struct MatrixUnparsed {
+pub struct MatrixToken {
     width: u32,
     height: u32,
-    tokens: Vec<Vec<Box<dyn Token>>>,
+    tokens: Vec<Tokenized>,
 }
 
-impl MatrixUnparsed {
+impl MatrixToken {
     pub fn new(
         lexer: &mut Lexer,
         raw: String,
-    ) -> Result<MatrixUnparsed, LexerError> {
+    ) -> Result<MatrixToken, LexerError> {
         let width: u32;
         let mut height: u32 = 0;
         let mut tokens: Vec<Tokenized> = Vec::new();
@@ -50,7 +51,7 @@ impl MatrixUnparsed {
                 tokens.append(&mut first);
             }
             None => {
-                return Ok(MatrixUnparsed {
+                return Ok(MatrixToken {
                     width: 0,
                     height: 0,
                     tokens,
@@ -70,11 +71,25 @@ impl MatrixUnparsed {
             height += 1;
             tokens.append(&mut row);
         }
-        Ok(MatrixUnparsed {
+        Ok(MatrixToken {
             width,
             height,
             tokens,
         })
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    pub fn consume_tokens(&mut self) -> Vec<Tokenized> {
+        let mut export: Vec<Tokenized> = Vec::new();
+        std::mem::swap(&mut self.tokens, &mut export);
+        return export;
     }
 }
 
@@ -87,18 +102,21 @@ fn new_row(
     }
     let mut row: Vec<Tokenized> = Vec::new();
     let raw_cells = raw_row[1..raw_row.len() - 1].split(",");
+    let depth = lexer.depth();
     for raw_cell in raw_cells {
         match lexer.lexe(String::from(raw_cell)) {
             Err(_) => {
-                return Err(MatrixError::InvalidVal(String::from(raw_cell)))
+                lexer.set_depth(depth);
+                return Err(MatrixError::InvalidVal(String::from(raw_cell)));
             }
             Ok(tokens) => row.push(tokens),
         };
     }
+    lexer.set_depth(depth);
     return Ok(row);
 }
 
-impl fmt::Display for MatrixUnparsed {
+impl fmt::Display for MatrixToken {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut print = String::new();
         print.push('[');
@@ -128,13 +146,13 @@ impl fmt::Display for MatrixUnparsed {
     }
 }
 
-impl fmt::Debug for MatrixUnparsed {
+impl fmt::Debug for MatrixToken {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "[mat_!pars:{}]", self)
+        write!(f, "[mat_tok:{}]", self)
     }
 }
 
-impl Token for MatrixUnparsed {
+impl Token for MatrixToken {
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -147,6 +165,93 @@ impl Token for MatrixUnparsed {
         &self,
         _mem: &Memory,
         _ext: Option<&mut Extension>,
+    ) -> TreeResult {
+        Err(ComputorError::unparsed_token(self))
+    }
+}
+
+pub struct MatrixTree {
+    width: u32,
+    height: u32,
+    trees: Vec<Box<dyn TokenTree>>,
+}
+
+impl MatrixTree {
+    pub fn new(
+        parser: &Parser,
+        width: u32,
+        height: u32,
+        tokens: Vec<Tokenized>,
+    ) -> Result<Self, LexerError> {
+        let mut mat = MatrixTree {
+            width,
+            height,
+            trees: Vec::new(),
+        };
+        for cell in tokens {
+            let cell_str = super::display_token(&cell);
+            match parser.parse_tokens(cell) {
+                None => {
+                    return Err(LexerError::InvalidMat(
+                        MatrixError::InvalidVal(cell_str),
+                    ))
+                }
+                Some(tree) => mat.trees.push(tree),
+            };
+        }
+        return Ok(mat);
+    }
+}
+
+impl fmt::Display for MatrixTree {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut print = String::new();
+        print.push('[');
+        let mut i: u32 = 0;
+        let mut j: u32 = 0;
+        for cell in self.trees.iter() {
+            if i == 0 {
+                print.push('[');
+            }
+            i += 1;
+            print.push('{');
+            print += &cell.to_string();
+            print.push('}');
+            if i == self.width {
+                print.push(']');
+                i = 0;
+                j += 1;
+                if j < self.height {
+                    print.push(';');
+                }
+            } else {
+                print.push(',');
+            }
+        }
+        print.push(']');
+        write!(f, "{}", print)
+    }
+}
+
+impl fmt::Debug for MatrixTree {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[mat_tree:{}]", self)
+    }
+}
+
+impl Token for MatrixTree {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn get_result(
+        &self,
+        mem: &Memory,
+        ext: Option<&mut Extension>,
     ) -> TreeResult {
         Err(ComputorError::unparsed_token(self))
     }
