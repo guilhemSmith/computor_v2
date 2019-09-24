@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/23 17:23:48 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/24 13:06:22 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ use token::new_operator;
 use token::Expression;
 use token::FunctionToken;
 use token::LexerError;
-use token::Matrix;
+use token::MatrixUnparsed;
 use token::Resolve;
 use token::Value;
 use token::Variable;
@@ -66,6 +66,14 @@ impl Lexer {
         self.bench
     }
 
+    pub fn depth(&self) -> i32 {
+        self.depth
+    }
+
+    pub fn set_depth(&mut self, depth: i32) {
+        self.depth = depth;
+    }
+
     pub fn read_input(&mut self) -> Result<Vec<Box<dyn Token>>, ComputorError> {
         let readline = self.line.readline(PROMPT);
         match readline {
@@ -107,7 +115,7 @@ impl Lexer {
         }
     }
 
-    fn lexe(
+    pub fn lexe(
         &mut self,
         l: String,
     ) -> Result<Vec<Box<dyn Token>>, ComputorError> {
@@ -192,7 +200,7 @@ impl Lexer {
                     depth -= 1;
                     raw.push(']');
                     if depth == 0 {
-                        return match Matrix::new(raw) {
+                        return match MatrixUnparsed::new(self, raw) {
                             Ok(mat) => Box::new(mat),
                             Err(err) => Box::new(err),
                         };

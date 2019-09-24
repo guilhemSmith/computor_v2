@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:16:31 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:51:20 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/24 14:01:22 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ pub use tree_branch::TreeBranch;
 pub use tree_leaf::TreeLeaf;
 
 use crate::lexer::token::{
-    self, Expression, FunctionToken, FunctionTree, LexerError,
+    self, Expression, FunctionToken, FunctionTree, LexerError, MatrixUnparsed,
 };
 
 use crate::arg_parse::Param;
@@ -108,7 +108,12 @@ impl Parser {
         match op.as_op_mut() {
             None => match op.as_any_mut().downcast_mut::<Expression>() {
                 None => match op.as_any_mut().downcast_mut::<FunctionToken>() {
-                    None => Some(Box::new(TreeLeaf::new(token))),
+                    None => {
+                        match op.as_any_mut().downcast_mut::<MatrixUnparsed>() {
+                            None => Some(Box::new(TreeLeaf::new(token))),
+                            Some(mat) => self.mat_to_node(mat),
+                        }
+                    }
                     Some(fun) => self.fun_to_node(fun),
                 },
                 Some(exp) => self.expr_to_node(exp),
@@ -144,5 +149,12 @@ impl Parser {
         }
         let token: Box<dyn Token> = Box::new(FunctionTree::new(id, param_tree));
         return Some(Box::new(TreeLeaf::new(token)));
+    }
+
+    fn mat_to_node(
+        &self,
+        mat: &mut MatrixUnparsed,
+    ) -> Option<Box<dyn TokenTree>> {
+        None
     }
 }
