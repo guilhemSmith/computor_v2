@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 16:23:25 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 11:27:57 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ pub enum ErrorKind {
     FunArgInv,
     MatrixInEq,
     MatrixVal,
+    MatrixDim,
     ModWithIm,
     ModWithUnk,
     InvalidInput,
@@ -56,6 +57,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::FunArgInv => write!(f, "function"),
             ErrorKind::MatrixInEq => write!(f, "parser"),
             ErrorKind::MatrixVal => write!(f, "parser"),
+            ErrorKind::MatrixDim => write!(f, "math"),
             ErrorKind::ModWithIm => write!(f, "math"),
             ErrorKind::ModWithUnk => write!(f, "parser"),
             ErrorKind::InvalidInput => write!(f, "syntax"),
@@ -168,6 +170,23 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::MatrixVal,
             info: String::from("Matrix can only contain imaginary value."),
+        }
+    }
+
+    pub fn matrix_dim(product: bool) -> Self {
+        ComputorError {
+            kind: ErrorKind::MatrixDim,
+            info: if product {
+                format!(
+                    "Two matrix should have {}.",
+                    "symetric dimensions to be multiplied"
+                )
+            } else {
+                format!(
+                    "Two matrix should have {}.",
+                    "the same dimensions to be added/substracted"
+                )
+            },
         }
     }
 

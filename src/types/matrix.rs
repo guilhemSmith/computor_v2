@@ -6,11 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 10:31:02 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 11:16:33 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 11:31:57 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{Imaginary, OpResult};
+use crate::computor::ComputorError;
 
 use std::{fmt, ops};
 
@@ -63,6 +64,36 @@ impl Matrix {
         let mut data: Vec<Imaginary> = Vec::new();
         for val in self.data.iter() {
             data.push(coef.mul(val)?);
+        }
+        Ok(Matrix {
+            width: self.width,
+            height: self.height,
+            data,
+        })
+    }
+
+    pub fn add(&self, other: &Matrix) -> OpResult<Self> {
+        let mut data: Vec<Imaginary> = Vec::new();
+        if self.width != other.width || self.height != other.height {
+            return Err(ComputorError::matrix_dim(false));
+        }
+        for i in 0..self.data.len() {
+            data.push(self.data[i].add(&other.data[i])?)
+        }
+        Ok(Matrix {
+            width: self.width,
+            height: self.height,
+            data,
+        })
+    }
+
+    pub fn sub(&self, other: &Matrix) -> OpResult<Self> {
+        let mut data: Vec<Imaginary> = Vec::new();
+        if self.width != other.width || self.height != other.height {
+            return Err(ComputorError::matrix_dim(false));
+        }
+        for i in 0..self.data.len() {
+            data.push(self.data[i].sub(&other.data[i])?)
         }
         Ok(Matrix {
             width: self.width,

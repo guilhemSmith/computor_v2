@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 11:13:41 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 11:31:37 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -302,7 +302,7 @@ impl Operator for OpMul {
         Err(CErr::op_matrix('*'))
     }
 
-    fn op_mat(&self, mut mat: Matrix, val: Im) -> TreeResult {
+    fn op_mat(&self, mat: Matrix, val: Im) -> TreeResult {
         match mat.apply_mul(val) {
             Ok(n_mat) => Ok(Comp::Mat(n_mat)),
             Err(err) => Err(err),
@@ -446,7 +446,10 @@ impl Operator for OpAdd {
     }
 
     fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult {
-        Err(CErr::op_matrix('+'))
+        match mat_a.add(&mat_b) {
+            Ok(mat) => Ok(Comp::Mat(mat)),
+            Err(err) => Err(err),
+        }
     }
 
     fn op_mat(&self, _: Matrix, _: Im) -> TreeResult {
@@ -585,7 +588,10 @@ impl Operator for OpSub {
     }
 
     fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult {
-        Err(CErr::op_matrix('-'))
+        match mat_a.sub(&mat_b) {
+            Ok(mat) => Ok(Comp::Mat(mat)),
+            Err(err) => Err(err),
+        }
     }
 
     fn op_mat(&self, _: Matrix, _: Im) -> TreeResult {
