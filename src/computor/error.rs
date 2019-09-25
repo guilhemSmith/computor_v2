@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 11:27:57 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 11:49:47 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ pub enum ErrorKind {
     BadPow,
     BadResolve,
     BadUseOperator,
+    BadUseOpMat,
     DivByEq,
     DivByZero,
     EmptyInstr,
@@ -50,6 +51,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::BadPow => write!(f, "bad use"),
             ErrorKind::BadResolve => write!(f, "bad use"),
             ErrorKind::BadUseOperator => write!(f, "bad use"),
+            ErrorKind::BadUseOpMat => write!(f, "bad use"),
             ErrorKind::DivByEq => write!(f, "math"),
             ErrorKind::DivByZero => write!(f, "math"),
             ErrorKind::EmptyInstr => write!(f, "parser"),
@@ -113,6 +115,16 @@ impl ComputorError {
                 op,
                 "must be preceded by a value",
                 "followed by a another value."
+            ),
+        }
+    }
+
+    pub fn bad_use_op_mat() -> Self {
+        ComputorError {
+            kind: ErrorKind::BadUseOpMat,
+            info: format!(
+                "Operator: '**' {}",
+                "must be used with two matrix with symetrical dimensions",
             ),
         }
     }

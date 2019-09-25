@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 11:31:37 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 14:51:21 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,7 @@ pub fn new_operator(symbol: char) -> Result<Box<dyn Token>, LexerError> {
         '=' => Ok(Box::new(OpEqual::new())),
         '+' => Ok(Box::new(OpAdd::new())),
         '-' => Ok(Box::new(OpSub::new())),
+        '#' => Ok(Box::new(OpMat::new())),
         '*' => Ok(Box::new(OpMul::new())),
         '/' => Ok(Box::new(OpDiv::new())),
         '%' => Ok(Box::new(OpMod::new())),
@@ -365,6 +366,103 @@ impl Operator for OpMul {
         let mut eq: Equ = HashMap::new();
         eq.insert(1, val);
         return Ok(Comp::Equ(var, eq));
+    }
+}
+
+struct OpMat {
+    priority: i32,
+}
+
+impl OpMat {
+    fn new() -> Self {
+        OpMat { priority: 2 }
+    }
+}
+
+impl fmt::Display for OpMat {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "**")
+    }
+}
+
+impl fmt::Debug for OpMat {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[op:**]")
+    }
+}
+
+impl Token for OpMat {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn as_op_ref(&self) -> Option<&dyn Operator> {
+        Some(self as &dyn Operator)
+    }
+
+    fn as_op_mut(&mut self) -> Option<&mut dyn Operator> {
+        Some(self as &mut dyn Operator)
+    }
+
+    fn get_result(
+        &self,
+        _mem: &Memory,
+        _ext: Option<&mut Extension>,
+    ) -> TreeResult {
+        Err(CErr::unparsed_token(self))
+    }
+}
+
+impl Operator for OpMat {
+    fn priority(&self) -> i32 {
+        self.priority
+    }
+
+    fn set_prior_as_exp(&mut self) {
+        self.priority = 4;
+    }
+
+    fn symbol(&self) -> char {
+        '#'
+    }
+
+    fn op(&self, _: Im, _: Im) -> TreeResult {
+        Err(CErr::bad_use_op_mat())
+    }
+
+    fn dual_var(&self, _: String, _: String) -> TreeResult {
+        Err(CErr::bad_use_op_mat())
+    }
+
+    fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult {
+        match mat_a.mul(&mat_b) {
+            Ok(mat) => Ok(Comp::Mat(mat)),
+            Err(err) => Err(err),
+        }
+    }
+
+    fn op_mat(&self, _: Matrix, _: Im) -> TreeResult {
+        Err(CErr::bad_use_op_mat())
+    }
+
+    fn fus_eq(&self, _: String, _: String, _: Equ, _: Equ) -> TreeResult {
+        Err(CErr::bad_use_op_mat())
+    }
+
+    fn var_eq(&self, _: String, _: String, _: Equ, _: bool) -> TreeResult {
+        Err(CErr::bad_use_op_mat())
+    }
+
+    fn val_eq(&self, _: Im, _: String, _: Equ, _: bool) -> TreeResult {
+        Err(CErr::bad_use_op_mat())
+    }
+
+    fn new_eq(&self, _: String, _: Im, _: bool) -> TreeResult {
+        Err(CErr::bad_use_op_mat())
     }
 }
 

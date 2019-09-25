@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 14:26:12 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 11:39:23 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,14 +296,14 @@ impl Lexer {
 
         loop {
             match iter.next() {
-                Some(word) => cleared.push_str(word),
+                Some(word) => cleared.push_str(&word.replace("#", "!")),
                 None => {
-                    cleared = cleared.to_lowercase();
+                    cleared = cleared.replace("**", "#").to_lowercase();
                     if self.verbose {
                         println!(
                             "{}",
                             format!(
-                                "{} - input cleared: {}",
+                                "{} - instruction cleared: {}",
                                 "[v:Lexer]".cyan().bold(),
                                 cleared
                             )

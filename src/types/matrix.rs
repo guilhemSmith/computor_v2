@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 10:31:02 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 11:31:57 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 15:26:44 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,30 @@ impl Matrix {
             data,
         })
     }
+
+    pub fn mul(&self, other: &Matrix) -> OpResult<Self> {
+        if self.width != other.height || self.height != other.width {
+            return Err(ComputorError::matrix_dim(true));
+        }
+        let mut data: Vec<Imaginary> = Vec::new();
+        let width = other.width;
+        let height = self.height;
+        for i in 0..width * height {
+            let mut val = Imaginary::new(0.0, 0.0);
+            for j in 0..self.width {
+                let l = (i / width * self.width + j) as usize;
+                let r = (j * width + i % width) as usize;
+                let new = self.data[l].mul(&other.data[r])?;
+                val = val.add(&new)?;
+            }
+            data.push(val);
+        }
+        Ok(Matrix {
+            width,
+            height,
+            data,
+        })
+    }
 }
 
 impl fmt::Display for Matrix {
@@ -128,37 +152,3 @@ impl fmt::Display for Matrix {
         write!(f, "{}", print)
     }
 }
-
-// #[cfg(test)]
-// mod constructor {
-//     use super::Matrix;
-
-//     #[test]
-//     fn parser_valid() {
-//         match Matrix::parse("[[1.1,1.2,1.3];[2.1,2.2,2.3];[3.1,3.2,3.3]]") {
-//             Ok(mat) => assert_eq!(
-//                 "[ 1.1 , 1.2 , 1.3 ]\n[ 2.1 , 2.2 , 2.3 ]\n[ 3.1 , 3.2 , 3.3 ]",
-//                 mat.to_string()
-//             ),
-//             Err(err) => panic!(err),
-//         }
-//     }
-
-//     #[test]
-//     fn parser_error_0() {
-//         Matrix::parse("[[1.1,1.2,1.3];[2.1,2.3];[3.1,3.2,3.3]]")
-//             .expect_err("Expect a size error");
-//     }
-
-//     #[test]
-//     fn parser_error_1() {
-//         Matrix::parse("[[1.1,1.2,1.3];[2.1,2.2,2.3];[3.1,3.2.4,3.3]]")
-//             .expect_err("Expect an invalid value");
-//     }
-
-//     #[test]
-//     fn parser_error_2() {
-//         Matrix::parse("[[1.1,1.2,1.3];[2.1,2.2,2.3];3.1,3.2,3.3]]")
-//             .expect_err("Expect a format error");
-//     }
-// }
