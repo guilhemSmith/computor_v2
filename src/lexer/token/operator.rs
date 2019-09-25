@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/23 15:52:56 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 11:13:41 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ pub trait Operator: Token + fmt::Display {
     fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult;
     fn new_eq(&self, var: String, val: Im, var_left: bool) -> TreeResult;
     fn op(&self, val_a: Im, val_b: Im) -> TreeResult;
-    fn op_mat(&self, mat: Matrix, val: Im, mat_on_left: bool) -> TreeResult;
+    fn op_mat(&self, mat: Matrix, val: Im) -> TreeResult;
     fn fus_eq(
         &self,
         id_a: String,
@@ -60,14 +60,10 @@ pub trait Operator: Token + fmt::Display {
             (Comp::None, right) => none_on_left(right, self.symbol()),
             (_, Comp::None) => Err(CErr::bad_use_op(self.symbol())),
             (Comp::Mat(mat_a), Comp::Mat(mat_b)) => self.dual_mat(mat_a, mat_b),
-            (Comp::Val(val), Comp::Mat(mat)) => self.op_mat(mat, val, true),
-            (Comp::VarCall(_, val), Comp::Mat(mat)) => {
-                self.op_mat(mat, val, true)
-            }
-            (Comp::Mat(mat), Comp::Val(val)) => self.op_mat(mat, val, false),
-            (Comp::Mat(mat), Comp::VarCall(_, val)) => {
-                self.op_mat(mat, val, false)
-            }
+            (Comp::Val(val), Comp::Mat(mat)) => self.op_mat(mat, val),
+            (Comp::VarCall(_, val), Comp::Mat(mat)) => self.op_mat(mat, val),
+            (Comp::Mat(mat), Comp::Val(val)) => self.op_mat(mat, val),
+            (Comp::Mat(mat), Comp::VarCall(_, val)) => self.op_mat(mat, val),
             (Comp::Mat(_), Comp::VarSet(_)) => {
                 Err(CErr::bad_use_op(self.symbol()))
             }
@@ -200,7 +196,7 @@ impl Operator for OpEqual {
         Err(CErr::too_many_equal())
     }
 
-    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+    fn op_mat(&self, _: Matrix, _: Im) -> TreeResult {
         Err(CErr::too_many_equal())
     }
 
@@ -306,8 +302,11 @@ impl Operator for OpMul {
         Err(CErr::op_matrix('*'))
     }
 
-    fn op_mat(&self, mat: Matrix, val: Im, mat_on_left: bool) -> TreeResult {
-        Err(CErr::op_matrix('*'))
+    fn op_mat(&self, mut mat: Matrix, val: Im) -> TreeResult {
+        match mat.apply_mul(val) {
+            Ok(n_mat) => Ok(Comp::Mat(n_mat)),
+            Err(err) => Err(err),
+        }
     }
 
     fn fus_eq(
@@ -450,7 +449,7 @@ impl Operator for OpAdd {
         Err(CErr::op_matrix('+'))
     }
 
-    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+    fn op_mat(&self, _: Matrix, _: Im) -> TreeResult {
         Err(CErr::op_matrix('+'))
     }
 
@@ -589,7 +588,7 @@ impl Operator for OpSub {
         Err(CErr::op_matrix('-'))
     }
 
-    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+    fn op_mat(&self, _: Matrix, _: Im) -> TreeResult {
         Err(CErr::op_matrix('-'))
     }
 
@@ -768,7 +767,7 @@ impl Operator for OpDiv {
         Err(CErr::op_matrix('/'))
     }
 
-    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+    fn op_mat(&self, _: Matrix, _: Im) -> TreeResult {
         Err(CErr::op_matrix('/'))
     }
 
@@ -962,7 +961,7 @@ impl Operator for OpMod {
         Err(CErr::op_matrix('%'))
     }
 
-    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+    fn op_mat(&self, _: Matrix, _: Im) -> TreeResult {
         Err(CErr::op_matrix('%'))
     }
 
@@ -1081,7 +1080,7 @@ impl Operator for OpPow {
         Err(CErr::op_matrix('^'))
     }
 
-    fn op_mat(&self, _: Matrix, _: Im, _: bool) -> TreeResult {
+    fn op_mat(&self, _: Matrix, _: Im) -> TreeResult {
         Err(CErr::op_matrix('^'))
     }
 

@@ -6,13 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 10:31:02 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 17:29:10 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 11:16:33 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::Imaginary;
+use super::{Imaginary, OpResult};
 
-use std::fmt;
+use std::{fmt, ops};
 
 #[derive(Debug)]
 pub enum MatrixError {
@@ -57,6 +57,18 @@ impl Matrix {
 
     pub fn push(&mut self, val: Imaginary) {
         self.data.push(val);
+    }
+
+    pub fn apply_mul(&self, coef: Imaginary) -> OpResult<Self> {
+        let mut data: Vec<Imaginary> = Vec::new();
+        for val in self.data.iter() {
+            data.push(coef.mul(val)?);
+        }
+        Ok(Matrix {
+            width: self.width,
+            height: self.height,
+            data,
+        })
     }
 }
 
