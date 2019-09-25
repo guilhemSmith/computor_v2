@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:32:42 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 17:40:20 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@ mod variable;
 
 pub use extension::Extension;
 pub use function::Function;
+pub use variable::Value;
 pub use variable::Variable;
 
 use crate::parser::TokenTree;
-use crate::types::Imaginary;
 use std::{collections::HashMap, fmt};
 
 pub struct Memory {
@@ -35,25 +35,15 @@ impl Memory {
         }
     }
 
-    pub fn set_var(&mut self, name: String, val: Option<Imaginary>) {
-        match self.var.get_mut(&name) {
-            Some(var) => var.set(val),
-            None => {
-                let mut var = Variable::new(name.clone());
-                var.set(val);
-                self.var.insert(name, var);
-            }
-        };
+    pub fn set_var(&mut self, name: String, val: Value) {
+        self.var.insert(name.clone(), Variable::new(name, val));
     }
 
-    pub fn get_var_val<'ext, 'mem: 'ext>(
+    pub fn get_var<'ext, 'mem: 'ext>(
         &'mem self,
         name: &String,
-    ) -> Option<Imaginary> {
-        match self.var.get(name) {
-            None => None,
-            Some(var) => var.get(),
-        }
+    ) -> Option<&Variable> {
+        self.var.get(name)
     }
 
     pub fn set_fun(

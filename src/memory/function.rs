@@ -6,15 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 14:43:27 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 17:41:35 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use super::{Extension, Memory};
+use super::{Extension, Memory, Value};
 
 use crate::computor::{ComputorError, TreeResult};
 use crate::parser::TokenTree;
-use crate::types::Imaginary;
 
 use std::{fmt, vec::Vec};
 
@@ -45,13 +44,13 @@ impl Function {
         self.expr = Some(expr);
     }
 
-    pub fn compute(&self, mem: &Memory, arg: Vec<Imaginary>) -> TreeResult {
+    pub fn compute(&self, mem: &Memory, arg: Vec<Value>) -> TreeResult {
         if arg.len() != self.var.len() {
             return Err(ComputorError::fun_arg_inv(&self.name));
         }
         let mut extended = Extension::new();
         for i in 0..arg.len() {
-            extended.add(&self.var[i], arg[i]);
+            extended.add(&self.var[i], arg[i].clone());
         }
         let res = match &self.expr {
             Some(tree) => tree.compute(mem, Some(&mut extended)),

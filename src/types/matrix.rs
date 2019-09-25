@@ -6,14 +6,14 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 10:31:02 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 15:26:44 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 16:14:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{Imaginary, OpResult};
 use crate::computor::ComputorError;
 
-use std::{fmt, ops};
+use std::fmt;
 
 #[derive(Debug)]
 pub enum MatrixError {
@@ -40,7 +40,7 @@ impl fmt::Display for MatrixError {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Matrix {
     width: u32,
     height: u32,

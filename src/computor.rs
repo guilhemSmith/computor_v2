@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 14:46:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 17:44:05 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,10 @@ pub use result::{Computed, ComputorResult, TreeResult};
 
 use crate::arg_parse::Param;
 use crate::lexer::token;
-use crate::memory::Memory;
+use crate::memory::{Memory, Value};
 use crate::parser::{TokenTree, TreeBranch};
 use crate::timer::Timer;
-use crate::types::{Imaginary, Rational};
+use crate::types::{Imaginary, Matrix, Rational};
 use Computed as Comp;
 
 use std::collections::HashMap;
@@ -120,7 +120,7 @@ impl Computor {
         Ok(match left.compute(&mut self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => return Err(CErr::bad_resolve()),
-            Comp::Mat(mat) => println!("Matrix should be used in equality."),
+            Comp::Mat(mat) => self.dual_matr(mat, right)?,
             Comp::Val(val) => self.left_val(val, right)?,
             Comp::VarCall(id, val) => self.call_var(id, val, right)?,
             Comp::VarSet(id) => self.set_var(id, right)?,
@@ -200,14 +200,17 @@ impl Computor {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => println!("{}", val),
-            Comp::Mat(mat) => println!("Matrix should be set in memory."),
+            Comp::Mat(mat) => {
+                println!("{}", mat.to_string().replace(" ; ", "\n"));
+                self.memory.set_var(var, Value::Mat(mat));
+            }
             Comp::Val(nval) => {
-                self.memory.set_var(var, Some(nval));
                 println!("{}", nval);
+                self.memory.set_var(var, Value::Im(nval));
             }
             Comp::VarCall(_, nval) => {
-                self.memory.set_var(var, Some(nval));
                 println!("{}", nval);
+                self.memory.set_var(var, Value::Im(nval));
             }
             Comp::VarSet(v) => println!("{} = {} is a solution.", v, val),
             Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
@@ -223,13 +226,16 @@ impl Computor {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => return Err(CErr::unknown_id(var, true)),
-            Comp::Mat(mat) => println!("Matrix should be set in memory."),
+            Comp::Mat(mat) => {
+                println!("{}", mat.to_string().replace(" ; ", "\n"));
+                self.memory.set_var(var, Value::Mat(mat));
+            }
             Comp::Val(val) => {
-                self.memory.set_var(var, Some(val));
+                self.memory.set_var(var, Value::Im(val));
                 println!("{}", val);
             }
             Comp::VarCall(_, val) => {
-                self.memory.set_var(var, Some(val));
+                self.memory.set_var(var, Value::Im(val));
                 println!("{}", val);
             }
             Comp::VarSet(id) => {
@@ -261,6 +267,16 @@ impl Computor {
                 Ok(())
             }
             Some(_) => self.set_or_print_fn(id, param),
+        }
+    }
+
+    fn dual_matr(&self, mat: Matrix, right: TTree) -> ComputorResult {
+        match right.compute(&self.memory, None)? {
+            Comp::Mat(other) => {
+                println!("{}", if mat == other { "True" } else { "False" });
+                Ok(())
+            }
+            _ => Err(CErr::matrix_in_eq()),
         }
     }
 
