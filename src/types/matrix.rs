@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 10:31:02 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 16:12:11 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/24 17:29:10 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ impl fmt::Display for MatrixError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             MatrixError::IncoherentSizes => {
-                write!(f, "Matrix row sizes are not the equal.")
+                write!(f, "Matrix row sizes are not equal.")
             }
             MatrixError::InvalidVal(s) => {
                 write!(f, "Could not read the value '{}'.", s)

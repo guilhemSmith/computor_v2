@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 18:31:51 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 10:43:54 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,8 +213,13 @@ impl Token for FunctionTree {
                     Comp::Val(val) => {
                         self.exec_fun(mem, extend, val, iter_param)
                     }
-                    Comp::VarCall(_, val) => {
-                        self.exec_fun(mem, extend, val, iter_param)
+                    Comp::VarCall(name, val) => {
+                        let fun = mem.get_fun(&self.id);
+                        if let None = fun {
+                            self.setup_fun(mem, extend, name, iter_param)
+                        } else {
+                            self.exec_fun(mem, extend, val, iter_param)
+                        }
                     }
                     Comp::VarSet(name) => {
                         self.setup_fun(mem, extend, name, iter_param)
