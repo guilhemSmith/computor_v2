@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 16:45:57 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 14:46:51 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ impl Computor {
             Comp::Val(val) => println!("{}", val),
             Comp::VarCall(_, val) => println!("{}", val),
             Comp::VarSet(v) => return Err(CErr::unknown_id(v, true)),
-            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
+            Comp::FunSet(f, param) => self.set_or_print_fn(f, param)?,
             Comp::Equ(_, eq) => self.eq_one_sided(eq)?,
         })
     }
@@ -124,7 +124,7 @@ impl Computor {
             Comp::Val(val) => self.left_val(val, right)?,
             Comp::VarCall(id, val) => self.call_var(id, val, right)?,
             Comp::VarSet(id) => self.set_var(id, right)?,
-            Comp::FunSet(id, param) => self.set_fun(id, param, right),
+            Comp::FunSet(id, param) => self.set_fun(id, param, right)?,
             Comp::Equ(id, eq) => self.eq_two_sided(id, eq, right)?,
         })
     }
@@ -248,8 +248,34 @@ impl Computor {
         })
     }
 
-    fn set_fun(&mut self, id: String, param: Vec<String>, exp: TTree) {
-        self.memory.set_fun(id, param, exp);
+    fn set_fun(
+        &mut self,
+        id: String,
+        param: Vec<String>,
+        exp: TTree,
+    ) -> ComputorResult {
+        match exp.token().as_any().downcast_ref::<token::Resolve>() {
+            None => {
+                println!("{}", exp);
+                self.memory.set_fun(id, param, exp);
+                Ok(())
+            }
+            Some(_) => self.set_or_print_fn(id, param),
+        }
+    }
+
+    fn set_or_print_fn(
+        &mut self,
+        id: String,
+        param: Vec<String>,
+    ) -> ComputorResult {
+        match self.memory.get_fun(&id) {
+            None => Err(CErr::unknown_id(id, false)),
+            Some(fun) => {
+                fun.print(param);
+                Ok(())
+            }
+        }
     }
 
     fn mem_dump(&self) {

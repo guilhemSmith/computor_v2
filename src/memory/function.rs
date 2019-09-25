@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 16:53:09 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/25 14:43:27 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,22 @@ impl Function {
             }
         }
         return String::from(var_str.trim_start_matches(", "));
+    }
+
+    pub fn print(&self, alias: Vec<String>) {
+        let var = &self.var;
+        let len = alias.len();
+        if len != var.len() {
+            return;
+        }
+        for i in 0..len {
+            if var[i] != alias[i] {
+                return;
+            }
+        }
+        if let Some(exp) = &self.expr {
+            println!("{}", exp.to_string());
+        }
     }
 }
 
