@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/26 15:42:01 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 16:05:31 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,6 @@ use crate::lexer::Lexer;
 use crate::parser::Parser;
 use crate::timer::Timer;
 use std::{env, process};
-
-extern crate colored;
-use colored::Colorize;
 
 fn main() {
     let exit_code = main_wrapped();
@@ -64,7 +61,7 @@ fn main_wrapped() -> i32 {
             }
             Err(err) => {
                 if *err.kind() == ErrorKind::IOStop {
-                    println!("{}", err.to_string().red().bold());
+                    println!("{}", err);
                     break;
                 } else {
                     eprintln!("{}", err);
