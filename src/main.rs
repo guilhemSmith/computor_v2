@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/09 10:56:56 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/21 16:23:24 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 15:42:01 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,10 @@ fn main_wrapped() -> i32 {
             }
             Err(err) => {
                 if *err.kind() == ErrorKind::IOStop {
-                    println!("{}", err);
+                    println!("{}", err.to_string().red().bold());
                     break;
                 } else {
-                    eprintln!("{}", err.to_string().red().bold());
+                    eprintln!("{}", err);
                 }
             }
         }
