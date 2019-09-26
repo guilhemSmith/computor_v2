@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 17:44:05 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 17:16:41 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,7 +212,7 @@ impl Computor {
                 println!("{}", nval);
                 self.memory.set_var(var, Value::Im(nval));
             }
-            Comp::VarSet(v) => println!("{} = {} is a solution.", v, val),
+            Comp::VarSet(v) => return Err(CErr::unknown_id(v, true)),
             Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
             Comp::Equ(id, eq) => {
                 let mut eq = eq;
@@ -262,8 +262,7 @@ impl Computor {
     ) -> ComputorResult {
         match exp.token().as_any().downcast_ref::<token::Resolve>() {
             None => {
-                println!("{}", exp);
-                self.memory.set_fun(id, param, exp);
+                self.memory.set_fun(id, param, exp)?;
                 Ok(())
             }
             Some(_) => self.set_or_print_fn(id, param),
@@ -271,13 +270,18 @@ impl Computor {
     }
 
     fn dual_matr(&self, mat: Matrix, right: TTree) -> ComputorResult {
-        match right.compute(&self.memory, None)? {
+        Ok(match right.compute(&self.memory, None)? {
+            Comp::None => return Err(CErr::bad_use_op('=')),
+            Comp::Res => println!("{}", mat),
             Comp::Mat(other) => {
                 println!("{}", if mat == other { "True" } else { "False" });
-                Ok(())
             }
-            _ => Err(CErr::matrix_in_eq()),
-        }
+            Comp::Val(_) => println!("False"),
+            Comp::VarCall(_, _) => println!("False"),
+            Comp::VarSet(v) => return Err(CErr::unknown_id(v, true)),
+            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
+            Comp::Equ(_, _) => return Err(CErr::matrix_in_eq()),
+        })
     }
 
     fn set_or_print_fn(

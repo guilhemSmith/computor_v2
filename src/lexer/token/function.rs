@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 17:38:48 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 17:05:08 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,10 @@ impl FunctionTree {
 
     pub fn param(&self) -> &Vec<Box<dyn TokenTree>> {
         &self.param
+    }
+
+    pub fn param_mut(&mut self) -> &mut Vec<Box<dyn TokenTree>> {
+        &mut self.param
     }
 
     fn exec_fun(

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:16:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 17:32:53 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 16:39:19 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,9 @@ impl Variable {
             }
         }
         Ok(Variable { id: id })
+    }
+    pub fn id(&self) -> &String {
+        &self.id
     }
 }
 

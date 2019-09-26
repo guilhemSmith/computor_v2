@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 13:51:19 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 16:43:58 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 17:04:13 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,6 +201,10 @@ impl MatrixTree {
         }
         return Ok(mat);
     }
+
+    pub fn trees_mut(&mut self) -> &mut Vec<Box<dyn TokenTree>> {
+        &mut self.trees
+    }
 }
 
 impl fmt::Display for MatrixTree {
@@ -275,5 +279,41 @@ impl Token for MatrixTree {
             }
         };
         return Ok(Computed::Mat(mat));
+    }
+}
+
+pub struct MatrixComp {
+    mat: Matrix,
+}
+
+impl MatrixComp {
+    pub fn new(mat: Matrix) -> Self {
+        MatrixComp { mat }
+    }
+}
+
+impl fmt::Display for MatrixComp {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.mat)
+    }
+}
+
+impl fmt::Debug for MatrixComp {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[mat_comp:{}]", self)
+    }
+}
+
+impl Token for MatrixComp {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn get_result(&self, _: &Memory, _: Option<&mut Extension>) -> TreeResult {
+        Ok(Computed::Mat(self.mat.clone()))
     }
 }

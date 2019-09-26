@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 17:40:20 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 17:16:50 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ pub use function::Function;
 pub use variable::Value;
 pub use variable::Variable;
 
+use crate::computor::ComputorResult;
 use crate::parser::TokenTree;
 use std::{collections::HashMap, fmt};
 
@@ -50,8 +51,10 @@ impl Memory {
         &mut self,
         name: String,
         var: Vec<String>,
-        exp: Box<dyn TokenTree>,
-    ) {
+        mut exp: Box<dyn TokenTree>,
+    ) -> ComputorResult {
+        exp.fix_exp(self, &var)?;
+        println!("{}", exp);
         match self.fun.get_mut(&name) {
             Some(fun) => fun.set(var, exp),
             None => {
@@ -60,6 +63,7 @@ impl Memory {
                 self.fun.insert(name, fun);
             }
         };
+        Ok(())
     }
 
     pub fn get_fun(&self, name: &String) -> Option<&Function> {

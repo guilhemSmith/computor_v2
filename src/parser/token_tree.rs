@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:13:01 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/18 15:31:00 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 17:11:07 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::TreeBranch;
-use crate::computor::TreeResult;
+use crate::computor::{ComputorResult, TreeResult};
 use crate::lexer::Token;
 use crate::memory::{Extension, Memory};
 
@@ -25,6 +25,7 @@ pub trait TokenTree: fmt::Display + fmt::Debug {
     fn count(&self, foo: fn(&Box<dyn Token>) -> i32) -> i32;
     fn is_full(&self) -> bool;
     fn set_as_exp(&mut self);
+    fn fix_exp(&mut self, mem: &Memory, var: &Vec<String>) -> ComputorResult;
     fn compute(&self, mem: &Memory, ext: Option<&mut Extension>) -> TreeResult;
 }
 

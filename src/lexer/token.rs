@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/30 14:43:15 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/24 15:15:25 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 16:53:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ pub use expression::Expression;
 pub use function::FunctionToken;
 pub use function::FunctionTree;
 pub use lexer_error::LexerError;
+pub use matrix::MatrixComp;
 pub use matrix::MatrixToken;
 pub use matrix::MatrixTree;
 pub use operator::new_operator;

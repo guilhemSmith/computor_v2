@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/23 11:40:43 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 16:43:26 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,10 @@ impl Value {
             None => Err(LexerError::InvalidVal(raw)),
             Some(val) => Ok(Value { value: val }),
         }
+    }
+
+    pub fn from(value: Imaginary) -> Self {
+        Value { value }
     }
 }
 

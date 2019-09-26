@@ -6,12 +6,12 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/19 15:49:54 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/26 17:11:30 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::TokenTree;
-use crate::computor::{Computed, TreeResult};
+use crate::computor::{Computed, ComputorResult, TreeResult};
 use crate::lexer::{
     token::{new_operator, Operator},
     Token,
@@ -291,6 +291,16 @@ impl TokenTree for TreeBranch {
     fn set_as_exp(&mut self) {
         self.op_mut().set_prior_as_exp();
         self.was_expr = true;
+    }
+
+    fn fix_exp(&mut self, mem: &Memory, var: &Vec<String>) -> ComputorResult {
+        if let Some(left) = &mut self.branch_left {
+            left.fix_exp(mem, var)?;
+        }
+        if let Some(right) = &mut self.branch_right {
+            right.fix_exp(mem, var)?;
+        }
+        Ok(())
     }
 
     fn compute(
