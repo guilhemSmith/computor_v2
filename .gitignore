@@ -1,3 +1,4 @@
 computorv2
 /target
 **/*.rs.bk
+.vscode
