@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 14:07:30 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 17:41:57 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ pub use function::Function;
 pub use variable::Value;
 pub use variable::Variable;
 
-use crate::computor::ComputorResult;
+use crate::computor::{Computed, ComputorError, ComputorResult, TreeResult};
 use crate::parser::TokenTree;
 use std::{collections::HashMap, fmt};
 
@@ -51,16 +51,35 @@ impl Memory {
     pub fn set_fun(
         &mut self,
         name: String,
-        var: Vec<String>,
+        args: Vec<Computed>,
         mut exp: Box<dyn TokenTree>,
     ) -> ComputorResult {
-        exp.fix_exp(self, &var)?;
+        let mut vars: Vec<String> = Vec::new();
+        let mut iter = args.into_iter();
+
+        loop {
+            match iter.next() {
+                Some(comp) => match comp {
+                    Computed::VarSet(name) => {
+                        vars.push(name);
+                        continue;
+                    }
+                    Computed::VarCall(name, _) => {
+                        vars.push(name);
+                        continue;
+                    }
+                    _ => return Err(ComputorError::fun_arg_inv(&name)),
+                },
+                None => break,
+            }
+        }
+        exp.fix_exp(self, &vars)?;
         println!("{}", exp);
         match self.fun.get_mut(&name) {
-            Some(fun) => fun.set(var, exp),
+            Some(fun) => fun.set(vars, exp),
             None => {
                 let mut fun = Function::new(name.clone());
-                fun.set(var, exp);
+                fun.set(vars, exp);
                 self.fun.insert(name, fun);
             }
         };
@@ -69,6 +88,67 @@ impl Memory {
 
     pub fn get_fun(&self, name: &String) -> Option<&Function> {
         self.fun.get(name)
+    }
+
+    fn solve_arg(
+        &self,
+        id: String,
+        arg: Computed,
+    ) -> Result<Value, ComputorError> {
+        match arg {
+            Computed::ValIm(val) => Ok(Value::Im(val)),
+            Computed::VarCall(_, val) => Ok(val),
+            Computed::ValMat(val) => Ok(Value::Mat(val)),
+            Computed::FunId(id, sub_args) => {
+                self.solve_arg(id.clone(), self.solve_fun(id, sub_args)?)
+            }
+            _ => Err(ComputorError::fun_arg_inv(&id)),
+        }
+    }
+
+    pub fn solve_fun(&self, name: String, args: Vec<Computed>) -> TreeResult {
+        let mut lst: Vec<Value> = Vec::new();
+        let mut iter = args.into_iter();
+
+        loop {
+            match iter.next() {
+                Some(comp) => lst.push(self.solve_arg(name.clone(), comp)?),
+                None => break,
+            }
+        }
+        let fun_mem = self.get_fun(&name);
+        match fun_mem {
+            Some(fun) => fun.compute(self, lst),
+            None => Err(ComputorError::fun_undef(&name)),
+        }
+    }
+
+    pub fn valid_args(&self, args: &Vec<Computed>) -> bool {
+        for arg in args.iter() {
+            match arg {
+                Computed::ValMat(_) => continue,
+                Computed::ValIm(_) => continue,
+                Computed::VarCall(_, _) => continue,
+                Computed::FunId(_, sub_args) => {
+                    if !self.valid_args(sub_args) {
+                        return false;
+                    }
+                }
+                _ => return false,
+            };
+        }
+        return true;
+    }
+
+    pub fn param_to_string(
+        &self,
+        args: Vec<Computed>,
+    ) -> Result<Vec<String>, ComputorError> {
+        let mut param: Vec<String> = Vec::new();
+        for arg in args.iter() {
+            param.push(arg.to_string());
+        }
+        return Ok(param);
     }
 
     fn var_to_string(&self) -> String {

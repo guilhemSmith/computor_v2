@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/26 17:13:12 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 16:21:57 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,11 @@ impl TreeLeaf {
 }
 
 impl TokenTree for TreeLeaf {
-    fn as_any(&mut self) -> &mut dyn Any {
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn as_any(&self) -> &dyn Any {
         self
     }
 

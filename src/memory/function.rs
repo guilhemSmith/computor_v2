@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 13:18:47 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 17:29:18 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,14 +78,7 @@ impl Function {
         if len != var.len() {
             return;
         }
-        for i in 0..len {
-            if var[i] != alias[i] {
-                return;
-            }
-        }
-        if let Some(exp) = &self.expr {
-            println!("{}", exp.to_string());
-        }
+        println!("{}", self);
     }
 }
 

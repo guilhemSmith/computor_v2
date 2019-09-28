@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 14:11:17 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 16:39:55 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,12 +90,16 @@ pub trait Operator: Token + fmt::Display {
     ) -> TreeResult;
     fn val_eq(&self, val: Im, id: String, eq: Equ, eq_left: bool)
         -> TreeResult;
-    fn exec(&self, _mem: &Memory, left: Comp, right: Comp) -> TreeResult {
+    fn exec(&self, mem: &Memory, left: Comp, right: Comp) -> TreeResult {
         match (left, right) {
             (Comp::Res, _) => Err(CErr::bad_resolve()),
             (_, Comp::Res) => Err(CErr::bad_resolve()),
-            (Comp::FunId(id, _), _) => Err(CErr::fun_undef(&id)),
-            (_, Comp::FunId(id, _)) => Err(CErr::fun_undef(&id)),
+            (Comp::FunId(id, args), right) => {
+                self.exec(mem, mem.solve_fun(id, args)?, right)
+            }
+            (left, Comp::FunId(id, args)) => {
+                self.exec(mem, left, mem.solve_fun(id, args)?)
+            }
             (Comp::None, right) => none_on_left(right, self.symbol()),
             (_, Comp::None) => Err(CErr::bad_use_op(self.symbol())),
             (Comp::ValMat(mat_a), Comp::ValMat(mat_b)) => {

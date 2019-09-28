@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/26 17:11:30 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 16:14:42 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ impl TreeBranch {
         new_tree.rot_left(next);
         let mut box_tree: TTree = Box::new(new_tree);
         std::mem::swap(leaf, &mut box_tree);
-        let any = leaf.as_any();
+        let any = leaf.as_any_mut();
         let nw_left = any.downcast_mut::<TreeBranch>().unwrap();
         nw_left.rot_right(box_tree);
     }
@@ -87,7 +87,7 @@ impl TreeBranch {
     }
 
     pub fn rot_left(&mut self, mut new: TTree) {
-        match new.as_any().downcast_mut::<TreeBranch>() {
+        match new.as_any_mut().downcast_mut::<TreeBranch>() {
             None => self.insert_leaf_left(new),
             Some(branch) => {
                 if branch.op_ref().is_prior(self.op_ref()) {
@@ -102,7 +102,7 @@ impl TreeBranch {
 
     pub fn insert_leaf_left(&mut self, new: TTree) {
         if let Some(node) = &mut self.branch_left {
-            match node.as_any().downcast_mut::<TreeBranch>() {
+            match node.as_any_mut().downcast_mut::<TreeBranch>() {
                 None => self.insert_default_left(new),
                 Some(branch) => {
                     if !branch.was_expr {
@@ -118,9 +118,9 @@ impl TreeBranch {
     }
 
     fn insert_branch_left(&mut self, mut new: TTree) {
-        let n_branch = new.as_any().downcast_mut::<TreeBranch>().unwrap();
+        let n_branch = new.as_any_mut().downcast_mut::<TreeBranch>().unwrap();
         if let Some(node) = &mut self.branch_left {
-            match node.as_any().downcast_mut::<TreeBranch>() {
+            match node.as_any_mut().downcast_mut::<TreeBranch>() {
                 None => {
                     if !n_branch.was_expr {
                         n_branch.branch_right = self.branch_left.take();
@@ -172,7 +172,7 @@ impl TreeBranch {
     }
 
     pub fn rot_right(&mut self, mut new: TTree) {
-        match new.as_any().downcast_mut::<TreeBranch>() {
+        match new.as_any_mut().downcast_mut::<TreeBranch>() {
             None => self.insert_leaf_right(new),
             Some(branch) => {
                 if branch.op_ref().is_prior(self.op_ref()) {
@@ -187,7 +187,7 @@ impl TreeBranch {
 
     pub fn insert_leaf_right(&mut self, new: TTree) {
         if let Some(node) = &mut self.branch_right {
-            match node.as_any().downcast_mut::<TreeBranch>() {
+            match node.as_any_mut().downcast_mut::<TreeBranch>() {
                 None => self.insert_default_right(new),
                 Some(branch) => {
                     if !branch.was_expr {
@@ -203,9 +203,9 @@ impl TreeBranch {
     }
 
     fn insert_branch_right(&mut self, mut new: TTree) {
-        let n_branch = new.as_any().downcast_mut::<TreeBranch>().unwrap();
+        let n_branch = new.as_any_mut().downcast_mut::<TreeBranch>().unwrap();
         if let Some(node) = &mut self.branch_right {
-            match node.as_any().downcast_mut::<TreeBranch>() {
+            match node.as_any_mut().downcast_mut::<TreeBranch>() {
                 None => {
                     if !n_branch.was_expr {
                         n_branch.branch_left = self.branch_right.take();
@@ -248,7 +248,11 @@ impl TreeBranch {
 }
 
 impl TokenTree for TreeBranch {
-    fn as_any(&mut self) -> &mut dyn Any {
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn as_any(&self) -> &dyn Any {
         self
     }
 

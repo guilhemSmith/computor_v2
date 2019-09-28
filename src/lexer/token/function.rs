@@ -6,18 +6,17 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 14:11:09 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 16:30:40 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{LexerError, Token};
 use crate::computor::{Computed as Comp, ComputorError as CError, TreeResult};
-use crate::memory::{Extension, Memory, Value};
+use crate::memory::{Extension, Memory};
 use crate::parser::TokenTree;
 
 use std::any::Any;
 use std::fmt;
-use std::slice::Iter;
 
 pub struct FunctionToken {
     id: String,
@@ -94,106 +93,6 @@ impl FunctionTree {
     pub fn param_mut(&mut self) -> &mut Vec<Box<dyn TokenTree>> {
         &mut self.param
     }
-
-    fn exec_fun(
-        &self,
-        mem: &Memory,
-        mut ext: Option<&mut Extension>,
-        first: Value,
-        mut iter: Iter<Box<dyn TokenTree>>,
-    ) -> TreeResult {
-        let mut lst = vec![first];
-
-        let mut loop_iter =
-            |extend: Option<&mut Extension>| -> Result<bool, CError> {
-                match iter.next() {
-                    Some(tree) => match tree.compute(mem, extend)? {
-                        Comp::ValIm(val) => {
-                            lst.push(Value::Im(val));
-                            Ok(true)
-                        }
-                        Comp::VarCall(_, val) => {
-                            lst.push(val);
-                            Ok(true)
-                        }
-                        Comp::ValMat(val) => {
-                            lst.push(Value::Mat(val));
-                            Ok(true)
-                        }
-                        _ => {
-                            return Err(CError::fun_arg_inv(&self.id));
-                        }
-                    },
-                    None => return Ok(false),
-                }
-            };
-
-        match &mut ext {
-            Some(extend) => loop {
-                let mut ext_clone = extend.clone();
-                match loop_iter(Some(&mut ext_clone)) {
-                    Ok(true) => continue,
-                    Ok(false) => break,
-                    Err(error) => return Err(error),
-                }
-            },
-            None => loop {
-                match loop_iter(None) {
-                    Ok(true) => continue,
-                    Ok(false) => break,
-                    Err(error) => return Err(error),
-                }
-            },
-        }
-        let fun_mem = mem.get_fun(&self.id);
-        match fun_mem {
-            Some(fun) => fun.compute(mem, lst),
-            None => Err(CError::fun_undef(&self.id)),
-        }
-    }
-
-    fn setup_fun(
-        &self,
-        mem: &Memory,
-        mut ext: Option<&mut Extension>,
-        first: String,
-        mut iter: Iter<Box<dyn TokenTree>>,
-    ) -> TreeResult {
-        let mut lst = vec![first];
-
-        let mut loop_iter =
-            |extend: Option<&mut Extension>| -> Result<bool, CError> {
-                match iter.next() {
-                    Some(tree) => match tree.compute(mem, extend)? {
-                        Comp::VarSet(name) => {
-                            lst.push(name);
-                            return Ok(true);
-                        }
-                        _ => return Err(CError::fun_arg_inv(&self.id)),
-                    },
-                    None => return Ok(false),
-                }
-            };
-
-        match &mut ext {
-            Some(extend) => loop {
-                let mut ext_clone = extend.clone();
-                match loop_iter(Some(&mut ext_clone)) {
-                    Ok(true) => continue,
-                    Ok(false) => break,
-                    Err(error) => return Err(error),
-                }
-            },
-            None => loop {
-                match loop_iter(None) {
-                    Ok(true) => continue,
-                    Ok(false) => break,
-                    Err(error) => return Err(error),
-                }
-            },
-        }
-        Ok(Comp::FunId(self.id.clone(), lst))
-    }
 }
 
 impl Token for FunctionTree {
@@ -208,45 +107,23 @@ impl Token for FunctionTree {
     fn get_result(
         &self,
         mem: &Memory,
-        mut ext: Option<&mut Extension>,
+        ext: Option<&mut Extension>,
     ) -> TreeResult {
-        let mut iter_param = self.param.iter();
-
-        let check_first = |extend: Option<&mut Extension>,
-                           clone: Option<&mut Extension>|
-         -> TreeResult {
-            match iter_param.next() {
-                Some(param) => match param.compute(mem, clone)? {
-                    Comp::ValMat(val) => {
-                        self.exec_fun(mem, extend, Value::Mat(val), iter_param)
-                    }
-                    Comp::ValIm(val) => {
-                        self.exec_fun(mem, extend, Value::Im(val), iter_param)
-                    }
-                    Comp::VarCall(name, val) => {
-                        let fun = mem.get_fun(&self.id);
-                        if let None = fun {
-                            self.setup_fun(mem, extend, name, iter_param)
-                        } else {
-                            self.exec_fun(mem, extend, val, iter_param)
-                        }
-                    }
-                    Comp::VarSet(name) => {
-                        self.setup_fun(mem, extend, name, iter_param)
-                    }
-                    _ => Err(CError::fun_arg_inv(&self.id)),
-                },
-                None => Err(CError::fun_arg_inv(&self.id)),
-            }
-        };
-
-        match &mut ext {
+        let mut args: Vec<Comp> = Vec::new();
+        match ext {
             Some(extend) => {
-                let mut ext_clone = extend.clone();
-                check_first(ext, Some(&mut ext_clone))
+                for arg in self.param.iter() {
+                    let mut cloned = extend.clone();
+                    args.push(arg.compute(mem, Some(&mut cloned))?);
+                }
             }
-            None => check_first(ext, None),
+            None => {
+                for arg in self.param.iter() {
+                    args.push(arg.compute(mem, None)?);
+                }
+            }
         }
+        return Ok(Comp::FunId(self.id.clone(), args));
     }
 }
 
