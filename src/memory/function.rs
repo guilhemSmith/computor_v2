@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:20 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 17:29:18 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 17:55:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.expr {
             Some(expr) => {
-                write!(f, "{}({}): {}", self.name, self.var_to_string(), expr)
+                write!(f, "{}({}) = {}", self.name, self.var_to_string(), expr)
             }
             None => write!(f, "{}(): not defined.", self.name),
         }

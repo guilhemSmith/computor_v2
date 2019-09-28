@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:28:27 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 13:01:44 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 17:56:46 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,12 +42,12 @@ pub enum Value {
 impl fmt::Display for Variable {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.val {
-            Value::Im(val) => write!(f, "{}: {}", self.name, val),
+            Value::Im(val) => write!(f, "{}:\n  {}", self.name, val),
             Value::Mat(val) => write!(
                 f,
-                "{}:\n{}",
+                "{}:\n  {}",
                 self.name,
-                val.to_string().replace(" ; ", "\n")
+                val.to_string().replace(" ; ", "\n  ")
             ),
         }
     }

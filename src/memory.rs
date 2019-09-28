@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 17:41:57 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 17:53:24 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,13 +60,17 @@ impl Memory {
         loop {
             match iter.next() {
                 Some(comp) => match comp {
-                    Computed::VarSet(name) => {
-                        vars.push(name);
-                        continue;
+                    Computed::VarSet(id) => {
+                        if vars.contains(&id) {
+                            return Err(ComputorError::fun_arg_inv(&name));
+                        }
+                        vars.push(id);
                     }
-                    Computed::VarCall(name, _) => {
-                        vars.push(name);
-                        continue;
+                    Computed::VarCall(id, _) => {
+                        if vars.contains(&id) {
+                            return Err(ComputorError::fun_arg_inv(&name));
+                        }
+                        vars.push(id);
                     }
                     _ => return Err(ComputorError::fun_arg_inv(&name)),
                 },
