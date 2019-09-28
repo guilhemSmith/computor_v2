@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 14:51:21 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 14:11:17 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@ use super::{LexerError, Token};
 use crate::computor::{
     filter_eq, Computed as Comp, ComputorError as CErr, TreeResult,
 };
-use crate::memory::{Extension, Memory};
+use crate::memory::{Extension, Memory, Value};
 use crate::types::{Imaginary as Im, Matrix};
 
 use std::any::Any;
@@ -33,7 +33,46 @@ pub trait Operator: Token + fmt::Display {
     fn dual_var(&self, var_a: String, var_b: String) -> TreeResult;
     fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult;
     fn new_eq(&self, var: String, val: Im, var_left: bool) -> TreeResult;
+    fn dual_varcall(&self, var_a: Value, var_b: Value) -> TreeResult {
+        match (var_a, var_b) {
+            (Value::Im(im_a), Value::Im(im_b)) => self.op(im_a, im_b),
+            (Value::Mat(mat_a), Value::Mat(mat_b)) => {
+                self.dual_mat(mat_a, mat_b)
+            }
+            (Value::Im(im), Value::Mat(mat)) => self.op_mat(mat, im),
+            (Value::Mat(mat), Value::Im(im)) => self.op_mat(mat, im),
+        }
+    }
+    fn op_var(&self, val: Im, var: Value, var_left: bool) -> TreeResult {
+        match var {
+            Value::Im(im) => {
+                if var_left {
+                    self.op(im, val)
+                } else {
+                    self.op(val, im)
+                }
+            }
+            Value::Mat(mat) => self.op_mat(mat, val),
+        }
+    }
     fn op(&self, val_a: Im, val_b: Im) -> TreeResult;
+    fn op_mat_var(
+        &self,
+        mat: Matrix,
+        val: Value,
+        mat_left: bool,
+    ) -> TreeResult {
+        match val {
+            Value::Im(val) => self.op_mat(mat, val),
+            Value::Mat(val) => {
+                if mat_left {
+                    self.dual_mat(mat, val)
+                } else {
+                    self.dual_mat(val, mat)
+                }
+            }
+        }
+    }
     fn op_mat(&self, mat: Matrix, val: Im) -> TreeResult;
     fn fus_eq(
         &self,
@@ -55,40 +94,64 @@ pub trait Operator: Token + fmt::Display {
         match (left, right) {
             (Comp::Res, _) => Err(CErr::bad_resolve()),
             (_, Comp::Res) => Err(CErr::bad_resolve()),
-            (Comp::FunSet(id, _), _) => Err(CErr::fun_undef(&id)),
-            (_, Comp::FunSet(id, _)) => Err(CErr::fun_undef(&id)),
+            (Comp::FunId(id, _), _) => Err(CErr::fun_undef(&id)),
+            (_, Comp::FunId(id, _)) => Err(CErr::fun_undef(&id)),
             (Comp::None, right) => none_on_left(right, self.symbol()),
             (_, Comp::None) => Err(CErr::bad_use_op(self.symbol())),
-            (Comp::Mat(mat_a), Comp::Mat(mat_b)) => self.dual_mat(mat_a, mat_b),
-            (Comp::Val(val), Comp::Mat(mat)) => self.op_mat(mat, val),
-            (Comp::VarCall(_, val), Comp::Mat(mat)) => self.op_mat(mat, val),
-            (Comp::Mat(mat), Comp::Val(val)) => self.op_mat(mat, val),
-            (Comp::Mat(mat), Comp::VarCall(_, val)) => self.op_mat(mat, val),
-            (Comp::Mat(_), Comp::VarSet(_)) => {
+            (Comp::ValMat(mat_a), Comp::ValMat(mat_b)) => {
+                self.dual_mat(mat_a, mat_b)
+            }
+            (Comp::ValIm(val), Comp::ValMat(mat)) => self.op_mat(mat, val),
+            (Comp::VarCall(_, val), Comp::ValMat(mat)) => {
+                self.op_mat_var(mat, val, false)
+            }
+            (Comp::ValMat(mat), Comp::ValIm(val)) => self.op_mat(mat, val),
+            (Comp::ValMat(mat), Comp::VarCall(_, val)) => {
+                self.op_mat_var(mat, val, true)
+            }
+            (Comp::ValMat(_), Comp::VarSet(_)) => {
                 Err(CErr::bad_use_op(self.symbol()))
             }
-            (Comp::VarSet(_), Comp::Mat(_)) => {
+            (Comp::VarSet(_), Comp::ValMat(_)) => {
                 Err(CErr::bad_use_op(self.symbol()))
             }
-            (Comp::Mat(_), Comp::Equ(_, _)) => {
+            (Comp::ValMat(_), Comp::Equ(_, _)) => {
                 Err(CErr::bad_use_op(self.symbol()))
             }
-            (Comp::Equ(_, _), Comp::Mat(_)) => {
+            (Comp::Equ(_, _), Comp::ValMat(_)) => {
                 Err(CErr::bad_use_op(self.symbol()))
             }
             (Comp::VarSet(v_a), Comp::VarSet(v_b)) => self.dual_var(v_a, v_b),
             (Comp::VarSet(var), Comp::VarCall(_, val)) => {
-                self.new_eq(var, val, true)
+                if let Value::Im(val) = val {
+                    self.new_eq(var, val, true)
+                } else {
+                    return Err(CErr::matrix_in_eq());
+                }
             }
             (Comp::VarCall(_, val), Comp::VarSet(var)) => {
+                if let Value::Im(val) = val {
+                    self.new_eq(var, val, false)
+                } else {
+                    return Err(CErr::matrix_in_eq());
+                }
+            }
+            (Comp::VarSet(var), Comp::ValIm(val)) => {
+                self.new_eq(var, val, true)
+            }
+            (Comp::ValIm(val), Comp::VarSet(var)) => {
                 self.new_eq(var, val, false)
             }
-            (Comp::VarSet(var), Comp::Val(val)) => self.new_eq(var, val, true),
-            (Comp::Val(val), Comp::VarSet(var)) => self.new_eq(var, val, false),
-            (Comp::Val(v_a), Comp::Val(v_b)) => self.op(v_a, v_b),
-            (Comp::Val(v_a), Comp::VarCall(_, v_b)) => self.op(v_a, v_b),
-            (Comp::VarCall(_, v_a), Comp::Val(v_b)) => self.op(v_a, v_b),
-            (Comp::VarCall(_, v_a), Comp::VarCall(_, v_b)) => self.op(v_a, v_b),
+            (Comp::ValIm(v_a), Comp::ValIm(v_b)) => self.op(v_a, v_b),
+            (Comp::ValIm(v_a), Comp::VarCall(_, v_b)) => {
+                self.op_var(v_a, v_b, false)
+            }
+            (Comp::VarCall(_, v_a), Comp::ValIm(v_b)) => {
+                self.op_var(v_b, v_a, true)
+            }
+            (Comp::VarCall(_, v_a), Comp::VarCall(_, v_b)) => {
+                self.dual_varcall(v_a, v_b)
+            }
             (Comp::Equ(id_a, eq_a), Comp::Equ(id_b, eq_b)) => {
                 self.fus_eq(id_a, id_b, eq_a, eq_b)
             }
@@ -98,13 +161,23 @@ pub trait Operator: Token + fmt::Display {
             (Comp::VarSet(id_v), Comp::Equ(id_eq, eq)) => {
                 self.var_eq(id_v, id_eq, eq, false)
             }
-            (Comp::Equ(id, eq), Comp::Val(v)) => self.val_eq(v, id, eq, true),
-            (Comp::Val(v), Comp::Equ(id, eq)) => self.val_eq(v, id, eq, false),
-            (Comp::Equ(id, eq), Comp::VarCall(_, v)) => {
-                self.val_eq(v, id, eq, true)
-            }
-            (Comp::VarCall(_, v), Comp::Equ(id, eq)) => {
+            (Comp::Equ(id, eq), Comp::ValIm(v)) => self.val_eq(v, id, eq, true),
+            (Comp::ValIm(v), Comp::Equ(id, eq)) => {
                 self.val_eq(v, id, eq, false)
+            }
+            (Comp::Equ(id, eq), Comp::VarCall(_, val)) => {
+                if let Value::Im(val) = val {
+                    self.val_eq(val, id, eq, true)
+                } else {
+                    return Err(CErr::matrix_in_eq());
+                }
+            }
+            (Comp::VarCall(_, val), Comp::Equ(id, eq)) => {
+                if let Value::Im(val) = val {
+                    self.val_eq(val, id, eq, false)
+                } else {
+                    return Err(CErr::matrix_in_eq());
+                }
             }
         }
     }
@@ -285,7 +358,7 @@ impl Operator for OpMul {
 
     fn op(&self, val_a: Im, val_b: Im) -> TreeResult {
         match val_a.mul(&val_b) {
-            Ok(res) => Ok(Comp::Val(res)),
+            Ok(res) => Ok(Comp::ValIm(res)),
             Err(err) => Err(err),
         }
     }
@@ -305,7 +378,7 @@ impl Operator for OpMul {
 
     fn op_mat(&self, mat: Matrix, val: Im) -> TreeResult {
         match mat.apply_mul(val) {
-            Ok(n_mat) => Ok(Comp::Mat(n_mat)),
+            Ok(n_mat) => Ok(Comp::ValMat(n_mat)),
             Err(err) => Err(err),
         }
     }
@@ -440,7 +513,7 @@ impl Operator for OpMat {
 
     fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult {
         match mat_a.mul(&mat_b) {
-            Ok(mat) => Ok(Comp::Mat(mat)),
+            Ok(mat) => Ok(Comp::ValMat(mat)),
             Err(err) => Err(err),
         }
     }
@@ -529,7 +602,7 @@ impl Operator for OpAdd {
 
     fn op(&self, val_a: Im, val_b: Im) -> TreeResult {
         match val_a.add(&val_b) {
-            Ok(res) => Ok(Comp::Val(res)),
+            Ok(res) => Ok(Comp::ValIm(res)),
             Err(err) => Err(err),
         }
     }
@@ -545,7 +618,7 @@ impl Operator for OpAdd {
 
     fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult {
         match mat_a.add(&mat_b) {
-            Ok(mat) => Ok(Comp::Mat(mat)),
+            Ok(mat) => Ok(Comp::ValMat(mat)),
             Err(err) => Err(err),
         }
     }
@@ -680,14 +753,14 @@ impl Operator for OpSub {
 
     fn op(&self, val_a: Im, val_b: Im) -> TreeResult {
         match val_a.sub(&val_b) {
-            Ok(res) => Ok(Comp::Val(res)),
+            Ok(res) => Ok(Comp::ValIm(res)),
             Err(err) => Err(err),
         }
     }
 
     fn dual_mat(&self, mat_a: Matrix, mat_b: Matrix) -> TreeResult {
         match mat_a.sub(&mat_b) {
-            Ok(mat) => Ok(Comp::Mat(mat)),
+            Ok(mat) => Ok(Comp::ValMat(mat)),
             Err(err) => Err(err),
         }
     }
@@ -700,7 +773,7 @@ impl Operator for OpSub {
         if var_a != var_b {
             return Err(CErr::too_many_unknown());
         }
-        return Ok(Comp::Val(Im::new(0.0, 0.0)));
+        return Ok(Comp::ValIm(Im::new(0.0, 0.0)));
     }
 
     fn fus_eq(
@@ -855,7 +928,7 @@ impl Operator for OpDiv {
             return Err(CErr::div_by_zero());
         }
         match val_a.div(&val_b) {
-            Ok(res) => Ok(Comp::Val(res)),
+            Ok(res) => Ok(Comp::ValIm(res)),
             Err(err) => Err(err),
         }
     }
@@ -864,7 +937,7 @@ impl Operator for OpDiv {
         if var_a != var_b {
             return Err(CErr::too_many_unknown());
         }
-        return Ok(Comp::Val(Im::new(1.0, 0.0)));
+        return Ok(Comp::ValIm(Im::new(1.0, 0.0)));
     }
 
     fn dual_mat(&self, _: Matrix, _: Matrix) -> TreeResult {
@@ -1049,7 +1122,7 @@ impl Operator for OpMod {
             return Err(CErr::div_by_zero());
         }
         match val_a.rem(&val_b) {
-            Ok(res) => Ok(Comp::Val(res)),
+            Ok(res) => Ok(Comp::ValIm(res)),
             Err(err) => Err(err),
         }
     }
@@ -1058,7 +1131,7 @@ impl Operator for OpMod {
         if var_a != var_b {
             return Err(CErr::too_many_unknown());
         }
-        return Ok(Comp::Val(Im::new(0.0, 0.0)));
+        return Ok(Comp::ValIm(Im::new(0.0, 0.0)));
     }
 
     fn dual_mat(&self, _: Matrix, _: Matrix) -> TreeResult {
@@ -1171,7 +1244,7 @@ impl Operator for OpPow {
         }
         let power = val_b.get_real().get_val() as i32;
         match val_a.pow(power) {
-            Ok(res) => Ok(Comp::Val(res)),
+            Ok(res) => Ok(Comp::ValIm(res)),
             Err(err) => Err(err),
         }
     }
@@ -1263,8 +1336,11 @@ fn run_power(
 fn none_on_left(right: Comp, op: char) -> TreeResult {
     Ok(match op {
         '-' => match right {
-            Comp::Val(val) => Comp::Val(-val),
-            Comp::VarCall(_, val) => Comp::Val(-val),
+            Comp::ValIm(val) => Comp::ValIm(-val),
+            Comp::VarCall(_, val) => match val {
+                Value::Im(val) => Comp::ValIm(-val),
+                Value::Mat(_) => return Err(CErr::bad_use_op(op)),
+            },
             Comp::VarSet(id) => {
                 let mut res: Equ = HashMap::new();
                 res.insert(1, Im::new(-1.0, 0.0));

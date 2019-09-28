@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/08 18:14:00 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/26 17:16:50 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 14:07:30 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ impl Memory {
     }
 
     pub fn set_var(&mut self, name: String, val: Value) {
+        println!("{}", val);
         self.var.insert(name.clone(), Variable::new(name, val));
     }
 

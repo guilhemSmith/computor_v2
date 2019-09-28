@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:49 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/26 16:43:26 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 13:08:41 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,6 @@ impl Token for Value {
         _mem: &Memory,
         _ext: Option<&mut Extension>,
     ) -> TreeResult {
-        Ok(Computed::Val(self.value))
+        Ok(Computed::ValIm(self.value))
     }
 }

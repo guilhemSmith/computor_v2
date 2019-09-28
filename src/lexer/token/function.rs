@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/13 17:22:09 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/26 17:05:08 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 14:11:09 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,15 +108,15 @@ impl FunctionTree {
             |extend: Option<&mut Extension>| -> Result<bool, CError> {
                 match iter.next() {
                     Some(tree) => match tree.compute(mem, extend)? {
-                        Comp::Val(val) => {
+                        Comp::ValIm(val) => {
                             lst.push(Value::Im(val));
                             Ok(true)
                         }
                         Comp::VarCall(_, val) => {
-                            lst.push(Value::Im(val));
+                            lst.push(val);
                             Ok(true)
                         }
-                        Comp::Mat(val) => {
+                        Comp::ValMat(val) => {
                             lst.push(Value::Mat(val));
                             Ok(true)
                         }
@@ -192,7 +192,7 @@ impl FunctionTree {
                 }
             },
         }
-        Ok(Comp::FunSet(self.id.clone(), lst))
+        Ok(Comp::FunId(self.id.clone(), lst))
     }
 }
 
@@ -217,10 +217,10 @@ impl Token for FunctionTree {
          -> TreeResult {
             match iter_param.next() {
                 Some(param) => match param.compute(mem, clone)? {
-                    Comp::Mat(val) => {
+                    Comp::ValMat(val) => {
                         self.exec_fun(mem, extend, Value::Mat(val), iter_param)
                     }
-                    Comp::Val(val) => {
+                    Comp::ValIm(val) => {
                         self.exec_fun(mem, extend, Value::Im(val), iter_param)
                     }
                     Comp::VarCall(name, val) => {
@@ -228,12 +228,7 @@ impl Token for FunctionTree {
                         if let None = fun {
                             self.setup_fun(mem, extend, name, iter_param)
                         } else {
-                            self.exec_fun(
-                                mem,
-                                extend,
-                                Value::Im(val),
-                                iter_param,
-                            )
+                            self.exec_fun(mem, extend, val, iter_param)
                         }
                     }
                     Comp::VarSet(name) => {

@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/26 17:16:41 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 14:11:32 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,13 +105,13 @@ impl Computor {
         Ok(match tree.compute(&mut self.memory, None)? {
             Comp::None => return Err(CErr::empty_instr()),
             Comp::Res => self.mem_dump(),
-            Comp::Mat(mat) => {
+            Comp::ValMat(mat) => {
                 println!("{}", mat.to_string().replace(" ; ", "\n"))
             }
-            Comp::Val(val) => println!("{}", val),
+            Comp::ValIm(val) => println!("{}", val),
             Comp::VarCall(_, val) => println!("{}", val),
             Comp::VarSet(v) => return Err(CErr::unknown_id(v, true)),
-            Comp::FunSet(f, param) => self.set_or_print_fn(f, param)?,
+            Comp::FunId(f, param) => self.set_or_print_fn(f, param)?,
             Comp::Equ(_, eq) => self.eq_one_sided(eq)?,
         })
     }
@@ -120,11 +120,11 @@ impl Computor {
         Ok(match left.compute(&mut self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => return Err(CErr::bad_resolve()),
-            Comp::Mat(mat) => self.dual_matr(mat, right)?,
-            Comp::Val(val) => self.left_val(val, right)?,
+            Comp::ValMat(mat) => self.dual_matr(mat, right)?,
+            Comp::ValIm(val) => self.left_val(val, right)?,
             Comp::VarCall(id, val) => self.call_var(id, val, right)?,
             Comp::VarSet(id) => self.set_var(id, right)?,
-            Comp::FunSet(id, param) => self.set_fun(id, param, right)?,
+            Comp::FunId(id, param) => self.set_fun(id, param, right)?,
             Comp::Equ(id, eq) => self.eq_two_sided(id, eq, right)?,
         })
     }
@@ -153,20 +153,23 @@ impl Computor {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => return Err(CErr::uncomplete_eq()),
-            Comp::Mat(_) => return Err(CErr::matrix_in_eq()),
-            Comp::Val(val) => {
+            Comp::ValMat(_) => return Err(CErr::matrix_in_eq()),
+            Comp::ValIm(val) => {
                 val_into_eq(&mut left, val)?;
                 self.solve_eq(left, id)?;
             }
-            Comp::VarCall(id_v, val) => {
-                var_into_eq(&mut left, &id, id_v, val)?;
-                self.solve_eq(left, id)?;
-            }
+            Comp::VarCall(id_v, val) => match val {
+                Value::Im(val) => {
+                    var_into_eq(&mut left, &id, id_v, val)?;
+                    self.solve_eq(left, id)?;
+                }
+                Value::Mat(_) => return Err(CErr::matrix_in_eq()),
+            },
             Comp::VarSet(v) => {
                 unknow_into_eq(&mut left, &id, v)?;
                 self.solve_eq(left, id)?;
             }
-            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
+            Comp::FunId(f, _) => return Err(CErr::unknown_id(f, false)),
             Comp::Equ(id_r, eq) => {
                 fuse_eq(&mut left, &id, eq, id_r)?;
                 self.solve_eq(left, id)?;
@@ -178,11 +181,11 @@ impl Computor {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => println!("{}", val),
-            Comp::Mat(_) => println!("false"),
-            Comp::Val(r_val) => solve_two_val(val, r_val),
+            Comp::ValMat(_) => println!("false"),
+            Comp::ValIm(r_val) => solve_two_val(val, Value::Im(r_val)),
             Comp::VarCall(_, r_val) => solve_two_val(val, r_val),
             Comp::VarSet(v) => println!("{} = {} is a solution.", v, val),
-            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
+            Comp::FunId(f, _) => return Err(CErr::unknown_id(f, false)),
             Comp::Equ(id, eq) => {
                 let mut eq = eq;
                 val_into_eq(&mut eq, val)?;
@@ -194,31 +197,31 @@ impl Computor {
     fn call_var(
         &mut self,
         var: String,
-        val: Im,
+        val: Value,
         right: TTree,
     ) -> ComputorResult {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => println!("{}", val),
-            Comp::Mat(mat) => {
-                println!("{}", mat.to_string().replace(" ; ", "\n"));
+            Comp::ValMat(mat) => {
                 self.memory.set_var(var, Value::Mat(mat));
             }
-            Comp::Val(nval) => {
-                println!("{}", nval);
+            Comp::ValIm(nval) => {
                 self.memory.set_var(var, Value::Im(nval));
             }
             Comp::VarCall(_, nval) => {
-                println!("{}", nval);
-                self.memory.set_var(var, Value::Im(nval));
+                self.memory.set_var(var, nval);
             }
             Comp::VarSet(v) => return Err(CErr::unknown_id(v, true)),
-            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
-            Comp::Equ(id, eq) => {
-                let mut eq = eq;
-                var_into_eq(&mut eq, &id, var, val)?;
-                self.solve_eq(eq, id)?;
-            }
+            Comp::FunId(f, _) => return Err(CErr::unknown_id(f, false)),
+            Comp::Equ(id, eq) => match val {
+                Value::Im(val) => {
+                    let mut eq = eq;
+                    var_into_eq(&mut eq, &id, var, val)?;
+                    self.solve_eq(eq, id)?;
+                }
+                Value::Mat(_) => return Err(CErr::matrix_in_eq()),
+            },
         })
     }
 
@@ -226,17 +229,14 @@ impl Computor {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => return Err(CErr::unknown_id(var, true)),
-            Comp::Mat(mat) => {
-                println!("{}", mat.to_string().replace(" ; ", "\n"));
+            Comp::ValMat(mat) => {
                 self.memory.set_var(var, Value::Mat(mat));
             }
-            Comp::Val(val) => {
+            Comp::ValIm(val) => {
                 self.memory.set_var(var, Value::Im(val));
-                println!("{}", val);
             }
             Comp::VarCall(_, val) => {
-                self.memory.set_var(var, Value::Im(val));
-                println!("{}", val);
+                self.memory.set_var(var, val);
             }
             Comp::VarSet(id) => {
                 if id != var {
@@ -245,7 +245,7 @@ impl Computor {
                     println!("Any value for {} is a solution.", id);
                 }
             }
-            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
+            Comp::FunId(f, _) => return Err(CErr::unknown_id(f, false)),
             Comp::Equ(id, eq) => {
                 let mut eq = eq;
                 unknow_into_eq(&mut eq, &id, var)?;
@@ -273,13 +273,13 @@ impl Computor {
         Ok(match right.compute(&self.memory, None)? {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => println!("{}", mat),
-            Comp::Mat(other) => {
+            Comp::ValMat(other) => {
                 println!("{}", if mat == other { "True" } else { "False" });
             }
-            Comp::Val(_) => println!("False"),
+            Comp::ValIm(_) => println!("False"),
             Comp::VarCall(_, _) => println!("False"),
             Comp::VarSet(v) => return Err(CErr::unknown_id(v, true)),
-            Comp::FunSet(f, _) => return Err(CErr::unknown_id(f, false)),
+            Comp::FunId(f, _) => return Err(CErr::unknown_id(f, false)),
             Comp::Equ(_, _) => return Err(CErr::matrix_in_eq()),
         })
     }
@@ -397,11 +397,16 @@ fn fuse_eq(
     }
 }
 
-fn solve_two_val(val_l: Im, val_r: Im) {
-    if val_l == val_r {
-        println!("True");
-    } else {
-        println!("False");
+fn solve_two_val(val_l: Im, val_r: Value) {
+    match val_r {
+        Value::Im(val_r) => {
+            if val_l == val_r {
+                println!("True");
+            } else {
+                println!("False");
+            }
+        }
+        Value::Mat(_) => println!("False"),
     }
 }
 

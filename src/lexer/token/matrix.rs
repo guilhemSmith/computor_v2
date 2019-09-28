@@ -6,13 +6,13 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 13:51:19 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/26 17:04:13 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/09/28 13:43:14 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use super::{super::Lexer, LexerError, Token};
 use crate::computor::{Computed, ComputorError, TreeResult};
-use crate::memory::{Extension, Memory};
+use crate::memory::{Extension, Memory, Value};
 use crate::parser::{Parser, TokenTree};
 use crate::types::{Matrix, MatrixError};
 
@@ -262,8 +262,13 @@ impl Token for MatrixTree {
             None => {
                 for cell in self.trees.iter() {
                     match cell.compute(mem, None)? {
-                        Computed::Val(val) => mat.push(val),
-                        Computed::VarCall(_, val) => mat.push(val),
+                        Computed::ValIm(val) => mat.push(val),
+                        Computed::VarCall(_, val) => match val {
+                            Value::Im(val) => mat.push(val),
+                            Value::Mat(_) => {
+                                return Err(ComputorError::matrix_val())
+                            }
+                        },
                         _ => return Err(ComputorError::matrix_val()),
                     };
                 }
@@ -271,14 +276,19 @@ impl Token for MatrixTree {
             Some(extend) => {
                 for cell in self.trees.iter() {
                     match cell.compute(mem, Some(&mut extend.clone()))? {
-                        Computed::Val(val) => mat.push(val),
-                        Computed::VarCall(_, val) => mat.push(val),
+                        Computed::ValIm(val) => mat.push(val),
+                        Computed::VarCall(_, val) => match val {
+                            Value::Im(val) => mat.push(val),
+                            Value::Mat(_) => {
+                                return Err(ComputorError::matrix_val())
+                            }
+                        },
                         _ => return Err(ComputorError::matrix_val()),
                     };
                 }
             }
         };
-        return Ok(Computed::Mat(mat));
+        return Ok(Computed::ValMat(mat));
     }
 }
 
@@ -314,6 +324,6 @@ impl Token for MatrixComp {
     }
 
     fn get_result(&self, _: &Memory, _: Option<&mut Extension>) -> TreeResult {
-        Ok(Computed::Mat(self.mat.clone()))
+        Ok(Computed::ValMat(self.mat.clone()))
     }
 }
