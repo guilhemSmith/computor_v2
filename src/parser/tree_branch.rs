@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:14:29 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 16:14:42 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/10/04 18:30:15 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ impl TreeBranch {
                 }
             };
         } else {
-            if n_branch.was_expr || n_branch.op_ref().symbol() != '^' {
+            if !self.was_expr || n_branch.was_expr {
                 self.branch_left = Some(new);
             } else {
                 std::mem::swap(self, n_branch);
@@ -235,8 +235,8 @@ impl TreeBranch {
             };
         } else {
             if self.op_ref().symbol() == '='
+                || !self.was_expr
                 || n_branch.was_expr
-                || n_branch.op_ref().symbol() != '^'
             {
                 self.branch_right = Some(new);
             } else {
@@ -363,7 +363,9 @@ impl fmt::Debug for TreeBranch {
                 write!(f, "{{{}:{:?} {:?}}}", self.token, l, r)
             }
             (Some(left), None) => write!(f, "{{{}:{:?} _}}", self.token, left),
-            (None, Some(right)) => write!(f, "{{{}:_ {:?}]", self.token, right),
+            (None, Some(right)) => {
+                write!(f, "{{{}:_ {:?}}}", self.token, right)
+            }
             (None, None) => write!(f, "{{{}: _ _}}", self.token),
         }
     }
