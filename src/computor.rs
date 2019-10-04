@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/15 11:31:54 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 17:33:35 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/10/04 11:56:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,7 +205,7 @@ impl Computor {
         Ok(match right {
             Comp::None => return Err(CErr::bad_use_op('=')),
             Comp::Res => println!("{}", val),
-            Comp::ValMat(_) => println!("false"),
+            Comp::ValMat(_) => println!("False"),
             Comp::ValIm(r_val) => solve_two_val(val, Value::Im(r_val)),
             Comp::VarCall(_, r_val) => solve_two_val(val, r_val),
             Comp::VarSet(v) => println!("{} = {} is a solution.", v, val),
@@ -302,12 +302,17 @@ impl Computor {
     fn dual_matr(&self, mat: Matrix, right: Comp) -> ComputorResult {
         Ok(match right {
             Comp::None => return Err(CErr::bad_use_op('=')),
-            Comp::Res => println!("{}", mat),
+            Comp::Res => println!("{}", mat.to_string().replace(" ; ", "\n")),
             Comp::ValMat(other) => {
                 println!("{}", if mat == other { "True" } else { "False" });
             }
             Comp::ValIm(_) => println!("False"),
-            Comp::VarCall(_, _) => println!("False"),
+            Comp::VarCall(_, val) => match val {
+                Value::Im(_) => println!("False"),
+                Value::Mat(val) => {
+                    println!("{}", if mat == val { "True" } else { "False" })
+                }
+            },
             Comp::VarSet(v) => return Err(CErr::unknown_id(v, true)),
             Comp::FunId(f, arg) => {
                 self.dual_matr(mat, self.memory.solve_fun(f, arg)?)?
