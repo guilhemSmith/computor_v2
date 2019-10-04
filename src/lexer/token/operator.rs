@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 17:20:24 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 16:39:55 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/10/04 17:02:35 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1325,6 +1325,7 @@ fn run_power(
             }
             Some(prev_coef) => *prev_coef = prev_coef.add(&field.1)?,
         }
+        return Ok(());
     }
     for (old_pow, old_coef) in eq.iter() {
         run_power(
