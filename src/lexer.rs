@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 11:39:23 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/10/04 12:29:10 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,8 +179,7 @@ impl Lexer {
             if self.last_ch == None {
                 cur = chars.next();
             } else {
-                cur = self.last_ch;
-                self.last_ch = None;
+                cur = self.last_ch.take();
             }
         }
         return tokens;
@@ -260,6 +259,7 @@ impl Lexer {
                     let mut param_lst: Vec<Vec<Box<dyn Token>>> = Vec::new();
                     param_lst.push(self.tokenize(chars, true));
                     while self.last_ch == Some(',') {
+                        self.last_ch = None;
                         param_lst.push(self.tokenize(chars, true));
                     }
                     match FunctionToken::new(raw, param_lst) {
