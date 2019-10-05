@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 10:31:02 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 16:14:38 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/10/05 10:12:09 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ impl Matrix {
     }
 
     pub fn mul(&self, other: &Matrix) -> OpResult<Self> {
-        if self.width != other.height || self.height != other.width {
+        if self.width != other.height {
             return Err(ComputorError::matrix_dim(true));
         }
         let mut data: Vec<Imaginary> = Vec::new();
