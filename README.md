@@ -19,7 +19,7 @@ Matrix must respect a specific format to be recognised by the program.
 A matrix content must be inside brackets, lines are separated by semi-colons.  
 Each line of a matrix must have the same number of value as its sisters.  
 Values in a line are separated by a coma.  
-[See this example](####basic-computing).  
+[See this example](#basic-computing).  
 
 ### Variables
 A variable can only name with alphabetical character and is case insensitive (It will be stored lowercase).  
@@ -34,7 +34,7 @@ Each argument name must be unique for this function.
 ### Polynomial equations
 Equation are solved if their degree is below or equal to 2 and above 0.  
 Simply write an equation with an unknown (not previously set).  
-[See this example](####polynomial-equation-solving).
+[See this example](#polynomial-equation-solving).
 
 ### Memory print
 To print a value from memory use `= ?` after a variable or a function name.  
