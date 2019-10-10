@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/10 15:37:26 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/25 11:49:47 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/10/10 13:37:16 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ pub enum ErrorKind {
     EmptyInstr,
     FunUndefinded,
     FunArgInv,
+    FunCallFun,
     MatrixInEq,
     MatrixVal,
     MatrixDim,
@@ -57,6 +58,7 @@ impl fmt::Display for ErrorKind {
             ErrorKind::EmptyInstr => write!(f, "parser"),
             ErrorKind::FunUndefinded => write!(f, "function"),
             ErrorKind::FunArgInv => write!(f, "function"),
+            ErrorKind::FunCallFun => write!(f, "function"),
             ErrorKind::MatrixInEq => write!(f, "parser"),
             ErrorKind::MatrixVal => write!(f, "parser"),
             ErrorKind::MatrixDim => write!(f, "math"),
@@ -161,6 +163,13 @@ impl ComputorError {
         ComputorError {
             kind: ErrorKind::FunArgInv,
             info: format!("'{}' did not received valid argument(s).", name),
+        }
+    }
+
+    pub fn fun_call_fun() -> Self {
+        ComputorError {
+            kind: ErrorKind::FunCallFun,
+            info: format!("Functions are not allowed to call any function."),
         }
     }
 

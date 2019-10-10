@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/17 11:15:13 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 16:21:57 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/10/10 13:35:47 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,12 +80,7 @@ impl TokenTree for TreeLeaf {
             std::mem::swap(&mut new, &mut self.token);
         } else {
             let fun = any.downcast_mut::<FunctionTree>();
-            if let Some(fun) = fun {
-                let args = fun.param_mut();
-                for arg in args.iter_mut() {
-                    arg.fix_exp(mem, vars)?;
-                }
-            } else {
+            if let None = fun {
                 let mat = any.downcast_mut::<MatrixTree>();
                 if let Some(mat) = mat {
                     let trees = mat.trees_mut();
@@ -93,6 +88,8 @@ impl TokenTree for TreeLeaf {
                         tree.fix_exp(mem, vars)?;
                     }
                 }
+            } else {
+                return Err(ComputorError::fun_call_fun());
             }
         }
         Ok(())
