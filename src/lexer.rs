@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/07/25 16:50:34 by gsmith            #+#    #+#             */
-/*   Updated: 2019/10/04 12:29:10 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/10/10 13:13:37 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,6 +255,13 @@ impl Lexer {
             match chars.next() {
                 Some(ch) if ch.is_alphabetic() => raw.push(ch),
                 Some(ch) if ch == '(' => {
+                    if raw.len() == 1 && raw.starts_with('i') {
+                        self.last_ch = Some(ch);
+                        return match Value::new(raw) {
+                            Ok(val) => Box::new(val),
+                            Err(err) => Box::new(err),
+                        };
+                    }
                     self.depth += 1;
                     let mut param_lst: Vec<Vec<Box<dyn Token>>> = Vec::new();
                     param_lst.push(self.tokenize(chars, true));
