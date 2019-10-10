@@ -6,7 +6,7 @@
 /*   By: gsmith <gsmith@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/09/23 13:51:19 by gsmith            #+#    #+#             */
-/*   Updated: 2019/09/28 13:43:14 by gsmith           ###   ########.fr       */
+/*   Updated: 2019/10/10 13:47:38 by gsmith           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -269,6 +269,18 @@ impl Token for MatrixTree {
                                 return Err(ComputorError::matrix_val())
                             }
                         },
+                        Computed::FunId(id, args) => {
+                            match mem.solve_fun(id, args)? {
+                                Computed::ValIm(val) => mat.push(val),
+                                Computed::VarCall(_, val) => match val {
+                                    Value::Im(val) => mat.push(val),
+                                    Value::Mat(_) => {
+                                        return Err(ComputorError::matrix_val())
+                                    }
+                                },
+                                _ => return Err(ComputorError::matrix_val()),
+                            };
+                        }
                         _ => return Err(ComputorError::matrix_val()),
                     };
                 }
